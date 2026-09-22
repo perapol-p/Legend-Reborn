@@ -109,7 +109,7 @@ func run_tests() -> void:
 	press(KEY_E)
 	await wait_scene()
 	check(current_scene.scene_file_path == session.WORLD, "gate works again after Continue")
-	check(current_scene.get_node_or_null(enemy_path) == null, "defeated enemy stays defeated on re-entry")
+	check(current_scene.get_node_or_null(enemy_path) != null, "new expedition has fresh enemies")
 	check(session.player.inventory_system.inventory[0].count == 1, "re-entry does not duplicate consumables")
 	check(session.save_game(), "dungeon save remains valid")
 	var old_format: Dictionary = session.read_save()

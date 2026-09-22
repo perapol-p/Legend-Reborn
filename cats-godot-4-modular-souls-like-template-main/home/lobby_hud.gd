@@ -50,7 +50,7 @@ func _process(_delta: float) -> void:
 	if not visible or not is_instance_valid(lobby.player):
 		return
 	if lobby.near_gate():
-		prompt.text = "[ E ]  Enter Dungeon  -  Castle Outskirts"
+		prompt.text = "[ E ]  Enter Dungeon  -  New Random Expedition"
 	else:
 		prompt.text = "Walk to the dungeon gate"
 	status.text = "Quest Board: Coming soon     /     Merchant: Coming soon"

@@ -123,7 +123,7 @@ func show_pause() -> void:
 	actions.add_child(save)
 	actions.add_child(UI.button("Settings", show_settings, 40))
 	actions.add_child(UI.button("Controls", show_controls, 40))
-	if get_tree().current_scene.scene_file_path == session.WORLD:
+	if get_tree().current_scene.scene_file_path in [session.WORLD, session.LEGACY_WORLD]:
 		var home_button := UI.button("Return to Home", confirm_home, 40)
 		home_button.disabled = session.player.is_dead
 		actions.add_child(home_button)

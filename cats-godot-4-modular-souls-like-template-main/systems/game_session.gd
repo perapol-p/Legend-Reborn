@@ -2,7 +2,9 @@ extends Node
 ## Owns scene transitions, a complete local save slot, and persistent preferences.
 signal saved(success: bool)
 signal settings_changed
-const WORLD = "res://demo_level/world_castle.tscn"
+const WORLD = "res://dungeon/random_dungeon.tscn"
+const LEGACY_WORLD = "res://demo_level/world_castle.tscn"
+var dungeon_seed: int = 0
 const HOME = "res://home/home_lobby.tscn"
 const MAIN_MENU = "res://ui/menus/main_menu.tscn"
 var save_path: String = "user://legend_reborn_save.cfg"
@@ -73,7 +75,7 @@ func read_save() -> Dictionary:
 	var data = file.get_value("save", "data", {})
 	if not data is Dictionary or int(data.get("version", 0)) != 1:
 		return {}
-	if data.get("scene", "") not in [WORLD, HOME] or not data.get("character", null) is Dictionary:
+	if data.get("scene", "") not in [WORLD, LEGACY_WORLD, HOME] or not data.get("character", null) is Dictionary:
 		return {}
 	if not data.get("position", null) is Vector3 or not data.get("inventory", null) is Array:
 		return {}
@@ -106,6 +108,7 @@ func begin_new_game() -> void:
 	restore_character({})
 	defeated.clear()
 	play_seconds = 0.0
+	dungeon_seed = 0
 	dungeon_state.clear()
 	pending_loadout.clear()
 	pending_restore.clear()
@@ -125,8 +128,9 @@ func continue_game() -> void:
 		progression().load_progress()
 	else:
 		restore_character(data.character)
+		dungeon_seed = int(data.get("dungeon_seed", 0))
 		play_seconds = float(data.get("play_seconds", 0))
-		if data.scene == WORLD:
+		if data.scene in [WORLD, LEGACY_WORLD]:
 			# Existing dungeon saves remain intact; every login starts at Home.
 			dungeon_state = data.duplicate(true)
 			dungeon_state.erase("dungeon")
@@ -198,7 +202,7 @@ func capture_world() -> Dictionary:
 	var position: Vector3 = last_ground_position
 	if player.is_on_floor() and player.current_state == player.state.FREE and not player.busy:
 		position = player.global_position
-	return {"version": 1, "scene": scene.scene_file_path, "dungeon": dungeon_state.duplicate(true) if scene.scene_file_path == HOME else {}, "saved_at": Time.get_datetime_string_from_system().replace("T", " "), "play_seconds": play_seconds, "character": character_data(), "position": position, "rotation": player.rotation.y, "health": player.health_system.current_health, "stamina": player.stats.stamina, "inventory": inventory_data(), "weapon": player.weapon_system.current_equipment.equipment_info.name, "gadget": player.gadget_system.current_equipment.equipment_info.name, "defeated": defeated.duplicate(), "enemies": enemies, "interactables": interactables}
+	return {"version": 1, "scene": scene.scene_file_path, "dungeon_seed": dungeon_seed, "dungeon": dungeon_state.duplicate(true) if scene.scene_file_path == HOME else {}, "saved_at": Time.get_datetime_string_from_system().replace("T", " "), "play_seconds": play_seconds, "character": character_data(), "position": position, "rotation": player.rotation.y, "health": player.health_system.current_health, "stamina": player.stats.stamina, "inventory": inventory_data(), "weapon": player.weapon_system.current_equipment.equipment_info.name, "gadget": player.gadget_system.current_equipment.equipment_info.name, "defeated": defeated.duplicate(), "enemies": enemies, "interactables": interactables}
 
 func save_game() -> bool:
 	if not is_instance_valid(player) or player.is_dead:
@@ -403,7 +407,9 @@ func restore_loadout(data: Dictionary) -> void:
 func area_name(scene_path: String = "") -> String:
 	if scene_path.is_empty() and get_tree().current_scene:
 		scene_path = get_tree().current_scene.scene_file_path
-	return "Ashen Refuge" if scene_path == HOME else "Castle Outskirts"
+	if scene_path == HOME:
+		return "Ashen Refuge"
+	return "Castle Outskirts" if scene_path == LEGACY_WORLD else "Shifting Depths"
 
 func enter_dungeon() -> bool:
 	if transitioning or not is_instance_valid(player) or player.is_dead:
@@ -414,14 +420,20 @@ func enter_dungeon() -> bool:
 	if not save_game():
 		return false
 	pending_loadout = loadout
-	pending_restore = dungeon_state.duplicate(true)
+	# Every portal entry starts a fresh expedition, preserving only the loadout.
+	var previous_seed := dungeon_seed
+	dungeon_seed = randi_range(1, 2147483646)
+	while dungeon_seed == previous_seed:
+		dungeon_seed = randi_range(1, 2147483646)
+	pending_restore.clear()
+	dungeon_state.clear()
 	start_world(WORLD)
 	return true
 
 func return_home() -> bool:
 	if transitioning or not is_instance_valid(player) or player.is_dead:
 		return false
-	if get_tree().current_scene.scene_file_path != WORLD:
+	if get_tree().current_scene.scene_file_path not in [WORLD, LEGACY_WORLD]:
 		return false
 	var snapshot := capture_world()
 	if not save_game():
