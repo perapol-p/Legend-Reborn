@@ -1,0 +1,20 @@
+[application]
+config/name="Legend Rebron"
+run/main_scene="res://scenes/main_menu.tscn"
+
+[display]
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+
+[autoload]
+GameData="*res://scripts/game_data.gd"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+
+[audio]
+default_bus_layout="res://default_bus_layout.tres"
