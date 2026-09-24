@@ -1,0 +1,261 @@
+{
+  "base_stats": {
+    "attack": 10,
+    "max_hp": 100,
+    "max_mp": 50,
+    "speed": 100,
+    "luck": 0,
+    "crit_chance": 5,
+    "crit_damage": 150
+  },
+  "rarities": {
+    "common": {
+      "name": "Common",
+      "color": "#a6aeb8"
+    },
+    "rare": {
+      "name": "Rare",
+      "color": "#57a8f5"
+    },
+    "epic": {
+      "name": "Epic",
+      "color": "#b881f5"
+    },
+    "legendary": {
+      "name": "Legendary",
+      "color": "#edbe54"
+    }
+  },
+  "progression": {
+    "xp_initial": 10,
+    "xp_per_level": 5,
+    "rarity_level_start": 2,
+    "rarity_level_end": 20,
+    "early_weights": {
+      "common": 70,
+      "rare": 23,
+      "epic": 6,
+      "legendary": 1
+    },
+    "late_weights": {
+      "common": 15,
+      "rare": 30,
+      "epic": 35,
+      "legendary": 20
+    }
+  },
+  "weapons": [
+    {
+      "id": "sword",
+      "name": "Sword"
+    },
+    {
+      "id": "katana",
+      "name": "Katana"
+    },
+    {
+      "id": "gun",
+      "name": "Gun"
+    },
+    {
+      "id": "bow",
+      "name": "Bow"
+    },
+    {
+      "id": "spellbook",
+      "name": "Spellbook"
+    }
+  ],
+  "character_weapons": {
+    "Knight": "sword",
+    "Ninja": "katana",
+    "อัศวิน": "sword",
+    "นินจา": "katana"
+  },
+  "items": [
+    {
+      "id": "red_dot",
+      "name": "Red dot",
+      "rarity": "common",
+      "icon": "",
+      "effects": {
+        "crit_chance": 1,
+        "crit_damage": 2
+      }
+    },
+    {
+      "id": "pencil",
+      "name": "Pencil",
+      "rarity": "common",
+      "icon": "",
+      "effects": {
+        "attack": 10
+      }
+    },
+    {
+      "id": "g_string",
+      "name": "g-string",
+      "rarity": "common",
+      "icon": "",
+      "effects": {
+        "max_hp": 20
+      }
+    },
+    {
+      "id": "sandal",
+      "name": "Sandal",
+      "rarity": "common",
+      "icon": "",
+      "effects": {
+        "speed": 3
+      }
+    },
+    {
+      "id": "clover_three",
+      "name": "Clover 3 แฉก",
+      "rarity": "common",
+      "icon": "",
+      "effects": {
+        "luck": 0.5
+      }
+    },
+    {
+      "id": "scope_x2",
+      "name": "Scope X2",
+      "rarity": "rare",
+      "icon": "",
+      "effects": {
+        "crit_chance": 2.5,
+        "crit_damage": 5
+      }
+    },
+    {
+      "id": "pan",
+      "name": "Pan",
+      "rarity": "rare",
+      "icon": "",
+      "effects": {
+        "attack": 30
+      }
+    },
+    {
+      "id": "tank_top",
+      "name": "Tank top",
+      "rarity": "rare",
+      "icon": "",
+      "effects": {
+        "max_hp": 50
+      }
+    },
+    {
+      "id": "boot",
+      "name": "boot",
+      "rarity": "rare",
+      "icon": "",
+      "effects": {
+        "speed": 5
+      }
+    },
+    {
+      "id": "clover_four",
+      "name": "Clover 4 แฉก",
+      "rarity": "rare",
+      "icon": "",
+      "effects": {
+        "luck": 1
+      }
+    },
+    {
+      "id": "x_ray",
+      "name": "X-ray",
+      "rarity": "epic",
+      "icon": "",
+      "effects": {
+        "crit_chance": 5,
+        "crit_damage": 10
+      }
+    },
+    {
+      "id": "light_saber",
+      "name": "Light saber",
+      "rarity": "epic",
+      "icon": "",
+      "effects": {
+        "attack": 100
+      }
+    },
+    {
+      "id": "golden_dick",
+      "name": "golden dick",
+      "rarity": "epic",
+      "icon": "",
+      "effects": {
+        "max_hp": 150
+      }
+    },
+    {
+      "id": "hermes_boot",
+      "name": "Hermes boot",
+      "rarity": "epic",
+      "icon": "",
+      "effects": {
+        "speed": 7
+      }
+    },
+    {
+      "id": "mambo_doll",
+      "name": "Mambo doll",
+      "rarity": "epic",
+      "icon": "",
+      "effects": {
+        "luck": 2
+      }
+    },
+    {
+      "id": "god_eyes",
+      "name": "God Eyes",
+      "rarity": "legendary",
+      "icon": "",
+      "effects": {
+        "crit_chance": 10,
+        "crit_damage": 20
+      }
+    },
+    {
+      "id": "zenith",
+      "name": "Zenith",
+      "rarity": "legendary",
+      "icon": "",
+      "effects": {
+        "attack": 150
+      }
+    },
+    {
+      "id": "furry_set",
+      "name": "furry set",
+      "rarity": "legendary",
+      "icon": "",
+      "effects": {
+        "max_hp": 300
+      }
+    },
+    {
+      "id": "lighting_boot",
+      "name": "Lighting boot",
+      "rarity": "legendary",
+      "icon": "",
+      "effects": {
+        "speed": 10
+      }
+    },
+    {
+      "id": "baby_oil",
+      "name": "Baby oil",
+      "rarity": "legendary",
+      "icon": "",
+      "effects": {
+        "luck": 5
+      }
+    }
+  ]
+}

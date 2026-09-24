@@ -1,0 +1,12 @@
+[gd_scene load_steps=5 format=3]
+[ext_resource type="Script" path="res://scripts/game_placeholder.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/combo_meter.gd" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/game_hud.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/pause_overlay.tscn" id="4"]
+[node name="GamePlaceholder" type="Node3D"]
+script = ExtResource("1")
+[node name="Combo" type="Node" parent="."]
+script = ExtResource("2")
+[node name="Interface" type="CanvasLayer" parent="."]
+[node name="HUD" parent="Interface" instance=ExtResource("3")]
+[node name="PauseOverlay" parent="Interface" instance=ExtResource("4")]
