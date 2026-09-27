@@ -57,7 +57,7 @@ func _physics_process(delta: float) -> void:
 	var scale_speed := speed_multiplier()
 	if input_enabled and Input.is_action_just_pressed("dash") and dash_recovery <= 0:
 		dash_direction = direction if direction.length_squared() > 0.01 else -global_basis.z
-		dash_remaining = dash_duration * (1.5 if run != null and run.equipped_weapon_id == "katana" and run.weapon_level("katana") >= 3 else 1.0)
+		dash_remaining = dash_duration
 		dash_recovery = dash_cooldown
 	if dash_remaining > 0 and input_enabled:
 		dash_remaining = maxf(0.0, dash_remaining - delta)
@@ -82,13 +82,3 @@ func respawn() -> void:
 	dash_remaining = 0
 	dash_recovery = 0
 	jump_buffer = 0
-
-func receive_damage(amount: float) -> void:
-	if run == null or get_tree().paused:
-		return
-	if run.damage_player(amount):
-		run.restore_health()
-		respawn()
-		var spawner := get_parent().get_node_or_null("MonsterSpawner")
-		if spawner != null:
-			spawner.reset_encounter()

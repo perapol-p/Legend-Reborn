@@ -120,11 +120,14 @@ func restore_health() -> void:
 	damage_taken = 0.0
 	changed.emit()
 
-const MAX_WEAPON_LEVEL := 5
+const MAX_WEAPON_LEVEL := 10
+const WEAPON_DAMAGE_PER_LEVEL := 0.20
 var weapon_levels: Dictionary = {}
 func weapon_level(id: String = "") -> int:
 	var selected := equipped_weapon_id if id.is_empty() else id
 	return int(weapon_levels.get(selected, 1))
+func weapon_damage_multiplier(id: String = "") -> float:
+	return 1.0 + float(weapon_level(id) - 1) * WEAPON_DAMAGE_PER_LEVEL
 func upgrade_weapon() -> bool:
 	if equipped_weapon_id.is_empty():
 		return false
@@ -138,6 +141,3 @@ func upgrade_weapon() -> bool:
 	weapon_levels[equipped_weapon_id] = weapon_level() + 1
 	changed.emit()
 	return true
-
-func weapon_ability() -> String:
-	return preload("res://scripts/weapon_progression.gd").description(equipped_weapon_id, weapon_level())

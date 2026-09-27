@@ -13,7 +13,6 @@ const ACTIONS = {
 	"test_hit": {"label": "Test hit", "key": KEY_J},
 	"test_kill": {"label": "Test kill", "key": KEY_K},
 	"test_reset": {"label": "Reset combo", "key": KEY_R},
-	"test_weapon_level": {"label": "Test weapon level up", "key": KEY_U},
 	"test_level": {"label": "Test level up", "key": KEY_L}
 }
 const CROSSHAIR_COLORS = {

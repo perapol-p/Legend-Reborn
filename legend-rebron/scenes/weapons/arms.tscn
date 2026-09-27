@@ -1,0 +1,101 @@
+[gd_scene load_steps=16 format=3]
+
+[sub_resource type="StandardMaterial3D" id="skin"]
+albedo_color = Color(0.67, 0.43, 0.29, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="sleeve"]
+albedo_color = Color(0.16, 0.22, 0.30, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="steel"]
+albedo_color = Color(0.7, 0.77, 0.83, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="dark"]
+albedo_color = Color(0.08, 0.10, 0.13, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="gold"]
+albedo_color = Color(0.8, 0.56, 0.16, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="wood"]
+albedo_color = Color(0.38, 0.18, 0.07, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="paper"]
+albedo_color = Color(0.9, 0.85, 0.64, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="blue"]
+albedo_color = Color(0.15, 0.45, 0.95, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="red"]
+albedo_color = Color(0.65, 0.19, 0.13, 1)
+roughness = 0.8
+
+[sub_resource type="BoxMesh" id="mesh0"]
+size = Vector3(0.13, 0.14, 0.32)
+material = SubResource("sleeve")
+
+[sub_resource type="BoxMesh" id="mesh1"]
+size = Vector3(0.105, 0.115, 0.28)
+material = SubResource("skin")
+
+[sub_resource type="BoxMesh" id="mesh2"]
+size = Vector3(0.13, 0.12, 0.13)
+material = SubResource("skin")
+
+[sub_resource type="BoxMesh" id="mesh3"]
+size = Vector3(0.13, 0.14, 0.32)
+material = SubResource("sleeve")
+
+[sub_resource type="BoxMesh" id="mesh4"]
+size = Vector3(0.105, 0.115, 0.28)
+material = SubResource("skin")
+
+[sub_resource type="BoxMesh" id="mesh5"]
+size = Vector3(0.13, 0.12, 0.13)
+material = SubResource("skin")
+
+[node name="PlaceholderArms" type="Node3D"]
+
+[node name="Model" type="Node3D" parent="."]
+
+[node name="RightSleeve" type="MeshInstance3D" parent="Model"]
+position = Vector3(0.32, -0.34, -0.27)
+rotation_degrees = Vector3(-12, -10, 0)
+mesh = SubResource("mesh0")
+cast_shadow = 0
+
+[node name="RightForearm" type="MeshInstance3D" parent="Model"]
+position = Vector3(0.29, -0.28, -0.52)
+rotation_degrees = Vector3(-12, -10, 0)
+mesh = SubResource("mesh1")
+cast_shadow = 0
+
+[node name="RightHand" type="MeshInstance3D" parent="Model"]
+position = Vector3(0.27, -0.24, -0.68)
+mesh = SubResource("mesh2")
+cast_shadow = 0
+
+[node name="LeftSleeve" type="MeshInstance3D" parent="Model"]
+position = Vector3(-0.32, -0.34, -0.27)
+rotation_degrees = Vector3(-12, 10, 0)
+mesh = SubResource("mesh3")
+cast_shadow = 0
+
+[node name="LeftForearm" type="MeshInstance3D" parent="Model"]
+position = Vector3(-0.29, -0.28, -0.52)
+rotation_degrees = Vector3(-12, 10, 0)
+mesh = SubResource("mesh4")
+cast_shadow = 0
+
+[node name="LeftHand" type="MeshInstance3D" parent="Model"]
+position = Vector3(-0.27, -0.24, -0.68)
+mesh = SubResource("mesh5")
+cast_shadow = 0
+
+

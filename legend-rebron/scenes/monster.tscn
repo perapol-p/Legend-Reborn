@@ -1,0 +1,62 @@
+[gd_scene load_steps=9 format=3]
+[ext_resource type="Script" path="res://scripts/monster.gd" id="1"]
+[sub_resource type="CapsuleShape3D" id="Collision"]
+radius = 0.4
+height = 1.9
+[sub_resource type="StandardMaterial3D" id="Skin"]
+albedo_color = Color(0.28, 0.57, 0.19, 1)
+[sub_resource type="StandardMaterial3D" id="Eyes"]
+albedo_color = Color(1, 0.22, 0.08, 1)
+shading_mode = 0
+[sub_resource type="BoxMesh" id="Body"]
+size = Vector3(0.7, 0.85, 0.45)
+material = SubResource("Skin")
+[sub_resource type="BoxMesh" id="Head"]
+size = Vector3(0.62, 0.5, 0.5)
+material = SubResource("Skin")
+[sub_resource type="BoxMesh" id="Limb"]
+size = Vector3(0.2, 0.65, 0.2)
+material = SubResource("Skin")
+[sub_resource type="BoxMesh" id="Eye"]
+size = Vector3(0.12, 0.1, 0.03)
+material = SubResource("Eyes")
+[node name="Monster" type="CharacterBody3D"]
+script = ExtResource("1")
+floor_snap_length = 0.2
+[node name="Collision" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.95, 0)
+shape = SubResource("Collision")
+[node name="Model" type="Node3D" parent="."]
+[node name="Body" type="MeshInstance3D" parent="Model"]
+position = Vector3(0, 1, 0)
+mesh = SubResource("Body")
+[node name="Head" type="MeshInstance3D" parent="Model"]
+position = Vector3(0, 1.65, 0)
+mesh = SubResource("Head")
+[node name="LeftArm" type="MeshInstance3D" parent="Model"]
+position = Vector3(-0.46, 1.1, -0.15)
+rotation_degrees = Vector3(-35, 0, 0)
+mesh = SubResource("Limb")
+[node name="RightArm" type="MeshInstance3D" parent="Model"]
+position = Vector3(0.46, 1.1, -0.15)
+rotation_degrees = Vector3(-35, 0, 0)
+mesh = SubResource("Limb")
+[node name="LeftLeg" type="MeshInstance3D" parent="Model"]
+position = Vector3(-0.2, 0.32, 0)
+mesh = SubResource("Limb")
+[node name="RightLeg" type="MeshInstance3D" parent="Model"]
+position = Vector3(0.2, 0.32, 0)
+mesh = SubResource("Limb")
+[node name="LeftEye" type="MeshInstance3D" parent="Model"]
+position = Vector3(-0.15, 1.7, -0.26)
+mesh = SubResource("Eye")
+[node name="RightEye" type="MeshInstance3D" parent="Model"]
+position = Vector3(0.15, 1.7, -0.26)
+mesh = SubResource("Eye")
+[node name="Health" type="Label3D" parent="."]
+position = Vector3(0, 2.15, 0)
+billboard = 1
+font_size = 32
+pixel_size = 0.005
+text = "30 / 30"
+

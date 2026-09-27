@@ -12,7 +12,6 @@ func _ready() -> void:
 	$Interface/RewardOverlay.bind_run($RunState)
 	$RunState.offers_changed.connect(_sync_reward)
 	_update_pointer()
-	$Player/Head/Camera3D/Combat.bind_combat($Player, $RunState, $Combo)
 func _exit_tree() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 func _test_level_up() -> void:

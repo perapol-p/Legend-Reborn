@@ -9,7 +9,6 @@ var hp_bar: ProgressBar
 var hp_label: Label
 var weapon_label: Label
 var weapon_level_label: Label
-var weapon_ability_label: Label
 var weapon_upgrade_button: Button
 var level_button: Button
 var hit_button: Button
@@ -95,10 +94,6 @@ func _ready() -> void:
 	Style.label(weapon, GameData.selected_character.to_upper(), 18, Style.PAPER)
 	weapon_label = Style.label(weapon, "WEAPON / NOT ASSIGNED", 15, Style.PAPER)
 	weapon_level_label = Style.label(weapon, "", 14, Style.PAPER)
-	var ability_area := corner(Rect2(-350, 80, 700, 30), Vector2(0.5, 0))
-	weapon_ability_label = Style.label(ability_area, "", 15, Style.PAPER)
-	weapon_ability_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	weapon_ability_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hp_label = Style.label(stack, "HP    100 / 100", 14, Style.PAPER)
 	hp_bar = Style.bar(stack, Color("a73b29"), 100)
 	Style.label(stack, "MP      50 / 50", 14, Style.PAPER)
@@ -115,7 +110,7 @@ func _ready() -> void:
 	reset_button = Style.button(buttons, "Reset [R]", func(): combo.reset())
 	level_button = Style.button(tests, "Level up [L]", func(): level_up_requested.emit())
 	weapon_upgrade_button = Style.button(tests, "Weapon level up [U]", _upgrade_weapon)
-	weapon_upgrade_button.tooltip_text = "Upgrade held weapon to unlock the next ability in the reference table. Max level 5. Test only."
+	weapon_upgrade_button.tooltip_text = "Upgrade held weapon: +20% base damage per level. Test only."
 	cursor_hint = Style.label(tests, "", 14, Style.PAPER)
 	var help_area := corner(Rect2(-240, -56, 480, 40), Vector2(0.5, 1))
 	movement_hint = Style.label(help_area, "", 14, Style.PAPER)
@@ -133,8 +128,7 @@ func refresh_run() -> void:
 	hp_label.text = "HP    %s / %s" % [run.catalog.format_number(run.current_health()), run.catalog.format_number(float(current["max_hp"]))]
 	hp_bar.value = run.current_health() / maxf(float(current["max_hp"]), 1.0) * 100.0
 	weapon_label.text = "WEAPON / " + run.weapon_name().to_upper()
-	weapon_level_label.text = "WEAPON LV %d / %d" % [run.weapon_level(), run.MAX_WEAPON_LEVEL]
-	weapon_ability_label.text = run.weapon_ability()
+	weapon_level_label.text = "LV %d / %d  |  DMG x%.2f" % [run.weapon_level(), run.MAX_WEAPON_LEVEL, run.weapon_damage_multiplier()]
 	_refresh_weapon_button()
 func bind_combo(model: Node) -> void:
 	combo = model
@@ -186,4 +180,4 @@ func _refresh_weapon_button() -> void:
 		return
 	var maxed: bool = run != null and run.weapon_level() >= run.MAX_WEAPON_LEVEL
 	weapon_upgrade_button.disabled = run == null or run.equipped_weapon_id.is_empty() or maxed
-	weapon_upgrade_button.text = "Weapon MAX (Lv.5)" if maxed else "Weapon level up [%s]" % GameData.key_label("test_weapon_level")
+	weapon_upgrade_button.text = "Weapon MAX (Lv.10)" if maxed else "Weapon level up [%s]" % GameData.key_label("test_weapon_level")
