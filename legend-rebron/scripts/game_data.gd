@@ -9,12 +9,9 @@ const ACTIONS = {
 	"jump": {"label": "Jump", "key": KEY_SPACE},
 	"sprint": {"label": "Sprint (hold)", "key": KEY_SHIFT},
 	"dash": {"label": "Dash", "key": KEY_Q},
-	"toggle_cursor": {"label": "Release / capture mouse", "key": KEY_TAB},
-	"test_hit": {"label": "Test hit", "key": KEY_J},
-	"test_kill": {"label": "Test kill", "key": KEY_K},
-	"test_reset": {"label": "Reset combo", "key": KEY_R},
-	"test_weapon_level": {"label": "Test weapon level up", "key": KEY_U},
-	"test_level": {"label": "Test level up", "key": KEY_L}
+	"toggle_cursor": {"label": "Stats & equipment (hold)", "key": KEY_TAB},
+	"reload": {"label": "Reload weapon", "key": KEY_R}
+
 }
 const CROSSHAIR_COLORS = {
 	"white": Color.WHITE, "red": Color("ff3535"), "black": Color.BLACK,
@@ -33,8 +30,10 @@ var invert_y := false
 var crosshair_style := "plus"
 var crosshair_color := "white"
 var crosshair_size := 16.0
+var tab_ui_opacity := 0.65
 var bindings: Dictionary = {}
 var rebinding_active := false
+var command_console_active := false
 func _ready() -> void:
 	bindings = default_bindings()
 	load_settings()
@@ -56,8 +55,8 @@ func rebuild_input_map() -> void:
 		event.physical_keycode = int(bindings[action])
 		InputMap.action_add_event(action, event)
 func rebind(action: String, keycode: int) -> String:
-	if not ACTIONS.has(action) or keycode == KEY_NONE or keycode == KEY_ESCAPE:
-		return "Escape is reserved for pause / cancel."
+	if not ACTIONS.has(action) or keycode == KEY_NONE or keycode in [KEY_ESCAPE, KEY_F1]:
+		return "Escape and F1 are reserved for pause / console."
 	var old_key: int = bindings[action]
 	var message := "%s: %s" % [ACTIONS[action]["label"], OS.get_keycode_string(keycode)]
 	for other in bindings:
@@ -78,6 +77,7 @@ func save_settings() -> void:
 	cfg.set_value("controls", "mouse_sensitivity", mouse_sensitivity)
 	cfg.set_value("controls", "invert_y", invert_y)
 	cfg.set_value("display", "fullscreen", fullscreen)
+	cfg.set_value("ui", "tab_opacity", tab_ui_opacity)
 	cfg.set_value("crosshair", "style", crosshair_style)
 	cfg.set_value("crosshair", "color", crosshair_color)
 	cfg.set_value("crosshair", "size", crosshair_size)
@@ -93,6 +93,7 @@ func load_settings() -> void:
 	effects_volume = clampf(float(cfg.get_value("audio", "effects", effects_volume)), 0.0, 1.0)
 	mouse_sensitivity = clampf(float(cfg.get_value("controls", "mouse_sensitivity", mouse_sensitivity)), 0.01, 1.0)
 	fullscreen = bool(cfg.get_value("display", "fullscreen", fullscreen))
+	tab_ui_opacity = clampf(float(cfg.get_value("ui", "tab_opacity", 0.65)), 0.0, 1.0)
 	invert_y = bool(cfg.get_value("controls", "invert_y", invert_y))
 	var saved_style: String = cfg.get_value("crosshair", "style", "plus")
 	crosshair_style = saved_style if CROSSHAIR_STYLES.has(saved_style) else "plus"
@@ -103,7 +104,7 @@ func load_settings() -> void:
 	bindings = default_bindings()
 	for action in ACTIONS:
 		var keycode := int(cfg.get_value("bindings", action, bindings[action]))
-		if keycode <= 0 or keycode == KEY_ESCAPE:
+		if keycode <= 0 or keycode in [KEY_ESCAPE, KEY_F1]:
 			continue
 		var previous: int = bindings[action]
 		for other in bindings:
@@ -128,6 +129,7 @@ func restore_defaults() -> void:
 	crosshair_style = "plus"
 	crosshair_color = "white"
 	crosshair_size = 16.0
+	tab_ui_opacity = 0.65
 	bindings = default_bindings()
 	apply_settings()
 	save_settings()

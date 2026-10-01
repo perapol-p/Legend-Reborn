@@ -8,7 +8,7 @@ const MONSTER = preload("res://scenes/monster.tscn")
 @export var initial_count := 4
 @export var max_alive := 16
 ## Disable for the real game. Release exports never draw debug helpers.
-@export var show_debug_radius := true
+@export var show_debug_radius := false
 var player: CharacterBody3D
 var rng := RandomNumberGenerator.new()
 var monsters: Array[CharacterBody3D] = []
@@ -127,10 +127,10 @@ func update_debug() -> void:
 	var show := debug_visible()
 	ring.visible = show
 	markers.visible = show
-	info.visible = show
+	info.visible = false
 	if is_instance_valid(player):
 		ring.global_position = Vector3(player.global_position.x, 0.035, player.global_position.z)
-	info.text = "SPAWN TEST | B: show/hide\nCyan ring: %.0f m | Spawn outside ring\nAlive: %d / %d | Last spawn: %.1f m\nMonsters can walk inside after spawning" % [spawn_radius, monsters.size(), max_alive, last_distance]
+	info.text = "SPAWN DEBUG\nCyan ring: %.0f m | Spawn outside ring\nAlive: %d / %d | Last spawn: %.1f m\nMonsters can walk inside after spawning" % [spawn_radius, monsters.size(), max_alive, last_distance]
 func spawn_marker(point: Vector3, distance: float) -> void:
 	var marker := MeshInstance3D.new()
 	marker.mesh = ring_mesh(0.85, 0.12, Color(1, 0.65, 0.1))
@@ -145,11 +145,6 @@ func spawn_marker(point: Vector3, distance: float) -> void:
 	label.position.y = 2.8
 	marker.add_child(label)
 	get_tree().create_timer(2.0, false).timeout.connect(marker.queue_free)
-func _unhandled_key_input(event: InputEvent) -> void:
-	if OS.is_debug_build() and event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_B and player.input_enabled and not GameData.rebinding_active:
-		show_debug_radius = not show_debug_radius
-		update_debug()
-		get_viewport().set_input_as_handled()
 func reset_encounter() -> void:
 	for monster in monsters:
 		if is_instance_valid(monster):

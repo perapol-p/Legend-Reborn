@@ -1,0 +1,9 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS 5 levels: sword
+PASS 5 levels: katana
+PASS 5 levels: gun
+PASS 5 levels: bow
+PASS 5 levels: spellbook
+TORNADO distance 2.0 -> 0.42480435967445 health 9999.0
+REFERENCE WEAPON UPGRADE PASSED

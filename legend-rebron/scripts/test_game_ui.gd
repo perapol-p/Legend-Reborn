@@ -111,6 +111,7 @@ func _ready() -> void:
 		combo.register_kill()
 	assert(hud.rank_label.text == "SSS" and hud.flames.emitting)
 	pause.toggle_pause()
+	assert(pause.menu.visible and not pause.stats_panel.visible and not pause.equipment.visible)
 	assert(get_tree().paused and not player.input_enabled and not crosshair.visible)
 	var frozen: Vector3 = player.position
 	var frozen_combo: float = combo.remaining
@@ -159,7 +160,7 @@ func _ready() -> void:
 	pause.toggle_pause()
 	assert(crosshair.visible and player.input_enabled)
 	run.rng.seed = 20260925
-	hud.level_button.pressed.emit()
+	run.test_level_up()
 	assert(run.level == 2 and reward.choice_buttons.size() == 3 and get_tree().paused)
 	assert(not player.input_enabled and not crosshair.visible)
 	await send_key(KEY_ESCAPE, true)
@@ -170,7 +171,7 @@ func _ready() -> void:
 	reward.choice_buttons[0].pressed.emit()
 	assert(run.stack_count(chosen) == 1 and not get_tree().paused)
 	for i in range(9):
-		hud.level_button.pressed.emit()
+		run.test_level_up()
 		run.offers.assign([chosen])
 		game._sync_reward()
 		reward.choice_buttons[0].pressed.emit()
@@ -183,16 +184,17 @@ func _ready() -> void:
 	assert(pause.item_flow.get_child(0).get_child(0).text.ends_with("×10"))
 	await capture("stack_inventory_preview.png")
 	pause.toggle_pause()
-	hud.level_button.pressed.emit()
+	run.test_level_up()
 	await send_key(KEY_1, true)
 	await send_key(KEY_1, false)
 	assert(run.total_items() == 11 and not get_tree().paused)
 	await send_key(KEY_TAB, true)
-	await send_key(KEY_TAB, false)
 	assert(not player.input_enabled and not crosshair.visible)
-	await send_key(KEY_TAB, true)
+	assert(get_tree().paused and pause.stats_panel.visible and pause.equipment.visible and not pause.menu.visible)
+	assert(pause.heading.text == "Stats" and pause.content.get_child_count() == 10)
+	assert(pause.weapon_summary.text == run.weapon_name())
 	await send_key(KEY_TAB, false)
-	assert(player.input_enabled and crosshair.visible)
+	assert(not get_tree().paused and not pause.visible and player.input_enabled and crosshair.visible)
 	for path in ["res://scenes/settings.tscn", "res://scenes/controls.tscn"]:
 		var menu = load(path).instantiate()
 		add_child(menu)

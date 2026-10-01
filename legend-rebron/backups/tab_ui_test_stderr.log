@@ -1,0 +1,5 @@
+SCRIPT ERROR: Assertion failed.
+   at: _ready (res://scripts/test_game_ui.gd:70)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/test_game_ui.gd:70)
+       [1] frames (res://scripts/test_game_ui.gd:5)

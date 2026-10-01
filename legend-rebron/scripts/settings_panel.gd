@@ -9,6 +9,7 @@ var binding_buttons: Dictionary = {}
 var style_picker: OptionButton
 var color_picker: OptionButton
 var size_slider: HSlider
+var opacity_slider: HSlider
 func _ready() -> void:
 	add_theme_constant_override("separation", 12)
 	var tabs := HBoxContainer.new()
@@ -76,6 +77,8 @@ func _slider(label_text: String, current: float, minimum: float, maximum: float,
 		callback.call(value))
 	return slider
 func _general() -> void:
+	opacity_slider = _slider("Tab UI opacity (%)", GameData.tab_ui_opacity * 100, 0, 100, func(v): _set_number("tab_ui_opacity", v / 100.0))
+	Style.label(content, "0%: clear background / 100%: solid background. Text stays readable.", 14, Style.GOLD)
 	_slider("Master volume", GameData.master_volume * 100, 0, 100, func(v): _set_number("master_volume", v / 100.0))
 	_slider("Music volume", GameData.music_volume * 100, 0, 100, func(v): _set_number("music_volume", v / 100.0))
 	_slider("Effects volume", GameData.effects_volume * 100, 0, 100, func(v): _set_number("effects_volume", v / 100.0))
@@ -107,7 +110,7 @@ func _keyboard() -> void:
 		var button := Style.button(row, GameData.key_label(action), begin_rebind.bind(action))
 		button.custom_minimum_size.x = 155
 		binding_buttons[action] = button
-	Style.label(content, "Esc: pause / resume.  1 / 2 / 3: choose a level-up item.", 14, Style.GOLD)
+	Style.label(content, "Esc: pause / resume. F1: command console. 1 / 2 / 3: choose a level-up item.", 14, Style.GOLD)
 func begin_rebind(action: String) -> void:
 	waiting_action = action
 	GameData.rebinding_active = true

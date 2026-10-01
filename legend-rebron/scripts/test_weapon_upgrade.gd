@@ -55,7 +55,7 @@ func _ready() -> void:
 	if OS.get_cmdline_user_args().has("--ui-only"):
 		combat.equip("gun")
 		for i in range(3):
-			hud.weapon_upgrade_button.pressed.emit()
+			game.command_console.submit("/weaponlevel")
 		await frames(3)
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png("res://backups/upgrade_button_ready.png")
@@ -68,10 +68,10 @@ func _ready() -> void:
 		var previous_cooldown: float = combat.attack_cooldown()
 		for level in range(1, 6):
 			if level > 1:
-				hud.weapon_upgrade_button.pressed.emit()
-			check(run.weapon_level() == level, "Upgrade button: " + id + str(level))
+				game.command_console.submit("/weaponlevel")
+			check(run.weapon_level() == level, "Upgrade command: " + id + str(level))
 			check(hud.weapon_level_label.text.contains("LV %d / 5" % level), "Level label")
-			check(not hud.weapon_ability_label.text.is_empty(), "Ability description")
+			check(hud.weapon_ability_label.text.is_empty() if id == "gun" and level >= 3 else not hud.weapon_ability_label.text.is_empty(), "Ability description / visual gun charge meter")
 			await clear_effects()
 			var target := target_at(Vector3(0, 0, -8 if id == "sword" and level >= 2 else -2.6))
 			var nearby: Node3D
@@ -112,11 +112,11 @@ func _ready() -> void:
 					if level == 5:
 						check(combat.projectiles_fired - shots == 4, "Nuke plus three spells at once")
 			previous_cooldown = combat.attack_cooldown()
-		check(hud.weapon_upgrade_button.disabled, "MAX button disabled")
+		check(not run.upgrade_weapon(), "MAX rejects further upgrade")
 		check(not run.upgrade_weapon(), "Model enforces LV5 cap")
 		print("PASS 5 levels: ", id)
 	await clear_effects()
-	# U really routes through the input action and does not alter player level.
+	# U is disabled; only the console command upgrades the weapon.
 	run.weapon_levels["sword"] = 1
 	combat.equip("sword")
 	var key := InputEventKey.new()
@@ -125,7 +125,9 @@ func _ready() -> void:
 	key.pressed = true
 	Input.parse_input_event(key)
 	await frames(2)
-	check(run.weapon_level() == 2, "U shortcut upgrades")
+	check(run.weapon_level() == 1, "U shortcut disabled")
+	game.command_console.submit("/weaponlevel")
+	check(run.weapon_level() == 2, "Console command upgrades")
 	key.pressed = false
 	Input.parse_input_event(key)
 	await frames(2)
@@ -150,6 +152,7 @@ func _ready() -> void:
 	combat.equip("gun")
 	var gun_target := target_at(Vector3(0, 0, -3))
 	await frames(3)
+	combat.unlock_charge()
 	combat.charge_time = 1.0
 	var ammo: int = combat.gun_ammo
 	combat.release_charge()
@@ -196,8 +199,8 @@ func _ready() -> void:
 	run.weapon_levels["sword"] = 2
 	combat.equip("sword")
 	get_tree().paused = true
-	hud.weapon_upgrade_button.pressed.emit()
-	check(run.weapon_level() == 2, "Cannot upgrade while paused")
+	game.command_console.submit("/weaponlevel")
+	check(run.weapon_level() == 3, "Console commands work while paused")
 	get_tree().paused = false
 	print("REFERENCE WEAPON UPGRADE ", "FAILED" if failed else "PASSED")
 	get_tree().quit(1 if failed else 0)

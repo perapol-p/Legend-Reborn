@@ -2,6 +2,7 @@ extends Node3D
 ## Gameplay lives here; replace only the Models in scenes/weapons to swap art.
 const PROJECTILE = preload("res://scripts/weapon_projectile.gd")
 const TORNADO = preload("res://scripts/weapon_tornado.gd")
+const CHARGE_TARGET = preload("res://scripts/gun_charge_target.gd")
 const TARGET = preload("res://scenes/training_dummy.tscn")
 const WEAPONS = {
 	"sword": {"cooldown": 0.55, "damage": 1.3, "reach": 3.2, "delay": 0.16},
@@ -26,6 +27,8 @@ var dummy: Node3D
 var feedback: Label
 var feedback_time := 0.0
 var attack_held := false
+@export_range(0.0, 1.0, 0.01) var charge_target_chance := 0.35
+var charge_ready := false
 var charge_time := 0.0
 var empowered := 0.0
 var gun_ammo := 12
@@ -35,6 +38,9 @@ var bow_reload := 0.0
 var rpg_ready := false
 var special_cooldown := 0.0
 var ability_status: Label
+var ammo_label: Label
+var ammo_hint: Label
+var charge_meter: Control
 var volley_queue: Array[Dictionary] = []
 var attack_serial := 0
 var projectiles_fired := 0
@@ -47,17 +53,6 @@ func bind_combat(body: CharacterBody3D, model: Node, meter: Node) -> void:
 	combo = meter
 	var layer := CanvasLayer.new()
 	add_child(layer)
-	var hint := Label.new()
-	hint.text = "LMB Attack  |  1 Sword  2 Katana  3 Gun  4 Bow  5 Spellbook  |  T Target"
-	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	hint.position = Vector2(-360, 8)
-	hint.size.x = 720
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	hint.add_theme_color_override("font_shadow_color", Color.BLACK)
-	hint.add_theme_constant_override("shadow_offset_x", 1)
-	hint.add_theme_constant_override("shadow_offset_y", 1)
-	layer.add_child(hint)
 	feedback = Label.new()
 	layer.add_child(feedback)
 	feedback.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
@@ -81,6 +76,35 @@ func bind_combat(body: CharacterBody3D, model: Node, meter: Node) -> void:
 	ability_status.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ability_status.add_theme_color_override("font_shadow_color", Color.BLACK)
 	ability_status.add_theme_constant_override("shadow_offset_y", 1)
+	ammo_label = Label.new()
+	layer.add_child(ammo_label)
+	ammo_label.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	ammo_label.offset_left = -340
+	ammo_label.offset_right = -40
+	ammo_label.offset_top = -150
+	ammo_label.offset_bottom = -88
+	ammo_label.add_theme_font_size_override("font_size", 44)
+	ammo_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	ammo_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ammo_label.add_theme_color_override("font_color", Color("eee6d1"))
+	ammo_label.add_theme_color_override("font_shadow_color", Color.BLACK)
+	ammo_label.add_theme_constant_override("shadow_offset_x", 2)
+	ammo_label.add_theme_constant_override("shadow_offset_y", 2)
+	ammo_hint = Label.new()
+	layer.add_child(ammo_hint)
+	ammo_hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	ammo_hint.offset_left = -420
+	ammo_hint.offset_right = -40
+	ammo_hint.offset_top = -86
+	ammo_hint.offset_bottom = -46
+	ammo_hint.add_theme_font_size_override("font_size", 17)
+	ammo_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	ammo_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ammo_hint.add_theme_color_override("font_shadow_color", Color.BLACK)
+	ammo_hint.add_theme_constant_override("shadow_offset_y", 2)
+	charge_meter = preload("res://scripts/charge_meter.gd").new()
+	charge_meter.combat = self
+	layer.add_child(charge_meter)
 	equip(str(run.catalog.data["character_weapons"].get(run.character_name, "sword")))
 
 func can_act() -> bool:
@@ -95,6 +119,10 @@ func equip(id: String) -> void:
 	charge_time = 0.0
 	empowered = 0.0
 	volley_queue.clear()
+	charge_ready = false
+	for target in get_tree().get_nodes_in_group("gun_charge_targets"):
+		if target.source == self:
+			target.queue_free()
 	weapon_id = id
 	if is_instance_valid(view):
 		remove_child(view)
@@ -103,32 +131,39 @@ func equip(id: String) -> void:
 	add_child(view)
 	run.equipped_weapon_id = id
 	run.changed.emit()
+	update_status()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not can_act() or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		return
+	if event.is_action_pressed("reload") and not event.is_echo():
+		try_reload()
+		get_viewport().set_input_as_handled()
+		return
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		attack_held = event.pressed
 		if event.pressed:
-			if weapon_id == "gun" and weapon_level() >= 3:
+			if weapon_id == "gun" and weapon_level() >= 3 and charge_ready:
 				charge_time = 0.0
 			else:
 				try_attack()
-		elif weapon_id == "gun" and weapon_level() >= 3:
+		elif weapon_id == "gun" and weapon_level() >= 3 and charge_ready:
 			release_charge()
 		get_viewport().set_input_as_handled()
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 		try_special()
 		get_viewport().set_input_as_handled()
-	if event is InputEventKey and event.pressed and not event.echo:
-		var key: int = event.physical_keycode if event.physical_keycode != 0 else event.keycode
-		if key >= KEY_1 and key <= KEY_5:
-			equip(ORDER[key - KEY_1])
-			get_viewport().set_input_as_handled()
-		elif key == KEY_T:
-			spawn_target()
-			get_viewport().set_input_as_handled()
-
+func try_reload() -> bool:
+	if not can_act() or weapon_id != "gun" or gun_reload > 0.0 or gun_ammo >= 12:
+		return false
+	gun_reload = 1.4
+	pending = -1.0
+	attack_active = false
+	attack_held = false
+	charge_time = 0.0
+	empowered = 0.0
+	update_status()
+	return true
 func try_attack() -> bool:
 	if not can_act() or cooldown > 0.0 or (weapon_id == "gun" and gun_reload > 0.0 and empowered <= 0.0) or (weapon_id == "bow" and weapon_level() < 5 and bow_reload > 0.0):
 		return false
@@ -160,7 +195,7 @@ func _physics_process(delta: float) -> void:
 		bow_reload = 0.0
 		bow_ammo = 4
 	if can_act():
-		if attack_held and weapon_id == "gun" and weapon_level() >= 3:
+		if attack_held and weapon_id == "gun" and weapon_level() >= 3 and charge_ready and gun_reload <= 0.0:
 			charge_time = minf(1.5, charge_time + delta)
 		elif (attack_held and (weapon_id == "gun" or (weapon_id == "sword" and weapon_level() >= 4) or (weapon_id == "bow" and weapon_level() >= 5))) or (weapon_id == "gun" and empowered > 0.0):
 			try_attack()
@@ -211,8 +246,8 @@ func _physics_process(delta: float) -> void:
 		if t >= 1.0:
 			attack_active = false
 
-func ray(from: Vector3, to: Vector3) -> Dictionary:
-	var query := PhysicsRayQueryParameters3D.create(from, to, 1, [player.get_rid()])
+func ray(from: Vector3, to: Vector3, mask: int = 1) -> Dictionary:
+	var query := PhysicsRayQueryParameters3D.create(from, to, mask, [player.get_rid()])
 	return get_world_3d().direct_space_state.intersect_ray(query)
 
 func resolve_attack() -> void:
@@ -246,10 +281,13 @@ func resolve_attack() -> void:
 			gun_ammo -= 1
 			if gun_ammo == 0:
 				gun_reload = 1.4
-		var hit := ray(origin, origin + forward * 150.0)
+		var hit := ray(origin, origin + forward * 150.0, 3)
 		var end: Vector3 = origin + forward * 150.0 if hit.is_empty() else hit["position"]
 		tracer(origin + camera.global_basis * Vector3(0.26, -0.18, -0.6), end)
 		if not hit.is_empty():
+			if hit["collider"].has_method("collect_charge"):
+				hit["collider"].collect_charge(self)
+				return
 			var damage := roll_damage()
 			deal_hit(hit["collider"], damage, "gun", true)
 			if level >= 5:
@@ -318,6 +356,8 @@ func roll_damage() -> float:
 func deal_hit(body: Object, damage: float, hit_weapon: String = "", grants_rpg: bool = false) -> void:
 	if not is_instance_valid(body) or not body.has_method("take_damage"):
 		return
+	var monster_kill: bool = body.is_in_group("monsters")
+	var death_position: Vector3 = body.global_position if body is Node3D else Vector3.ZERO
 	var result: int = body.take_damage(damage)
 	if result == 0:
 		return
@@ -330,8 +370,27 @@ func deal_hit(body: Object, damage: float, hit_weapon: String = "", grants_rpg: 
 	if result == 2:
 		combo.register_kill()
 		feedback.text = "TARGET DOWN"
+		if monster_kill and weapon_id == "gun" and weapon_level() >= 3 and (hit_weapon.is_empty() or hit_weapon == "gun"):
+			try_spawn_charge_target(death_position)
 		run.add_xp(3)
 
+func try_spawn_charge_target(death_position: Vector3) -> Node3D:
+	if weapon_id != "gun" or weapon_level() < 3 or run.rng.randf() >= charge_target_chance:
+		return null
+	var target := StaticBody3D.new()
+	target.set_script(CHARGE_TARGET)
+	target.source = self
+	get_tree().current_scene.add_child(target)
+	target.global_position = death_position + Vector3(0, 3.0, 0)
+	return target
+func unlock_charge() -> void:
+	charge_ready = true
+	charge_time = 0.0
+	attack_held = false
+	feedback.text = "CHARGE READY"
+	feedback.modulate = Color("ff6977")
+	feedback_time = 1.0
+	update_status()
 func tracer(from: Vector3, to: Vector3) -> void:
 	var line := MeshInstance3D.new()
 	var mesh := CylinderMesh.new()
@@ -377,10 +436,11 @@ func attack_cooldown() -> float:
 	return float(WEAPONS[weapon_id]["cooldown"])
 
 func release_charge() -> void:
-	if not can_act():
+	if not can_act() or gun_reload > 0.0 or not charge_ready:
 		charge_time = 0.0
 		return
 	if charge_time >= 0.45:
+		charge_ready = false
 		empowered = 2.0 + minf(charge_time, 1.5) * 2.0
 		gun_reload = 0.0
 		cooldown = 0.0
@@ -390,25 +450,29 @@ func release_charge() -> void:
 func update_status() -> void:
 	if ability_status == null:
 		return
+	ammo_label.visible = weapon_id in ["gun", "bow"]
+	ammo_hint.visible = ammo_label.visible
 	var text := ""
 	if weapon_id == "gun":
-		text = "AMMO %d / 12" % gun_ammo
+		ammo_label.text = "%02d / 12" % gun_ammo
+		ammo_hint.text = "%s  RELOAD" % GameData.key_label("reload")
 		if gun_reload > 0.0:
-			text = "RELOADING %.1fs" % gun_reload
-		if weapon_level() >= 3:
-			text += " | Hold LMB: charge %.0f%% -> release burst" % (charge_time / 1.5 * 100.0)
-		if empowered > 0.0:
-			text = "POWER BURST %.1fs | Double damage / unlimited ammo" % empowered
+			ammo_hint.text = "RELOADING  %.1fs" % gun_reload
+		elif charge_ready:
+			ammo_hint.text += " | CHARGE READY"
+		elif empowered > 0.0:
+			ammo_label.text = "∞ / 12"
+			ammo_hint.text = "POWER BURST  %.1fs" % empowered
 		if weapon_level() >= 4:
-			text += " | RMB: RPG " + ("READY" if rpg_ready else "(hit a target first)")
+			ammo_hint.text += "\nRMB  RPG " + ("READY" if rpg_ready else "NOT READY")
 	elif weapon_id == "bow":
-		text = "NO RELOAD | Hold LMB to fire" if weapon_level() >= 5 else ("VOLLEYS %d / 4" % bow_ammo if bow_reload <= 0 else "RELOADING %.1fs" % bow_reload)
+		ammo_label.text = "∞ / 4" if weapon_level() >= 5 else "%d / 4" % bow_ammo
+		ammo_hint.text = "ARROWS" if bow_reload <= 0.0 else "RELOADING  %.1fs" % bow_reload
 	elif weapon_id == "spellbook" and weapon_level() >= 4:
 		text = "RMB: Warp | %.1fs cooldown" % special_cooldown
 	elif weapon_id == "sword" and weapon_level() >= 4:
 		text = "Hold LMB: rapid sword waves"
 	ability_status.text = text
-
 func fire_projectile(kind: String, direction: Vector3, damage: float, speed: float, radius: float, piercing: bool, splash: float = 0.0) -> Node3D:
 	var shot := Node3D.new()
 	shot.set_script(PROJECTILE)

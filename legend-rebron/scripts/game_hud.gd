@@ -1,6 +1,5 @@
 extends Control
 const Style = preload("res://scripts/ui_style.gd")
-signal level_up_requested
 var run: Node
 var level_label: Label
 var xp_label: Label
@@ -10,12 +9,6 @@ var hp_label: Label
 var weapon_label: Label
 var weapon_level_label: Label
 var weapon_ability_label: Label
-var weapon_upgrade_button: Button
-var level_button: Button
-var hit_button: Button
-var kill_button: Button
-var reset_button: Button
-var cursor_hint: Label
 var movement_hint: Label
 var combo: Node
 var elapsed := 0.0
@@ -103,20 +96,6 @@ func _ready() -> void:
 	hp_bar = Style.bar(stack, Color("a73b29"), 100)
 	Style.label(stack, "MP      50 / 50", 14, Style.PAPER)
 	Style.bar(stack, Color("427e92"), 100)
-	var test_area := corner(Rect2(-410, -238, 370, 208), Vector2(1, 1))
-	var tests := VBoxContainer.new()
-	test_area.add_child(tests)
-	tests.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	Style.label(tests, "TEST CONTROLS", 14, Style.PAPER)
-	var buttons := HBoxContainer.new()
-	tests.add_child(buttons)
-	hit_button = Style.button(buttons, "Hit [J]", func(): combo.register_hit())
-	kill_button = Style.button(buttons, "Kill [K]", func(): combo.register_kill())
-	reset_button = Style.button(buttons, "Reset [R]", func(): combo.reset())
-	level_button = Style.button(tests, "Level up [L]", func(): level_up_requested.emit())
-	weapon_upgrade_button = Style.button(tests, "Weapon level up [U]", _upgrade_weapon)
-	weapon_upgrade_button.tooltip_text = "Upgrade held weapon to unlock the next ability in the reference table. Max level 5. Test only."
-	cursor_hint = Style.label(tests, "", 14, Style.PAPER)
 	var help_area := corner(Rect2(-240, -56, 480, 40), Vector2(0.5, 1))
 	movement_hint = Style.label(help_area, "", 14, Style.PAPER)
 	movement_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -134,8 +113,7 @@ func refresh_run() -> void:
 	hp_bar.value = run.current_health() / maxf(float(current["max_hp"]), 1.0) * 100.0
 	weapon_label.text = "WEAPON / " + run.weapon_name().to_upper()
 	weapon_level_label.text = "WEAPON LV %d / %d" % [run.weapon_level(), run.MAX_WEAPON_LEVEL]
-	weapon_ability_label.text = run.weapon_ability()
-	_refresh_weapon_button()
+	weapon_ability_label.text = "" if run.equipped_weapon_id == "gun" and run.weapon_level() >= 3 else run.weapon_ability()
 func bind_combo(model: Node) -> void:
 	combo = model
 	combo.changed.connect(refresh_combo)
@@ -151,39 +129,7 @@ func _process(delta: float) -> void:
 	elapsed += delta
 	clock_label.text = "%02d:%02d" % [int(elapsed) / 60, int(elapsed) % 60]
 func refresh_bindings() -> void:
-	if hit_button == null:
-		return
-	hit_button.text = "Hit [%s]" % GameData.key_label("test_hit")
-	kill_button.text = "Kill [%s]" % GameData.key_label("test_kill")
-	reset_button.text = "Reset [%s]" % GameData.key_label("test_reset")
-	level_button.text = "Level up [%s]" % GameData.key_label("test_level")
-	_refresh_weapon_button()
-	cursor_hint.text = "Esc / Pause    %s / Mouse cursor" % GameData.key_label("toggle_cursor")
 	movement_hint.text = "%s%s%s%s  Move  /  %s Jump  /  %s Sprint  /  %s Dash" % [
 		GameData.key_label("move_forward"), GameData.key_label("move_left"),
 		GameData.key_label("move_back"), GameData.key_label("move_right"),
 		GameData.key_label("jump"), GameData.key_label("sprint"), GameData.key_label("dash")]
-func _unhandled_key_input(event: InputEvent) -> void:
-	if GameData.rebinding_active or combo == null or event.is_echo() or get_tree().paused:
-		return
-	if event.is_action_pressed("test_hit"):
-		combo.register_hit()
-	elif event.is_action_pressed("test_kill"):
-		combo.register_kill()
-	elif event.is_action_pressed("test_reset"):
-		combo.reset()
-	elif event.is_action_pressed("test_weapon_level"):
-		_upgrade_weapon()
-		get_viewport().set_input_as_handled()
-	elif event.is_action_pressed("test_level"):
-		level_up_requested.emit()
-
-func _upgrade_weapon() -> void:
-	if run != null and not get_tree().paused and not GameData.rebinding_active:
-		run.upgrade_weapon()
-func _refresh_weapon_button() -> void:
-	if weapon_upgrade_button == null:
-		return
-	var maxed: bool = run != null and run.weapon_level() >= run.MAX_WEAPON_LEVEL
-	weapon_upgrade_button.disabled = run == null or run.equipped_weapon_id.is_empty() or maxed
-	weapon_upgrade_button.text = "Weapon MAX (Lv.5)" if maxed else "Weapon level up [%s]" % GameData.key_label("test_weapon_level")

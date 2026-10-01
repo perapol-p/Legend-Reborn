@@ -79,6 +79,8 @@ func _choose(id: String, generation: int) -> void:
 		button.disabled = true
 	run.choose_item(id, generation)
 func _input(event: InputEvent) -> void:
+	if GameData.command_console_active:
+		return
 	if not visible:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
