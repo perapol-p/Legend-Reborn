@@ -6,9 +6,9 @@ README.md::TextFile::-1::1790882588::0::1::::<><><>0<>0<><>::
 ::res://assets/audio/::1790276839
 ::res://assets/characters/::1790276839
 ::res://assets/ui/::1790276839
-::res://assets/weapons/::1791042656
-Hand_Sword.glb::PackedScene::1241158592461956474::1791042465::1791043122::1::::<><><>0<>0<>95645fbbdb5f33f5a7b3fa476eedb39e<>res://.godot/imported/Hand_Sword.glb-891cc93886dbb0f2c500ae5a2dee3f66.scn::uid://bw1ovgp7ypgvv::::res://assets/weapons/Hand_Sword_Sword_Texture.png
-Hand_Sword_Sword_Texture.png::CompressedTexture2D::3985136944704870959::1791043122::1791043122::1::::<><><>0<>0<>1f6c70262644e7587c09453d6b35a33a<>res://.godot/imported/Hand_Sword_Sword_Texture.png-cecafa2cdead062f6d415ac2eede9447.ctex::
+::res://assets/weapons/::1791043122
+Hand_Sword.glb::PackedScene::1241158592461956474::1791044487::1791044794::1::::<><><>0<>0<>95645fbbdb5f33f5a7b3fa476eedb39e<>res://.godot/imported/Hand_Sword.glb-891cc93886dbb0f2c500ae5a2dee3f66.scn::uid://bw1ovgp7ypgvv::::res://assets/weapons/Hand_Sword_Sword_Texture.png
+Hand_Sword_Sword_Texture.png::CompressedTexture2D::3985136944704870959::1791043122::1791044794::1::::<><><>0<>0<>1f6c70262644e7587c09453d6b35a33a<>res://.godot/imported/Hand_Sword_Sword_Texture.png-cecafa2cdead062f6d415ac2eede9447.ctex::
 ::res://data/::1790883168
 item_catalog.json::JSON::-1::1790275118::0::1::::<><><>0<>0<><>::
 ::res://docs/::1790883168
@@ -42,7 +42,7 @@ gun.tscn::PackedScene::-1::1790530004::0::1::::<><><>0<>0<><>::res://scenes/weap
 katana.tscn::PackedScene::-1::1790530004::0::1::::<><><>0<>0<><>::res://scenes/weapons/arms.tscn
 spellbook.tscn::PackedScene::-1::1790530004::0::1::::<><><>0<>0<><>::res://scenes/weapons/arms.tscn
 sword.tscn::PackedScene::-1::1791043050::0::1::::<><><>0<>0<><>::res://assets/weapons/Hand_Sword.glb<>res://scripts/sword_view.gd
-::res://scripts/::1791042732
+::res://scripts/::1791043122
 character_detail.gd::GDScript::7896003718951818976::1790272228::0::1::::<>Control<><>0<>0<><>::
 character_select.gd::GDScript::6093919403145414510::1790272228::0::1::::<>Control<><>0<>0<><>::
 charge_meter.gd::GDScript::1580764577566400998::1790882396::0::1::::<>Control<><>0<>0<><>::
@@ -65,7 +65,7 @@ run_state.gd::GDScript::5789596978659179551::1790531368::0::1::::<>Node<><>0<>0<
 settings.gd::GDScript::1196582503344099091::1790276288::0::1::::<>Control<><>0<>0<><>::
 settings_panel.gd::GDScript::8609575048206229023::1790880842::0::1::::<>VBoxContainer<><>0<>0<><>::
 simple_back.gd::GDScript::606240748828467991::1790272228::0::1::::<>Control<><>0<>0<><>::
-sword_view.gd::GDScript::7815379558678044105::1791043097::0::1::::<>Node3D<><>0<>0<><>::
+sword_view.gd::GDScript::7815379558678044105::1791044739::0::1::::<>Node3D<><>0<>0<><>::
 test_charge_ui.gd::GDScript::5334178940923448685::1790882396::0::1::::<>SceneTree<><>0<>0<><>::
 test_combo.gd::GDScript::4099746754926087911::1790273236::0::1::::<>SceneTree<><>0<>0<><>::
 test_command_console.gd::GDScript::988346226530236624::1790880766::0::1::::<>SceneTree<><>0<>0<><>::
