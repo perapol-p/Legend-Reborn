@@ -172,6 +172,8 @@ func try_attack() -> bool:
 	attack_serial += 1
 	elapsed = 0.0
 	attack_active = true
+	if is_instance_valid(view) and view.has_method("play_attack"):
+		view.play_attack(cooldown)
 	if pending == 0.0:
 		pending = -1.0
 		resolve_attack()
@@ -211,6 +213,8 @@ func _physics_process(delta: float) -> void:
 	if not can_act():
 		pending = -1.0
 		attack_active = false
+		if is_instance_valid(view) and view.has_method("cancel_attack"):
+			view.cancel_attack()
 		attack_held = false
 		charge_time = 0.0
 		empowered = 0.0
@@ -231,7 +235,7 @@ func _physics_process(delta: float) -> void:
 		var t := clampf(elapsed / attack_cooldown(), 0, 1)
 		var swing := sin(t * PI)
 		match weapon_id:
-			"sword", "katana":
+			"katana":
 				view.rotation = Vector3(-0.25, -0.65, -0.85) * swing
 				view.position += Vector3(-0.22, 0.02, -0.18) * swing
 			"gun":
