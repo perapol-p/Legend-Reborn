@@ -76,6 +76,8 @@ func add_xp(amount: int) -> void:
 		xp -= xp_to_next()
 		level += 1
 		pending_levels.append(level)
+		if level % WEAPON_UPGRADE_INTERVAL == 0:
+			upgrade_weapon()
 	changed.emit()
 	if offers.is_empty():
 		_next_reward()
@@ -121,6 +123,7 @@ func restore_health() -> void:
 	changed.emit()
 
 const MAX_WEAPON_LEVEL := 5
+const WEAPON_UPGRADE_INTERVAL := 10
 var weapon_levels: Dictionary = {}
 func weapon_level(id: String = "") -> int:
 	var selected := equipped_weapon_id if id.is_empty() else id

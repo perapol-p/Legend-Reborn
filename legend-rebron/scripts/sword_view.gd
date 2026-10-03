@@ -62,6 +62,25 @@ func _setup_grip_ik() -> void:
 	# two hand targets on the animated sword bone so the exported rig can grip it.
 	var sword_skeleton: Skeleton3D = $Model/Armature/Skeleton3D
 	var arms: Skeleton3D = $Model/Arm_Rig/Skeleton3D
+	# Put the shoulder origins behind the first-person camera, with the arms
+	# facing forward independently of the decorative blade angle.
+	var arm_rig: Node3D = $Model/Arm_Rig
+	arm_rig.rotation.y = -1.2
+	arm_rig.position = Vector3(0.471, 0.8, 1.212)
+	for side in ["L", "R"]:
+		var shoulder := arms.find_bone("upper_arm_" + side)
+		var shoulder_rest := arms.get_bone_rest(shoulder)
+		shoulder_rest.origin.x = 2.2 if side == "L" else -2.2
+		shoulder_rest.origin.z = -4.5
+		arms.set_bone_rest(shoulder, shoulder_rest)
+		arms.set_bone_pose_position(shoulder, shoulder_rest.origin)
+		for bone_name in ["lower_arm_" + side, "hand_" + side]:
+			var bone := arms.find_bone(bone_name)
+			var bone_rest := arms.get_bone_rest(bone)
+			bone_rest.origin.y *= 2.0
+			arms.set_bone_rest(bone, bone_rest)
+			arms.set_bone_pose_position(bone, bone_rest.origin)
+	_fit_arm_mesh_to_rest(arms)
 	var grip := BoneAttachment3D.new()
 	grip.bone_name = "handle_root"
 	sword_skeleton.add_child(grip)
@@ -95,3 +114,34 @@ func _close_grip_fingers() -> void:
 			for key in animation.track_get_key_count(track):
 				var rotation: Quaternion = animation.track_get_key_value(track, key)
 				animation.track_set_key_value(track, key, rotation * Quaternion(Vector3.RIGHT, bend))
+func _process(_delta: float) -> void:
+	# Shoulders stay attached to the player while the sword rig swings.
+	var arm_rig: Node3D = $Model/Arm_Rig
+	arm_rig.global_transform = Transform3D(
+		global_transform.basis * Basis(Vector3.UP, PI).scaled(Vector3.ONE * 0.1),
+		to_global(Vector3(0.0, -0.15, -0.35))
+	)
+func _fit_arm_mesh_to_rest(arms: Skeleton3D) -> void:
+	# Extend the source T-pose geometry with its rest bones, preserving hand size.
+	var instance := arms.get_node("Arm") as MeshInstance3D
+	var source := instance.mesh
+	var fitted := ArrayMesh.new()
+	for surface in source.get_surface_count():
+		var arrays := source.surface_get_arrays(surface)
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		for index in vertices.size():
+			var vertex := vertices[index]
+			var side := 1.0 if vertex.x >= 0.0 else -1.0
+			vertex.x += side * (1.2 + clampf(absf(vertex.x) - 1.003529, 0.0, 3.798198))
+			vertex.z -= 4.5
+			vertices[index] = vertex
+		arrays[Mesh.ARRAY_VERTEX] = vertices
+		fitted.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+		fitted.surface_set_material(surface, source.surface_get_material(surface))
+	instance.mesh = fitted
+	var skin := instance.skin.duplicate() as Skin
+	for bind in skin.get_bind_count():
+		var bone := arms.find_bone(skin.get_bind_name(bind))
+		if bone >= 0:
+			skin.set_bind_pose(bind, arms.get_bone_global_rest(bone).affine_inverse())
+	instance.skin = skin

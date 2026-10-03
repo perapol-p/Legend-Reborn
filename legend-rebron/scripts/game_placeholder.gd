@@ -7,6 +7,7 @@ func _ready() -> void:
 	$Player.bind_run($RunState)
 	$Interface/HUD.bind_combo($Combo)
 	$Interface/HUD.bind_run($RunState)
+	$Interface/HUD.bind_spawner($MonsterSpawner)
 	
 	$Interface/PauseOverlay.bind_run($RunState)
 	$Interface/PauseOverlay.pause_changed.connect(_pause_changed)

@@ -21,7 +21,7 @@ Command console (F1; F1 or Esc closes; Up/Down recalls history):
 - `/target`: create training target
 - `/hit`, `/kill`, `/reset`: test combo
 - `/levelup`: level up and open item selection
-- `/weaponlevel`: upgrade current weapon, up to level 5
+- `/weaponlevel`: debug override to upgrade current weapon, up to level 5
 - `/spawndebug on|off`: show/hide spawn radius and markers (off by default)
 - `/spawninfo`: print spawn information in the console
 - `/clear`: clear console output
@@ -30,3 +30,4 @@ The console pauses gameplay and preserves any existing pause or reward screen wh
 
 Console regression check: Godot --headless --path . --script res://scripts/test_command_console.gd
 Gun level 3 and above: monster kills with the gun have a 35% chance to create a red floating target above the defeated monster. The target and its hitbox shrink to zero over 3 seconds. Shoot it with the gun to unlock one use of the existing charged burst. Without an earned charge, the gun fires normally. A short hold keeps the charge; a charged release consumes it. Switching weapons clears earned charge and floating targets. Paused gameplay freezes the target timer.
+Weapon progression: the equipped weapon gains one level whenever the character reaches a multiple of 10 (10, 20, 30, 40, ...), capped at weapon level 5. Crossing several milestones in one XP award grants each upgrade. Item choices still appear for every character level. Weapon levels remain separate when switching weapons; the milestone upgrades only the weapon equipped at that moment. HUD shows the next character level required.

@@ -1,5 +1,6 @@
 extends Node3D
 signal monster_spawned(monster: CharacterBody3D, distance: float)
+signal wave_changed
 const MONSTER = preload("res://scenes/monster.tscn")
 @export var enabled := true
 @export_range(1.0, 100.0, 0.5) var spawn_radius := 20.0
@@ -7,6 +8,11 @@ const MONSTER = preload("res://scenes/monster.tscn")
 @export_range(0.1, 30.0, 0.1) var spawn_interval := 2.0
 @export var initial_count := 4
 @export var max_alive := 16
+@export_range(1, 100, 1) var monsters_per_wave := 3
+@export_range(0.1, 30.0, 0.1) var wave_break := 5.0
+var wave_number := 1
+var wave_spawned := 0
+var between_waves := false
 ## Disable for the real game. Release exports never draw debug helpers.
 @export var show_debug_radius := false
 var player: CharacterBody3D
@@ -67,13 +73,34 @@ func _physics_process(delta: float) -> void:
 	for monster in monsters:
 		if monster.global_position.distance_to(player.global_position) > 85.0:
 			monster.queue_free()
+	if not between_waves and wave_spawned >= wave_size() and monsters.is_empty():
+		between_waves = true
+		countdown = wave_break
+		wave_changed.emit()
 	countdown -= delta
-	if countdown <= 0:
-		var count := initial_count if not started else 1
-		started = true
-		for i in range(count):
-			spawn_one()
-		countdown = maxf(spawn_interval, 0.1)
+	if countdown > 0.0:
+		return
+	if between_waves:
+		wave_number += 1
+		wave_spawned = 0
+		between_waves = false
+		started = false
+		wave_changed.emit()
+	if wave_spawned >= wave_size():
+		return
+	var count := mini(initial_count if not started else 1, wave_size() - wave_spawned)
+	started = true
+	for i in range(count):
+		if spawn_one() != null:
+			wave_spawned += 1
+	countdown = maxf(0.35, spawn_interval / (1.0 + 0.12 * (wave_number - 1)))
+
+func wave_size() -> int:
+	return maxi(1, initial_count) + (wave_number - 1) * monsters_per_wave
+
+func wave_remaining() -> int:
+	return maxi(0, wave_size() - wave_spawned) + monsters.filter(func(m): return is_instance_valid(m) and not m.dead and not m.is_queued_for_deletion()).size()
+
 func spawn_one() -> CharacterBody3D:
 	monsters = monsters.filter(func(m): return is_instance_valid(m) and not m.dead and not m.is_queued_for_deletion())
 	if not enabled or get_tree().paused or monsters.size() >= max_alive or not is_instance_valid(player):
@@ -109,6 +136,11 @@ func spawn_one() -> CharacterBody3D:
 			continue
 		var monster: CharacterBody3D = MONSTER.instantiate()
 		monster.player = player
+		var difficulty := float(wave_number - 1)
+		monster.max_health *= 1.0 + 0.25 * difficulty
+		monster.attack_damage *= 1.0 + 0.15 * difficulty
+		monster.move_speed *= 1.0 + 0.05 * difficulty
+		monster.attack_interval = maxf(0.5, monster.attack_interval / (1.0 + 0.03 * difficulty))
 		add_child(monster)
 		monster.global_position = candidate
 		monsters.append(monster)
@@ -151,5 +183,9 @@ func reset_encounter() -> void:
 			monster.queue_free()
 	monsters.clear()
 	started = false
+	wave_number = 1
+	wave_spawned = 0
+	between_waves = false
 	countdown = 2.0
+	wave_changed.emit()
 

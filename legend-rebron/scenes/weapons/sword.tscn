@@ -7,6 +7,6 @@
 script = ExtResource("2")
 
 [node name="Model" parent="." instance=ExtResource("1")]
-position = Vector3(0.34, -0.23, -0.35)
+position = Vector3(0.13, -0.23, -0.35)
 rotation = Vector3(0, 4.34159265, 0)
 scale = Vector3(0.1, 0.1, 0.1)

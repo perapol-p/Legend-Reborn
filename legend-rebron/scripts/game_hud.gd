@@ -13,6 +13,8 @@ var movement_hint: Label
 var combo: Node
 var elapsed := 0.0
 var clock_label: Label
+var wave_label: Label
+var spawner: Node
 var rank_label: Label
 var combo_bar: ProgressBar
 var combo_info: Label
@@ -39,10 +41,14 @@ func _ready() -> void:
 	level_label = Style.label(progress_stack, "LEVEL 1", 20, Style.PAPER)
 	xp_bar = Style.bar(progress_stack, Color("b79550"), 0, 10)
 	xp_label = Style.label(progress_stack, "0 / 10 XP", 14, Style.PAPER)
-	var top := corner(Rect2(-110, 25, 220, 60), Vector2(0.5, 0))
-	clock_label = Style.label(top, "00:00", 28, Style.PAPER)
+	var top := corner(Rect2(-110, 48, 220, 30), Vector2(0.5, 0))
+	clock_label = Style.label(top, "00:00", 24, Style.PAPER)
 	clock_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	clock_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var wave_area := corner(Rect2(-220, 16, 440, 30), Vector2(0.5, 0))
+	wave_label = Style.label(wave_area, "WAVE 1", 24, Style.GOLD)
+	wave_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var rank_area := corner(Rect2(-286, 72, 242, 175), Vector2(1, 0))
 	flames = CPUParticles2D.new()
 	rank_area.add_child(flames)
@@ -113,6 +119,11 @@ func refresh_run() -> void:
 	hp_bar.value = run.current_health() / maxf(float(current["max_hp"]), 1.0) * 100.0
 	weapon_label.text = "WEAPON / " + run.weapon_name().to_upper()
 	weapon_level_label.text = "WEAPON LV %d / %d" % [run.weapon_level(), run.MAX_WEAPON_LEVEL]
+	if run.weapon_level() < run.MAX_WEAPON_LEVEL:
+		var next_level: int = (int(run.level) / run.WEAPON_UPGRADE_INTERVAL + 1) * run.WEAPON_UPGRADE_INTERVAL
+		weapon_level_label.text += "\nNEXT: CHARACTER LV %d" % next_level
+	else:
+		weapon_level_label.text += " / MAX"
 	weapon_ability_label.text = "" if run.equipped_weapon_id == "gun" and run.weapon_level() >= 3 else run.weapon_ability()
 func bind_combo(model: Node) -> void:
 	combo = model
@@ -126,6 +137,7 @@ func refresh_combo() -> void:
 	flames.emitting = rank == 8
 	rank_label.add_theme_color_override("font_color", Color("f36b26") if rank == 8 else Color("b9572b"))
 func _process(delta: float) -> void:
+	refresh_wave()
 	elapsed += delta
 	clock_label.text = "%02d:%02d" % [int(elapsed) / 60, int(elapsed) % 60]
 func refresh_bindings() -> void:
@@ -133,3 +145,17 @@ func refresh_bindings() -> void:
 		GameData.key_label("move_forward"), GameData.key_label("move_left"),
 		GameData.key_label("move_back"), GameData.key_label("move_right"),
 		GameData.key_label("jump"), GameData.key_label("sprint"), GameData.key_label("dash")]
+
+
+func bind_spawner(model: Node) -> void:
+	spawner = model
+	spawner.wave_changed.connect(refresh_wave)
+	refresh_wave()
+
+func refresh_wave() -> void:
+	if not is_instance_valid(spawner):
+		return
+	if spawner.between_waves:
+		wave_label.text = "WAVE %d CLEARED / NEXT IN %ds" % [spawner.wave_number, ceili(maxf(0.0, spawner.countdown))]
+	else:
+		wave_label.text = "WAVE %d / %d REMAINING" % [spawner.wave_number, spawner.wave_remaining()]
