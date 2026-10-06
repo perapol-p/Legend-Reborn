@@ -60,7 +60,8 @@ func _physics_process(delta: float) -> void:
 		var query := PhysicsRayQueryParameters3D.create(aim_point(), player.global_position + Vector3.UP, 1, [get_rid()])
 		var hit := get_world_3d().direct_space_state.intersect_ray(query)
 		if not hit.is_empty() and hit["collider"] == player:
-			player.receive_damage(attack_damage)
+			player.receive_damage(attack_damage, global_position)
 			attack_timer = attack_interval
+
 
 

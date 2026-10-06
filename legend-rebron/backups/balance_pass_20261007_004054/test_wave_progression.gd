@@ -1,0 +1,78 @@
+﻿extends Node
+var failed := false
+func check(ok: bool, message: String) -> void:
+	if not ok:
+		failed = true
+		push_error(message)
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	var game = load("res://scenes/game_placeholder.tscn").instantiate()
+	game.auto_pause_on_focus_loss = false
+	var spawner = game.get_node("MonsterSpawner")
+	spawner.enabled = false
+	add_child(game)
+	await get_tree().physics_frame
+	spawner.set_physics_process(false)
+	spawner.enabled = true
+	var hud = game.get_node("Interface/HUD")
+	for seconds in [0.0, 119.99, 120.0, 240.0, 600.0]:
+		spawner.survival_time = seconds
+		spawner.countdown = 1000.0
+		spawner._physics_process(0.0)
+		var step := int(seconds / 120.0)
+		check(spawner.spawn_batch_size() == 1 + step, "Spawn batch increases every 120 seconds")
+		var monster = spawner.spawn_one()
+		check(monster != null, "Spawn succeeds")
+		if monster != null:
+			var minutes: float = floor(float(seconds)) / 60.0
+			check(is_equal_approx(monster.max_health, 30.0 + 25.0 * minutes + 5.0 * minutes * minutes), "HP follows per-second quadratic growth" )
+			check(monster.health == monster.max_health, "New monster starts at full HP")
+			check(monster.attack_damage == 8.0 and monster.move_speed == 2.6, "Difficulty increases via health")
+			monster.queue_free()
+		await get_tree().process_frame
+	for sample in [[0.0, 30.0], [0.99, 30.0], [1.0, 30.4180555556], [60.0, 60.0], [180.0, 150.0], [300.0, 280.0], [600.0, 780.0]]:
+		spawner.survival_time = sample[0]
+		check(absf(spawner.monster_health() - sample[1]) < 0.00001, "HP curve checkpoint " + str(sample[0]))
+	spawner.survival_time = 5.0
+	var health_before: float = spawner.monster_health()
+	spawner.survival_time = 6.0
+	check(spawner.monster_health() > health_before, "HP growth is independent from the spawn interval")
+	spawner.reset_encounter()
+	check(spawner.survival_time == 0 and spawner.spawn_batch_size() == 1, "Death reset clears difficulty")
+	spawner.countdown = 0.0
+	spawner._physics_process(0.0)
+	check(spawner.monsters.size() == 4, "Initial four monsters")
+	var before: float = spawner.survival_time
+	get_tree().paused = true
+	spawner._physics_process(10.0)
+	check(spawner.survival_time == before, "Pause freezes difficulty")
+	get_tree().paused = false
+	for monster in spawner.monsters:
+		monster.queue_free()
+	await get_tree().process_frame
+	spawner.survival_time = 240.0
+	spawner.countdown = 0.0
+	spawner._physics_process(0.0)
+	check(spawner.monsters.size() == 3, "Continuous spawn batch at 240 seconds without waiting for clear")
+	hud.refresh_survival()
+	check(not hud.survival_label.text.contains("WAVE"), "HUD removes waves")
+	spawner.countdown = 0.0
+	spawner._physics_process(0.0)
+	check(spawner.monsters.size() == 6, "Spawning continues while existing monsters are alive")
+	for i in range(5):
+		spawner.countdown = 0.0
+		spawner._physics_process(0.0)
+	check(spawner.monsters.size() > 16, "Population can exceed 16")
+	spawner.max_alive = spawner.monsters.size()
+	var capped: int = spawner.monsters.size()
+	check(spawner.spawn_one() == null, "No spawn at population cap")
+	spawner.monsters[0].queue_free()
+	await get_tree().process_frame
+	check(spawner.spawn_one() != null, "A freed population slot can spawn again")
+	check(spawner.monsters.size() == capped, "Population stays within cap")
+	print("SURVIVAL SPAWNING ", "FAILED" if failed else "PASSED")
+	get_tree().quit(1 if failed else 0)
+
+
+
+

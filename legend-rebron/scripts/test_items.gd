@@ -1,4 +1,4 @@
-extends SceneTree
+﻿extends SceneTree
 const Run = preload("res://scripts/run_state.gd")
 func _initialize() -> void:
 	var run = Run.new()
@@ -21,7 +21,7 @@ func _initialize() -> void:
 		assert(run.choose_item("pencil"))
 	assert(run.owned_ids.size() == 1)
 	assert(run.total_items() == 10 and run.stack_count("pencil") == 10)
-	assert(run.stats()["attack"] == 110)
+	assert(run.stats()["attack"] == 30)
 	assert(not run.choose_item("pencil"))
 	var repeat_seen := false
 	for i in range(250):
@@ -47,16 +47,17 @@ func _initialize() -> void:
 		run.offers.assign([item["id"]])
 		assert(run.choose_item(item["id"]))
 	assert(run.owned_ids.size() == 20 and run.total_items() == 20)
-	assert(run.stats()["max_hp"] == 620 and run.stats()["attack"] == 300)
-	assert(run.stats()["speed"] == 125 and run.stats()["luck"] == 8.5)
-	assert(run.stats()["crit_chance"] == 23.5 and run.stats()["crit_damage"] == 187)
+	assert(run.stats()["max_hp"] == 225 and run.stats()["attack"] == 42)
+	assert(run.stats()["speed"] == 114 and run.stats()["luck"] == 3.75)
+	assert(run.stats()["crit_chance"] == 11.5 and run.stats()["crit_damage"] == 172)
 	run.test_level_up()
 	assert(run.offers.size() == 3)
 	var repeated: String = run.offers[0]
 	assert(run.choose_item(repeated))
 	assert(run.stack_count(repeated) == 2 and run.total_items() == 21)
 	assert(run.rarity_weights(2)["common"] > run.rarity_weights(20)["common"])
-	assert(run.rarity_weights(2)["legendary"] < run.rarity_weights(20)["legendary"])
+	assert(run.rarity_weights(2)["legendary"] < run.rarity_weights(60)["legendary"])
 	run.free()
-	print("PASS: repeated rewards, Pencil x10 = +100 ATK, stack totals, unique cards, stale pick rejection, XP queue, all-types continuation")
+	print("PASS: repeated rewards, Pencil x10 = +20 ATK, stack totals, unique cards, stale pick rejection, XP queue, all-types continuation")
 	quit()
+

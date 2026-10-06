@@ -1,4 +1,5 @@
 ﻿extends CharacterBody3D
+signal damage_received(amount: float, source_position: Vector3)
 @export var move_speed := 9.0
 @export var sprint_multiplier := 1.5
 @export var jump_speed := 9.0
@@ -83,9 +84,11 @@ func respawn() -> void:
 	dash_recovery = 0
 	jump_buffer = 0
 
-func receive_damage(amount: float) -> void:
-	if run == null or run.finished or get_tree().paused:
+func receive_damage(amount: float, source_position: Vector3 = Vector3.INF) -> void:
+	if run == null or run.finished or get_tree().paused or amount <= 0.0:
 		return
+	damage_received.emit(amount, source_position)
 	if run.damage_player(amount):
 		input_enabled = false
 		velocity = Vector3.ZERO
+

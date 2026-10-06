@@ -44,13 +44,16 @@ func rarity_weights(at_level: int) -> Dictionary:
 	var weights: Dictionary = {}
 	for rarity in config["early_weights"]:
 		weights[rarity] = lerpf(float(config["early_weights"][rarity]), float(config["late_weights"][rarity]), progress)
+		if at_level < int(config.get("rarity_min_levels", {}).get(rarity, 1)):
+			weights[rarity] = 0.0
 	return weights
 func roll_choices(at_level: int) -> Array[String]:
+	var weights := rarity_weights(at_level)
 	var available: Array = []
 	for item in catalog.items:
-		available.append(item)
+		if float(weights.get(item["rarity"], 0.0)) > 0.0:
+			available.append(item)
 	var result: Array[String] = []
-	var weights := rarity_weights(at_level)
 	while result.size() < 3 and not available.is_empty():
 		var groups: Dictionary = {}
 		for item in available:
@@ -193,3 +196,4 @@ func result_summary() -> Dictionary:
 		"stats": stats().duplicate(true),
 		"health": current_health()
 	}
+

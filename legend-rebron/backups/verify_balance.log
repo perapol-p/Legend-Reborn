@@ -1,0 +1,12 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS reward LV1 3000 cards, rarity counts={ "common": 3000, "rare": 0, "epic": 0, "legendary": 0 }
+PASS reward LV4 3000 cards, rarity counts={ "common": 3000, "rare": 0, "epic": 0, "legendary": 0 }
+PASS reward LV5 3000 cards, rarity counts={ "common": 2553, "rare": 447, "epic": 0, "legendary": 0 }
+PASS reward LV11 3000 cards, rarity counts={ "common": 2431, "rare": 569, "epic": 0, "legendary": 0 }
+PASS reward LV12 3000 cards, rarity counts={ "common": 2461, "rare": 488, "epic": 51, "legendary": 0 }
+PASS reward LV24 3000 cards, rarity counts={ "common": 2253, "rare": 638, "epic": 109, "legendary": 0 }
+PASS reward LV25 3000 cards, rarity counts={ "common": 2246, "rare": 596, "epic": 138, "legendary": 20 }
+PASS reward LV40 3000 cards, rarity counts={ "common": 2065, "rare": 705, "epic": 204, "legendary": 26 }
+PASS reward LV60 3000 cards, rarity counts={ "common": 1779, "rare": 868, "epic": 309, "legendary": 44 }
+PASS higher monster HP curve, stronger bounded spawn settings, item rarity unlocks and low Legendary weight

@@ -1,0 +1,7 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS spawn unlock 299.99s sample5000={ "melee": 5000, "archer": 0, "flyer": 0 }
+PASS spawn unlock 300.0s sample5000={ "melee": 4007, "archer": 993, "flyer": 0 }
+PASS spawn unlock 599.99s sample5000={ "melee": 3991, "archer": 1009, "flyer": 0 }
+PASS spawn unlock 600.0s sample5000={ "melee": 3745, "archer": 840, "flyer": 415 }
+PASS caps fallback, telegraphs before firing, real projectile damage/direction, flight altitude and short fireball range

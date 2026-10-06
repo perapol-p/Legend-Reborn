@@ -1,15 +1,15 @@
 ﻿# Item and movement prototype
 
 ## Items
-The 20 names and bonuses come from item1.png / item2.png. Edit data/item_catalog.json to change names, colors, effects or optional icon paths. Stable IDs track item types independently of their display names.
+The 20 names come from item1.png / item2.png; bonuses are tuned for the survival game. Edit data/item_catalog.json to change names, colors, effects or optional icon paths. Stable IDs track item types independently of their display names.
 
-Items can repeat across level-up rounds without a stack cap. Each selection adds one stack and every stack adds the listed bonus. Pencil x10 adds 100 ATK (110 total with the temporary base ATK of 10). Different items' bonuses also add together. Inventory shows one colored name badge per type, with its stack count.
+Items can repeat across level-up rounds without a stack cap. Each selection adds one stack and every stack adds the listed bonus. Pencil x10 adds 20 ATK (30 total with base ATK of 10). Different items' bonuses also add together. Inventory shows one colored name badge per type, with its stack count.
 
-Each level-up offers three distinct types. Owned types remain eligible. Pick one; the other two return to the pool. Each type always remains eligible, including after all 20 types have been acquired. Pending multi-level rewards are queued; stale button callbacks cannot claim a later offer.
+Each level-up offers three distinct types. Owned types remain eligible. Pick one; the other two return to the pool. Types remain eligible after being acquired, subject to their rarity unlock level. Pending multi-level rewards are queued; stale button callbacks cannot claim a later offer.
 
-Rarity weights interpolate from Common/Rare/Epic/Legendary = 70/23/6/1 at level 2 to 15/30/35/20 at level 20, then remain constant. Within each offer, already shown types are excluded, with weights renormalized as needed. Luck is displayed as a percentage and does not modify reward weights yet.
+Rarity unlocks: Common LV1, Rare LV5, Epic LV12, Legendary LV25. Locked rarities are removed from the pool, not merely given a low chance. Weights interpolate from Common/Rare/Epic/Legendary = 85/15/0/0 at level 2 to 60/28/10/2 at level 60, then remain constant. A zero/locked weight is excluded before constructing the three choices. Within each offer, already shown types are excluded, with weights renormalized as needed. Luck is displayed as a percentage and does not modify reward weights yet.
 
-HP/ATK/crit/luck are stored stats; combat is not implemented. Speed bonuses now scale actual FPS movement relative to the base Speed of 100. Crit bonuses add percentage points. A fresh run clears levels and stacks. No between-run item save.
+ATK bonuses per Common/Rare/Epic/Legendary stack are 2/5/10/15; Max HP bonuses are 10/20/35/60. Crit chance bonuses are 0.5/1/2/3 points and crit damage 2/4/6/10 points. HP/ATK/crit/luck are stored stats used by combat. Speed bonuses now scale actual FPS movement relative to the base Speed of 100. Crit bonuses add percentage points. A fresh run clears levels and stacks. No between-run item save.
 
 XP threshold is temporarily 10 + 5 per existing level above 1. The test level button supplies enough XP for the next level. Monsters and XP drops are not implemented.
 
@@ -46,4 +46,5 @@ Bindings, mouse sensitivity/inversion and crosshair preferences save to user://s
 --headless --path <project> --script res://scripts/test_combo.gd
 
 The integration test covers real physics, key input, remapping and config reload, modal pausing, repeat rewards and inventory. It uses user://fps_test_settings.cfg so the player's settings.cfg is not overwritten. Without --headless it also captures preview PNGs in the ignored backups folder.
+
 

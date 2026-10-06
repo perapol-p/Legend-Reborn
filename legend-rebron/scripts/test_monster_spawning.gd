@@ -26,7 +26,7 @@ func _ready() -> void:
 	spawner.monster_spawned.connect(spawned)
 	add_child(game)
 	await frames(25)
-	check(spawner.monsters.size() == 4, "Initial four monsters")
+	check(spawner.monsters.size() == 6, "Initial six monsters")
 	var first: CharacterBody3D = spawner.monsters[0]
 	var initial_distance := first.global_position.distance_to(player.global_position)
 	await frames(60)
@@ -140,6 +140,7 @@ func _ready() -> void:
 	check(is_instance_valid(game.result_overlay) and game.result_overlay.visible, "Game Over summary is visible")
 	print("MONSTER INTEGRATION ", "FAILED" if failed else "PASSED", " | audited spawns: ", samples.size())
 	get_tree().quit(1 if failed else 0)
+
 
 
 
