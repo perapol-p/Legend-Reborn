@@ -58,6 +58,8 @@ func _physics_process(delta: float) -> void:
 	var movement := 1.0 if distance > preferred_distance else (-0.65 if distance < retreat_distance else 0.0)
 	if windup_remaining >= 0.0:
 		movement = 0.0
+	if enemy_type == "archer" and movement > 0.0:
+		direction = movement_direction(player.global_position)
 	velocity.x = direction.x * move_speed * movement
 	velocity.z = direction.z * move_speed * movement
 	if enemy_type == "flyer":
@@ -151,6 +153,7 @@ func _build_wings() -> void:
 		wing.material_override = _material(Color("41295c"))
 		$Model.add_child(wing)
 		wings.append(wing)
+
 
 
 

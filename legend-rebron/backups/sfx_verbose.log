@@ -1,0 +1,134 @@
+WorkerThreadPool: 16 threads, 4 max low-priority.
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+TextServer: Added interface "Dummy"
+TextServer: Added interface "ICU / HarfBuzz / Graphite (Built-in)"
+Using "default" pen tablet driver...
+
+TextServer: Primary interface set to: "ICU / HarfBuzz / Graphite (Built-in)".
+Loading resource: res://default_bus_layout.tres remapped: res://default_bus_layout.tres
+Completed load for: 'res://default_bus_layout.tres' remapped 'res://default_bus_layout.tres' at thread -1
+CORE API HASH: 2004498165
+EDITOR API HASH: 1696660745
+Loading resource: res://backups/verify_game_sfx.gd remapped: res://backups/verify_game_sfx.gd
+Completed load for: 'res://backups/verify_game_sfx.gd' remapped 'res://backups/verify_game_sfx.gd' at thread -1
+SceneTreeFTI: traversal method DEFAULT
+Loading resource: res://scripts/game_data.gd remapped: res://scripts/game_data.gd
+Completed load for: 'res://scripts/game_data.gd' remapped 'res://scripts/game_data.gd' at thread -1
+Loaded system CA certificates
+Loading resource: res://scenes/game_placeholder.tscn remapped: res://scenes/game_placeholder.tscn
+Loading resource: res://scripts/game_placeholder.gd remapped: res://scripts/game_placeholder.gd
+Loading resource: res://shaders/damage_vignette.gdshader remapped: res://shaders/damage_vignette.gdshader
+Completed load for: 'res://shaders/damage_vignette.gdshader' remapped 'res://shaders/damage_vignette.gdshader' at thread -1
+Loading resource: res://assets/audio/sfx/sword_attack.ogg remapped: res://assets/audio/sfx/sword_attack.ogg
+Loading resource: res://.godot/imported/sword_attack.ogg-14cbeb97042a7989a5adc5d8c4f86922.oggvorbisstr remapped: res://.godot/imported/sword_attack.ogg-14cbeb97042a7989a5adc5d8c4f86922.oggvorbisstr
+Completed load for: 'res://assets/audio/sfx/sword_attack.ogg' remapped 'res://assets/audio/sfx/sword_attack.ogg' at thread -1
+Loading resource: res://assets/audio/sfx/bow_attack.ogg remapped: res://assets/audio/sfx/bow_attack.ogg
+Loading resource: res://.godot/imported/bow_attack.ogg-4593d1386bb9072d7b78517a03a0a751.oggvorbisstr remapped: res://.godot/imported/bow_attack.ogg-4593d1386bb9072d7b78517a03a0a751.oggvorbisstr
+Completed load for: 'res://assets/audio/sfx/bow_attack.ogg' remapped 'res://assets/audio/sfx/bow_attack.ogg' at thread -1
+Loading resource: res://assets/audio/sfx/dash.wav remapped: res://assets/audio/sfx/dash.wav
+Loading resource: res://.godot/imported/dash.wav-751f76a9c829859a6ceee9808d98ce52.sample remapped: res://.godot/imported/dash.wav-751f76a9c829859a6ceee9808d98ce52.sample
+Completed load for: 'res://assets/audio/sfx/dash.wav' remapped 'res://assets/audio/sfx/dash.wav' at thread -1
+Loading resource: res://assets/audio/sfx/footstep.wav remapped: res://assets/audio/sfx/footstep.wav
+Loading resource: res://.godot/imported/footstep.wav-228616d123bbbc974b083556f8943754.sample remapped: res://.godot/imported/footstep.wav-228616d123bbbc974b083556f8943754.sample
+Completed load for: 'res://assets/audio/sfx/footstep.wav' remapped 'res://assets/audio/sfx/footstep.wav' at thread -1
+Completed load for: 'res://scripts/game_placeholder.gd' remapped 'res://scripts/game_placeholder.gd' at thread -1
+Loading resource: res://scripts/combo_meter.gd remapped: res://scripts/combo_meter.gd
+Completed load for: 'res://scripts/combo_meter.gd' remapped 'res://scripts/combo_meter.gd' at thread -1
+Loading resource: res://scenes/game_hud.tscn remapped: res://scenes/game_hud.tscn
+Loading resource: res://scripts/game_hud.gd remapped: res://scripts/game_hud.gd
+Completed load for: 'res://scripts/game_hud.gd' remapped 'res://scripts/game_hud.gd' at thread -1
+Completed load for: 'res://scenes/game_hud.tscn' remapped 'res://scenes/game_hud.tscn' at thread -1
+Loading resource: res://scenes/pause_overlay.tscn remapped: res://scenes/pause_overlay.tscn
+Loading resource: res://scripts/pause_overlay.gd remapped: res://scripts/pause_overlay.gd
+Completed load for: 'res://scripts/pause_overlay.gd' remapped 'res://scripts/pause_overlay.gd' at thread -1
+Completed load for: 'res://scenes/pause_overlay.tscn' remapped 'res://scenes/pause_overlay.tscn' at thread -1
+Loading resource: res://scripts/run_state.gd remapped: res://scripts/run_state.gd
+Completed load for: 'res://scripts/run_state.gd' remapped 'res://scripts/run_state.gd' at thread -1
+Loading resource: res://scenes/reward_overlay.tscn remapped: res://scenes/reward_overlay.tscn
+Loading resource: res://scripts/reward_overlay.gd remapped: res://scripts/reward_overlay.gd
+Completed load for: 'res://scripts/reward_overlay.gd' remapped 'res://scripts/reward_overlay.gd' at thread -1
+Completed load for: 'res://scenes/reward_overlay.tscn' remapped 'res://scenes/reward_overlay.tscn' at thread -1
+Loading resource: res://scenes/fps_player.tscn remapped: res://scenes/fps_player.tscn
+Loading resource: res://scripts/fps_controller.gd remapped: res://scripts/fps_controller.gd
+Completed load for: 'res://scripts/fps_controller.gd' remapped 'res://scripts/fps_controller.gd' at thread -1
+Loading resource: res://scripts/weapon_combat.gd remapped: res://scripts/weapon_combat.gd
+Loading resource: res://scenes/training_dummy.tscn remapped: res://scenes/training_dummy.tscn
+Loading resource: res://scripts/training_dummy.gd remapped: res://scripts/training_dummy.gd
+Completed load for: 'res://scripts/training_dummy.gd' remapped 'res://scripts/training_dummy.gd' at thread -1
+Completed load for: 'res://scenes/training_dummy.tscn' remapped 'res://scenes/training_dummy.tscn' at thread -1
+Loading resource: res://shaders/sword_wave.gdshader remapped: res://shaders/sword_wave.gdshader
+Completed load for: 'res://shaders/sword_wave.gdshader' remapped 'res://shaders/sword_wave.gdshader' at thread -1
+Completed load for: 'res://scripts/weapon_combat.gd' remapped 'res://scripts/weapon_combat.gd' at thread -1
+Completed load for: 'res://scenes/fps_player.tscn' remapped 'res://scenes/fps_player.tscn' at thread -1
+Loading resource: res://scenes/fps_arena.tscn remapped: res://scenes/fps_arena.tscn
+Loading resource: res://shaders/arena_grid.gdshader remapped: res://shaders/arena_grid.gdshader
+Completed load for: 'res://shaders/arena_grid.gdshader' remapped 'res://shaders/arena_grid.gdshader' at thread -1
+Loading resource: res://scripts/arena_layout.gd remapped: res://scripts/arena_layout.gd
+Completed load for: 'res://scripts/arena_layout.gd' remapped 'res://scripts/arena_layout.gd' at thread -1
+Loading resource: res://scripts/pyramid_cover.gd remapped: res://scripts/pyramid_cover.gd
+Completed load for: 'res://scripts/pyramid_cover.gd' remapped 'res://scripts/pyramid_cover.gd' at thread -1
+Completed load for: 'res://scenes/fps_arena.tscn' remapped 'res://scenes/fps_arena.tscn' at thread -1
+Loading resource: res://scripts/monster_spawner.gd remapped: res://scripts/monster_spawner.gd
+Loading resource: res://scenes/monster.tscn remapped: res://scenes/monster.tscn
+Loading resource: res://scripts/monster.gd remapped: res://scripts/monster.gd
+Completed load for: 'res://scripts/monster.gd' remapped 'res://scripts/monster.gd' at thread -1
+Completed load for: 'res://scenes/monster.tscn' remapped 'res://scenes/monster.tscn' at thread -1
+Loading resource: res://scenes/boss.tscn remapped: res://scenes/boss.tscn
+Loading resource: res://scripts/boss.gd remapped: res://scripts/boss.gd
+Completed load for: 'res://scripts/boss.gd' remapped 'res://scripts/boss.gd' at thread -1
+Completed load for: 'res://scenes/boss.tscn' remapped 'res://scenes/boss.tscn' at thread -1
+Loading resource: res://scenes/archer_monster.tscn remapped: res://scenes/archer_monster.tscn
+Loading resource: res://scripts/ranged_monster.gd remapped: res://scripts/ranged_monster.gd
+Completed load for: 'res://scripts/ranged_monster.gd' remapped 'res://scripts/ranged_monster.gd' at thread -1
+Completed load for: 'res://scenes/archer_monster.tscn' remapped 'res://scenes/archer_monster.tscn' at thread -1
+Loading resource: res://scenes/flying_monster.tscn remapped: res://scenes/flying_monster.tscn
+Completed load for: 'res://scenes/flying_monster.tscn' remapped 'res://scenes/flying_monster.tscn' at thread -1
+Completed load for: 'res://scripts/monster_spawner.gd' remapped 'res://scripts/monster_spawner.gd' at thread -1
+Completed load for: 'res://scenes/game_placeholder.tscn' remapped 'res://scenes/game_placeholder.tscn' at thread -1
+Loading resource: res://scenes/weapons/sword.tscn remapped: res://scenes/weapons/sword.tscn
+Loading resource: res://assets/weapons/Hand_Sword.glb remapped: res://assets/weapons/Hand_Sword.glb
+Loading resource: res://.godot/imported/Hand_Sword.glb-891cc93886dbb0f2c500ae5a2dee3f66.scn remapped: res://.godot/imported/Hand_Sword.glb-891cc93886dbb0f2c500ae5a2dee3f66.scn
+Loading resource: res://assets/weapons/Hand_Sword_Sword_Texture.png remapped: res://assets/weapons/Hand_Sword_Sword_Texture.png
+Loading resource: res://.godot/imported/Hand_Sword_Sword_Texture.png-cecafa2cdead062f6d415ac2eede9447.s3tc.ctex remapped: res://.godot/imported/Hand_Sword_Sword_Texture.png-cecafa2cdead062f6d415ac2eede9447.s3tc.ctex
+Completed load for: 'res://assets/weapons/Hand_Sword_Sword_Texture.png' remapped 'res://assets/weapons/Hand_Sword_Sword_Texture.png' at thread -1
+Completed load for: 'res://assets/weapons/Hand_Sword.glb' remapped 'res://assets/weapons/Hand_Sword.glb' at thread -1
+Loading resource: res://scripts/sword_view.gd remapped: res://scripts/sword_view.gd
+Completed load for: 'res://scripts/sword_view.gd' remapped 'res://scripts/sword_view.gd' at thread -1
+Completed load for: 'res://scenes/weapons/sword.tscn' remapped 'res://scenes/weapons/sword.tscn' at thread -1
+Loading resource: res://scenes/weapons/sword.tscn remapped: res://scenes/weapons/sword.tscn
+Loading resource: res://assets/weapons/Hand_Sword.glb remapped: res://assets/weapons/Hand_Sword.glb
+Loading resource: res://.godot/imported/Hand_Sword.glb-891cc93886dbb0f2c500ae5a2dee3f66.scn remapped: res://.godot/imported/Hand_Sword.glb-891cc93886dbb0f2c500ae5a2dee3f66.scn
+Completed load for: 'res://assets/weapons/Hand_Sword.glb' remapped 'res://assets/weapons/Hand_Sword.glb' at thread -1
+Completed load for: 'res://scenes/weapons/sword.tscn' remapped 'res://scenes/weapons/sword.tscn' at thread -1
+Loading resource: res://scenes/weapons/bow.tscn remapped: res://scenes/weapons/bow.tscn
+Loading resource: res://assets/weapons/Hand_Bow.glb remapped: res://assets/weapons/Hand_Bow.glb
+Loading resource: res://.godot/imported/Hand_Bow.glb-903d4e2305741f3ae79dd970a95ad426.scn remapped: res://.godot/imported/Hand_Bow.glb-903d4e2305741f3ae79dd970a95ad426.scn
+Completed load for: 'res://assets/weapons/Hand_Bow.glb' remapped 'res://assets/weapons/Hand_Bow.glb' at thread -1
+Loading resource: res://scripts/bow_view.gd remapped: res://scripts/bow_view.gd
+Completed load for: 'res://scripts/bow_view.gd' remapped 'res://scripts/bow_view.gd' at thread -1
+Completed load for: 'res://scenes/weapons/bow.tscn' remapped 'res://scenes/weapons/bow.tscn' at thread -1
+PASS imported 4 SFX, sword accepted attack, bow once/volley, footsteps, dash, pause stops voices, Effects volume and mute
+XR: Clearing primary interface
+XR: Removed interface "Native mobile"
+XR: Removed interface "OpenXR"
+Leaked instance: OggPacketSequence:9223372066131019237 - Reference count: 3
+Leaked instance: AudioStreamOggVorbis:9223372066147796454 - Reference count: 1
+Leaked instance: OggPacketSequence:9223372066416231911 - Reference count: 3
+Leaked instance: AudioStreamOggVorbis:9223372066433009128 - Reference count: 1
+Leaked instance: AudioStreamWAV:9223372066701444585 - Reference count: 1
+Leaked instance: AudioStreamWAV:9223372066953102826 - Reference count: 1
+Leaked instance: AudioStreamPlaybackWAV:9223372102973786055 - Reference count: 1
+Leaked instance: OggPacketSequencePlayback:9223372095575033829 - Reference count: 1
+Leaked instance: AudioStreamPlaybackOggVorbis:9223372095558256614 - Reference count: 1
+Leaked instance: AudioStreamPlaybackOggVorbis:9223372097017874438 - Reference count: 1
+Leaked instance: OggPacketSequencePlayback:9223372097034651657 - Reference count: 1
+Leaked instance: AudioStreamPlaybackWAV:9223372134733056340 - Reference count: 1
+Hint: Leaked instances typically happen when nodes are removed from the scene tree (with `remove_child()`) but not freed (with `free()` or `queue_free()`).
+Resource still in use: res://assets/audio/sfx/sword_attack.ogg::OggPacketSequence_aeune (OggPacketSequence)
+Resource still in use: res://assets/audio/sfx/sword_attack.ogg (AudioStreamOggVorbis)
+Resource still in use: res://assets/audio/sfx/bow_attack.ogg::OggPacketSequence_yvtp4 (OggPacketSequence)
+Resource still in use: res://assets/audio/sfx/bow_attack.ogg (AudioStreamOggVorbis)
+Resource still in use: res://assets/audio/sfx/dash.wav (AudioStreamWAV)
+Resource still in use: res://assets/audio/sfx/footstep.wav (AudioStreamWAV)
+Orphan StringName: Effects (static: 0, total: 7)
+StringName: 1 unclaimed string names at exit.

@@ -179,7 +179,7 @@ func refresh_survival() -> void:
 	if spawner.completed:
 		survival_label.text = "VICTORY"
 	elif spawner.boss_phase:
-		survival_label.text = "DEFEAT THE BOSS" if is_instance_valid(spawner.boss) else "BOSS INCOMING"
+		survival_label.text = "BOSS / PRESSURE x%.2f" % spawner.pressure_multiplier() if is_instance_valid(spawner.boss) else "BOSS INCOMING"
 		if is_instance_valid(spawner.boss):
 			boss_bar.value = spawner.boss.health / maxf(spawner.boss.max_health, 1.0) * 100.0
 	else:
@@ -195,4 +195,5 @@ func show_critical(damage: float) -> void:
 	critical_label.modulate.a = 1.0
 	critical_label.scale = Vector2.ONE * 1.08
 	critical_label.show()
+
 

@@ -3,3 +3,4 @@ res://scripts/command_console.gd
 res://scripts/enemy_projectile.gd
 res://scripts/monster.gd
 res://scripts/ranged_monster.gd
+res://scripts/game_data.gd

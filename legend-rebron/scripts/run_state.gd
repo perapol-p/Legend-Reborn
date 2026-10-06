@@ -39,7 +39,7 @@ func total_items() -> int:
 	for count in item_counts.values():
 		total += int(count)
 	return total
-func rarity_weights(_at_level: int) -> Dictionary:
+func rarity_weights(at_level: int) -> Dictionary:
 	var config: Dictionary = catalog.data["progression"]
 	var stages: Array = config["rarity_time_stages"]
 	var first: Dictionary = stages[0]
@@ -59,7 +59,7 @@ func rarity_weights(_at_level: int) -> Dictionary:
 		var weight := lerpf(float(first["weights"][rarity]), float(second["weights"][rarity]), progress)
 		var factor: float = {"common":0.0,"rare":1.0,"epic":2.0,"legendary":4.0}[rarity]
 		weight *= 1.0 + luck * factor
-		if elapsed_time < float(config["rarity_unlock_seconds"][rarity]):
+		if elapsed_time < float(config["rarity_unlock_seconds"][rarity]) or at_level < int(config["rarity_min_levels"][rarity]):
 			weight = 0.0
 		weights[rarity] = weight
 	return weights
@@ -120,7 +120,7 @@ func _next_reward() -> void:
 	while not pending_levels.is_empty():
 		reward_level = pending_levels.pop_front()
 		var config: Dictionary = catalog.data["progression"]
-		var epic_unlocked := elapsed_time >= float(config["rarity_unlock_seconds"]["epic"])
+		var epic_unlocked := elapsed_time >= float(config["rarity_unlock_seconds"]["epic"]) and reward_level >= int(config["rarity_min_levels"]["epic"])
 		offers = roll_choices(reward_level, epic_unlocked and offers_without_high_rarity >= int(config["epic_pity_offers"]))
 		if epic_unlocked and not offers.is_empty():
 			var has_high_rarity := false
@@ -228,6 +228,7 @@ func result_summary() -> Dictionary:
 		"stats": stats().duplicate(true),
 		"health": current_health()
 	}
+
 
 
 

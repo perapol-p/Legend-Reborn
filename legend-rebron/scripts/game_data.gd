@@ -119,6 +119,15 @@ func load_settings() -> void:
 		bindings[action] = keycode
 func apply_settings() -> void:
 	AudioServer.set_bus_volume_db(0, linear_to_db(maxf(master_volume, 0.001)))
+	AudioServer.set_bus_mute(0, master_volume <= 0.0)
+	var effects_bus := AudioServer.get_bus_index("Effects")
+	if effects_bus >= 0:
+		AudioServer.set_bus_volume_db(effects_bus, linear_to_db(maxf(effects_volume, 0.001)))
+		AudioServer.set_bus_mute(effects_bus, effects_volume <= 0.0)
+	var music_bus := AudioServer.get_bus_index("Music")
+	if music_bus >= 0:
+		AudioServer.set_bus_volume_db(music_bus, linear_to_db(maxf(music_volume, 0.001)))
+		AudioServer.set_bus_mute(music_bus, music_volume <= 0.0)
 	var target_mode := DisplayServer.WINDOW_MODE_FULLSCREEN if fullscreen else DisplayServer.WINDOW_MODE_WINDOWED
 	if DisplayServer.get_name() != "headless" and DisplayServer.window_get_mode() != target_mode:
 		DisplayServer.window_set_mode(target_mode)
@@ -166,3 +175,5 @@ func load_progress() -> void:
 		if character in CHARACTERS and not unlocked_characters.has(character):
 			unlocked_characters.append(character)
 	games_completed = maxi(0, int(cfg.get_value("progress", "games_completed", 0)))
+
+

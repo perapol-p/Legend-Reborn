@@ -1,5 +1,7 @@
 ﻿extends Node3D
 signal critical_hit(damage: float)
+signal attack_started(weapon: String)
+signal bow_released
 var last_damage_critical := false
 ## Gameplay lives here; replace only the Models in scenes/weapons to swap art.
 const PROJECTILE = preload("res://scripts/weapon_projectile.gd")
@@ -173,6 +175,7 @@ func try_attack() -> bool:
 	cooldown = attack_cooldown()
 	pending = minf(float(WEAPONS[weapon_id]["delay"]), cooldown * 0.3)
 	attack_serial += 1
+	attack_started.emit(weapon_id)
 	elapsed = 0.0
 	attack_active = true
 	if is_instance_valid(view) and view.has_method("play_attack"):
@@ -235,8 +238,7 @@ func _physics_process(delta: float) -> void:
 	if not is_instance_valid(view):
 		return
 	motion_time += delta * 9.0
-	var walking := minf(Vector2(player.velocity.x, player.velocity.z).length() / 9.0, 1.0)
-	view.position = Vector3(sin(motion_time) * 0.012, absf(cos(motion_time)) * 0.012, 0) * walking
+	view.position = Vector3.ZERO
 	view.rotation = Vector3.ZERO
 	if weapon_id in ["sword", "bow"]:
 		view.position = Vector3.ZERO
@@ -313,12 +315,14 @@ func resolve_attack() -> void:
 				bow_reload = 1.3
 		if is_instance_valid(view) and view.has_method("release_arrow"):
 			view.release_arrow()
+		bow_released.emit()
 		var release_position: Vector3 = view.arrow_release_position()
 		var aim_hit := ray(origin, origin + forward * 120.0)
 		var target_position: Vector3 = origin + forward * 120.0 if aim_hit.is_empty() else Vector3(aim_hit["position"])
 		var bow_forward := (target_position - release_position).normalized()
 		# Put the back of the flying arrow at the nock when it leaves the string.
 		var spawn_position := release_position + bow_forward * 0.45
+		var volley_hits: Dictionary = {}
 		var count := 1 if level == 1 else (3 if level == 2 else 6)
 		for row in range(2 if level >= 4 else 1):
 			for i in range(count):
@@ -330,7 +334,7 @@ func resolve_attack() -> void:
 				var row_pitch := (0.035 if row == 0 else -0.035) if level >= 4 else 0.0
 				var pitch := row_pitch + randf_range(-jitter, jitter)
 				var direction := (bow_forward + camera.global_basis.x * angle + camera.global_basis.y * pitch).normalized()
-				fire_projectile("bow", direction, roll_damage(), 38.0, 0.04, level >= 3, 0.0, spawn_position, last_damage_critical)
+				fire_projectile("bow", direction, roll_damage(), 38.0, 0.04, level >= 3, 0.0, spawn_position, last_damage_critical, volley_hits)
 	else:
 		if level < 3:
 			fire_projectile("magic_wave", forward, roll_damage(), 22.0, 0.15 if level == 1 else 0.9, false, 0.0, Vector3.INF, last_damage_critical)
@@ -502,7 +506,7 @@ func update_status() -> void:
 	elif weapon_id == "sword" and weapon_level() >= 4:
 		text = "Hold LMB: rapid sword waves"
 	ability_status.text = text
-func fire_projectile(kind: String, direction: Vector3, damage: float, speed: float, radius: float, piercing: bool, splash: float = 0.0, spawn_position: Vector3 = Vector3.INF, critical: bool = false) -> Node3D:
+func fire_projectile(kind: String, direction: Vector3, damage: float, speed: float, radius: float, piercing: bool, splash: float = 0.0, spawn_position: Vector3 = Vector3.INF, critical: bool = false, bow_volley_hits: Variant = null) -> Node3D:
 	var shot := Node3D.new()
 	shot.set_script(PROJECTILE)
 	shot.direction = direction
@@ -515,6 +519,7 @@ func fire_projectile(kind: String, direction: Vector3, damage: float, speed: flo
 	shot.splash = splash
 	shot.source_weapon = weapon_id
 	shot.critical = critical
+	shot.bow_volley_hits = bow_volley_hits if bow_volley_hits != null else {}
 	shot.excluded.assign([player.get_rid()])
 	get_tree().current_scene.add_child(shot)
 	shot.global_position = camera.global_position + (-camera.global_basis.z) * 0.15 if spawn_position == Vector3.INF else spawn_position
@@ -641,6 +646,9 @@ func flash(center: Vector3, radius: float, color: Color) -> void:
 func bow_capacity() -> int:
 	var level: int = run.weapon_level("bow") if is_instance_valid(run) else 1
 	return [4, 6, 8, 10, 12][clampi(level, 1, 5) - 1]
+
+
+
 
 
 

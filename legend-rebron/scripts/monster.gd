@@ -5,6 +5,9 @@ signal defeated
 @export var speed_growth_per_minute := 0.10
 var alive_seconds := 0.0
 var base_move_speed := 0.0
+var pressure_multiplier := 1.0
+var base_attack_damage := 0.0
+var base_attack_interval := 0.0
 @export var attack_damage := 8.0
 @export var attack_interval := 1.2
 @export var attack_range := 1.55
@@ -19,6 +22,8 @@ var hit_flash := 0.0
 func _ready() -> void:
 	health = max_health
 	base_move_speed = move_speed
+	base_attack_damage = attack_damage
+	base_attack_interval = attack_interval
 	add_to_group("monsters")
 	refresh()
 func aim_point() -> Vector3:
@@ -51,7 +56,7 @@ func _physics_process(delta: float) -> void:
 	var offset := player.global_position - global_position
 	var flat := Vector3(offset.x, 0, offset.z)
 	var distance := flat.length()
-	var direction := flat.normalized()
+	var direction := movement_direction(player.global_position)
 	if distance > 0.05:
 		rotation.y = atan2(-direction.x, -direction.z)
 	velocity.x = direction.x * move_speed if distance > stop_distance else 0.0
@@ -75,4 +80,19 @@ func advance_age(delta: float) -> void:
 	if dead or get_tree().paused:
 		return
 	alive_seconds += maxf(delta, 0.0)
-	move_speed = base_move_speed * (1.0 + speed_growth_per_minute * alive_seconds / 60.0)
+	move_speed = base_move_speed * (1.0 + speed_growth_per_minute * alive_seconds / 60.0) * pressure_multiplier
+	attack_damage = base_attack_damage * pressure_multiplier
+	attack_interval = base_attack_interval / maxf(pressure_multiplier, 1.0)
+
+
+func movement_direction(target: Vector3) -> Vector3:
+	var current_scene = get_tree().current_scene
+	var arena = current_scene.get_node_or_null("Arena") if is_instance_valid(current_scene) else null
+	if arena == null:
+		arena = player.get_parent().get_node_or_null("Arena")
+	var destination: Vector3 = arena.movement_target(self,target) if arena != null and arena.has_method("movement_target") else target
+	var direction := destination - global_position
+	direction.y = 0.0
+	direction = direction.normalized()
+	return arena.steer_direction(self,direction) if arena != null and arena.has_method("steer_direction") else direction
+

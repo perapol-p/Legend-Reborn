@@ -21,7 +21,7 @@ func _initialize() -> void:
 		assert(run.choose_item("pencil"))
 	assert(run.owned_ids.size() == 1)
 	assert(run.total_items() == 10 and run.stack_count("pencil") == 10)
-	assert(run.stats()["attack"] == 110)
+	assert(run.stats()["attack"] == 40)
 	assert(not run.choose_item("pencil"))
 	var repeat_seen := false
 	for i in range(250):
@@ -47,7 +47,7 @@ func _initialize() -> void:
 		run.offers.assign([item["id"]])
 		assert(run.choose_item(item["id"]))
 	assert(run.owned_ids.size() == 20 and run.total_items() == 20)
-	assert(run.stats()["max_hp"] == 620 and run.stats()["attack"] == 300)
+	assert(run.stats()["max_hp"] == 620 and run.stats()["attack"] == 51)
 	assert(run.stats()["speed"] == 125 and run.stats()["luck"] == 65)
 	assert(run.stats()["crit_chance"] == 23.5 and run.stats()["crit_damage"] == 187)
 	run.test_level_up()
@@ -58,12 +58,13 @@ func _initialize() -> void:
 	run.elapsed_time = 0.0
 	var early: Dictionary = run.rarity_weights(2)
 	run.elapsed_time = 900.0
-	var late: Dictionary = run.rarity_weights(2)
+	var late: Dictionary = run.rarity_weights(40)
 	assert(early["common"] > late["common"])
 	assert(early["legendary"] < late["legendary"])
 	run.free()
-	print("PASS: repeated rewards, Pencil x10 = +100 ATK, stack totals, unique cards, stale pick rejection, XP queue, all-types continuation")
+	print("PASS: repeated rewards, Pencil x10 = +30 ATK, stack totals, unique cards, stale pick rejection, XP queue, all-types continuation")
 	quit()
+
 
 
 

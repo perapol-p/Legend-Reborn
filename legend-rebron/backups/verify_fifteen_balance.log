@@ -1,0 +1,6 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS boss at15min once, ongoing spawns, increasing HP/speed/damage/fire rate, pause and no boss healing
+PASS bow full/35%/35% per victim, piercing different victims full, new volley resets, real attack shares metadata
+PASS item unlocks require both time and level
+PASS boss kill still ends in victory

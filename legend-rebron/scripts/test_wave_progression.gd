@@ -26,13 +26,13 @@ func _ready() -> void:
 		if monster != null:
 			var minutes: float = floor(float(seconds)) / 60.0
 			var multiplier := 0.7 if monster.is_in_group("archer_monsters") else (0.6 if monster.is_in_group("flying_monsters") else 1.0)
-			check(is_equal_approx(monster.max_health, (40.0 + 30.0 * minutes + 6.0 * minutes * minutes) * multiplier), "HP follows time curve and enemy role")
+			check(is_equal_approx(monster.max_health, (40.0 + 6.0 * minutes + 0.6 * minutes * minutes) * multiplier), "HP follows time curve and enemy role")
 			check(monster.health == monster.max_health, "New monster starts at full HP")
 			if multiplier == 1.0:
 				check(monster.attack_damage == 8.0 and monster.move_speed == 2.6, "Melee defaults unchanged")
 			monster.queue_free()
 		await get_tree().process_frame
-	for sample in [[0.0, 40.0], [0.99, 40.0], [1.0, 40.5016666667], [60.0, 76.0], [180.0, 184.0], [300.0, 340.0], [600.0, 940.0]]:
+	for sample in [[0.0, 40.0], [0.99, 40.0], [1.0, 40.1001666667], [60.0, 46.6], [180.0, 63.4], [300.0, 85.0], [600.0, 160.0]]:
 		spawner.survival_time = sample[0]
 		check(absf(spawner.monster_health() - sample[1]) < 0.00001, "HP curve checkpoint " + str(sample[0]))
 	spawner.survival_time = 5.0
@@ -68,6 +68,7 @@ func _ready() -> void:
 	check(spawner.spawn_one() != null, "Spawns continue without a population cap")
 	print("SURVIVAL SPAWNING ", "FAILED" if failed else "PASSED")
 	get_tree().quit(1 if failed else 0)
+
 
 
 

@@ -7,6 +7,8 @@ var round_finished := false
 var result_overlay: Control
 var victory_overlay: Control
 var damage_feedback: Control
+var sfx: Node
+var music: AudioStreamPlayer
 func _ready() -> void:
 	$RunState.character_name = GameData.selected_character
 	$RunState.player_died.connect(_on_player_died)
@@ -30,10 +32,28 @@ func _ready() -> void:
 	_update_pointer()
 	$Player/Head/Camera3D/Combat.bind_combat($Player, $RunState, $Combo)
 	$Interface/HUD.bind_combat($Player/Head/Camera3D/Combat)
+	sfx = preload("res://scripts/game_sfx.gd").new()
+	sfx.name = "GameSFX"
+	add_child(sfx)
+	sfx.bind_game($Player, $Player/Head/Camera3D/Combat)
+	music = AudioStreamPlayer.new()
+	music.name = "IngameMusic"
+	music.process_mode = Node.PROCESS_MODE_ALWAYS
+	music.bus = "Music"
+	music.volume_db = -14.0
+	var track := preload("res://assets/audio/music/ingame.mp3").duplicate() as AudioStreamMP3
+	track.loop = true
+	track.loop_offset = 0.0
+	music.stream = track
+	add_child(music)
+	music.play()
 	command_console = preload("res://scripts/command_console.gd").new()
 	command_console.game = self
 	$Interface.add_child(command_console)
 func _exit_tree() -> void:
+	if is_instance_valid(music):
+		music.stop()
+		music.stream = null
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	get_tree().paused = false
 func _sync_reward() -> void:
@@ -84,6 +104,8 @@ func _on_player_died() -> void:
 func _show_result(won: bool) -> void:
 	if is_instance_valid(result_overlay):
 		return
+	if is_instance_valid(music):
+		music.stop()
 	var summary: Dictionary = $RunState.result_summary()
 	if command_console.visible:
 		command_console.close_console()
@@ -112,6 +134,8 @@ func _show_result(won: bool) -> void:
 func _leave_result(scene: String) -> void:
 	get_tree().paused = false
 	get_tree().change_scene_to_file(scene)
+
+
 
 
 

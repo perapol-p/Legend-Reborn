@@ -1,0 +1,6 @@
+﻿# Grid arena
+The playable arena uses native Godot BoxMesh/BoxShape3D geometry with a spatial grid shader, not editor-only debug lines. Floor: 160 x 160 m, boundaries at +/-80 m with 8 m walls. Enemy spawn points must stay within +/-77 m, with original ground and occupancy checks.
+Grid cells are 4 m wide, use subtle alternating muted colors, are antialiased using screen derivatives, and fade with distance. The calm sky, soft illumination and fixed 90-degree dash FOV remain.
+Raised areas: East platform 2 m high, West platform 3 m high, Low platform 1 m high. Each has a sloped physical ramp. Eight box obstacles have actual collision and block arrows/fireballs and line of sight. The central spawn/aim lane stays clear.
+Arena nodes are editable in scenes/fps_arena.tscn. scripts/arena_layout.gd defines boundary spawn checks, raised-area approach waypoints and basic obstacle steering for ground enemies. When moving platforms or boundaries in the editor, update those script coordinates too. This is simple ramp routing and obstacle avoidance, not a baked navigation mesh for arbitrary mazes.
+Verification: backups/verify_grid_arena.gd checks rendering, platform heights, walking up ramps, boundary/box collisions, melee ramp pursuit and spawn positions near corners. Preview screenshots: backups/grid_arena_fps.png and backups/grid_arena_overview.png.

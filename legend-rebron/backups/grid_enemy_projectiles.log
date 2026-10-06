@@ -1,0 +1,6 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS arrow passes ally for aim/collision; wall=false damage=6.0
+PASS arrow passes ally for aim/collision; wall=true damage=0.0
+PASS fireball passes ally for aim/collision; wall=false damage=6.0
+PASS fireball passes ally for aim/collision; wall=true damage=0.0

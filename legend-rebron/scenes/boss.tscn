@@ -4,7 +4,7 @@
 [node name="Boss" instance=ExtResource("1")]
 script = ExtResource("2")
 scale = Vector3(2, 2, 2)
-max_health = 6000.0
+max_health = 10000.0
 move_speed = 2.2
 attack_damage = 20.0
 attack_interval = 1.4

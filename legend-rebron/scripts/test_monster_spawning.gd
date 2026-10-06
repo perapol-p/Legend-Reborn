@@ -65,7 +65,11 @@ func _ready() -> void:
 	spawner.countdown = 1000
 	var quadrants: Dictionary = {}
 	for i in range(100):
-		player.position = Vector3(float(i % 5) * 30.0, 0.1, float(i % 7) * 20.0)
+		var sample := Vector3(float(i % 5) * 20.0 - 40.0, 10.0, float(i % 7) * 12.0 - 36.0)
+		var ground_query := PhysicsRayQueryParameters3D.create(sample, sample - Vector3.UP * 20.0, 1, [player.get_rid()])
+		var ground := player.get_world_3d().direct_space_state.intersect_ray(ground_query)
+		check(not ground.is_empty(), "Sample position has arena ground")
+		player.global_position = ground["position"] + Vector3.UP * 0.08
 		player.velocity = Vector3.ZERO
 		var monster: CharacterBody3D = spawner.spawn_one()
 		check(monster != null, "Valid ground supports spawn")
@@ -89,11 +93,11 @@ func _ready() -> void:
 	await frames(2)
 	player.position = Vector3(1000, 0.1, 1000)
 	check(spawner.spawn_one() == null, "No spawn without ground")
-	player.position = Vector3(499, 0.1, 0)
+	player.position = Vector3(76, 0.1, 0)
 	var edge_monster: CharacterBody3D = spawner.spawn_one()
 	check(edge_monster != null, "Spawn near arena edge finds safe ground")
 	if edge_monster != null:
-		check(absf(edge_monster.position.x) < 500 and absf(edge_monster.position.z) < 500, "Edge spawn stays on floor")
+		check(absf(edge_monster.position.x) < 77.1 and absf(edge_monster.position.z) < 77.1, "Edge spawn stays on floor")
 	spawner.reset_encounter()
 	spawner.enabled = false
 	await frames(2)
@@ -139,6 +143,7 @@ func _ready() -> void:
 	check(is_instance_valid(game.result_overlay) and game.result_overlay.visible, "Game Over summary is visible")
 	print("MONSTER INTEGRATION ", "FAILED" if failed else "PASSED", " | audited spawns: ", samples.size())
 	get_tree().quit(1 if failed else 0)
+
 
 
 

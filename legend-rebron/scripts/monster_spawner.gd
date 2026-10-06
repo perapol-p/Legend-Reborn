@@ -9,8 +9,6 @@ const ARCHER = preload("res://scenes/archer_monster.tscn")
 const FLYER = preload("res://scenes/flying_monster.tscn")
 @export var archer_unlock_time := 300.0
 @export var flyer_unlock_time := 600.0
-@export var max_archers := 12
-@export var max_flyers := 6
 @export var enabled := true
 @export_range(1.0, 100.0, 0.5) var spawn_radius := 20.0
 @export_range(1.0, 150.0, 0.5) var outer_radius := 26.0
@@ -18,14 +16,14 @@ const FLYER = preload("res://scenes/flying_monster.tscn")
 @export var initial_count := 6
 @export_range(1.0, 600.0, 1.0) var growth_interval := 90.0
 @export var max_batch_size := 12
-@export var survival_duration := 1200.0
-@export var boss_health := 6000.0
+@export var survival_duration := 900.0
+@export var boss_health := 10000.0
 var boss_phase := false
 var boss_started := false
 var completed := false
 var boss: CharacterBody3D
-@export_range(0.0, 100.0, 1.0) var health_growth_per_minute := 30.0
-@export_range(0.0, 100.0, 1.0) var health_growth_curve := 6.0
+@export_range(0.0, 100.0, 1.0) var health_growth_per_minute := 6.0
+@export_range(0.0, 100.0, 1.0) var health_growth_curve := 0.6
 var survival_time := 0.0
 var difficulty_step := 0
 ## Disable for the real game. Release exports never draw debug helpers.
@@ -85,20 +83,20 @@ func _physics_process(delta: float) -> void:
 	update_debug()
 	if not enabled or completed or not is_instance_valid(player) or get_tree().paused:
 		return
-	survival_time = minf(survival_time + delta, survival_duration)
+	survival_time += delta
 	if survival_time >= survival_duration:
 		if not boss_phase:
 			boss_phase = true
 			difficulty_changed.emit()
 		if not boss_started:
 			_try_spawn_boss()
-		return
+	_update_overtime_pressure()
 	var next_step := int(floor(survival_time / maxf(growth_interval, 0.1)))
 	if next_step != difficulty_step:
 		difficulty_step = next_step
 		difficulty_changed.emit()
 	for monster in monsters:
-		if monster.global_position.distance_to(player.global_position) > 85.0:
+		if monster != boss and monster.global_position.distance_to(player.global_position) > 85.0:
 			monster.queue_free()
 	countdown -= delta
 	if countdown > 0.0:
@@ -108,20 +106,20 @@ func _physics_process(delta: float) -> void:
 	for i in range(count):
 		if spawn_one() == null:
 			break
-	countdown = maxf(spawn_interval, 0.1)
+	countdown = current_spawn_interval()
 
 func spawn_batch_size() -> int:
-	return mini(2 + difficulty_step, maxi(max_batch_size, 1))
+	var regular := mini(2 + difficulty_step, maxi(max_batch_size, 1))
+	return regular + mini(int(overtime_minutes()) * 2, 8)
 
 func monster_health() -> float:
 	# Advance in one-second increments while preserving the minute-based curve.
 	var minutes: float = floorf(maxf(survival_time, 0.0)) / 60.0
-	return 40.0 + health_growth_per_minute * minutes + health_growth_curve * minutes * minutes
+	var base_hp := 40.0 + health_growth_per_minute * minutes + health_growth_curve * minutes * minutes
+	return base_hp * pow(1.0 + 0.30 * overtime_minutes(), 2.0)
 func spawn_one(as_boss: bool = false) -> CharacterBody3D:
 	monsters = monsters.filter(func(m): return is_instance_valid(m) and not m.dead and not m.is_queued_for_deletion())
 	if not enabled or completed or get_tree().paused or not is_instance_valid(player):
-		return null
-	if not as_boss and boss_phase:
 		return null
 	var enemy_type := "boss" if as_boss else pick_monster_type()
 	var center := player.global_position
@@ -132,6 +130,9 @@ func spawn_one(as_boss: bool = false) -> CharacterBody3D:
 		var angle := rng.randf_range(0, TAU)
 		var radius := sqrt(rng.randf_range(inner * inner, outer * outer))
 		var candidate := center + Vector3(cos(angle), 0, sin(angle)) * radius
+		var arena = get_parent().get_node_or_null("Arena")
+		if arena != null and arena.has_method("is_spawn_point_inside") and not arena.is_spawn_point_inside(candidate):
+			continue
 		var ground_query := PhysicsRayQueryParameters3D.create(candidate + Vector3(0, 8, 0), candidate - Vector3(0, 32, 0), 1, [player.get_rid()])
 		var ground := get_world_3d().direct_space_state.intersect_ray(ground_query)
 		if ground.is_empty() or ground["normal"].y < 0.8 or ground["collider"] is CharacterBody3D:
@@ -158,6 +159,7 @@ func spawn_one(as_boss: bool = false) -> CharacterBody3D:
 		monster.player = player
 		var health_scale := 0.70 if enemy_type == "archer" else (0.60 if enemy_type == "flyer" else 1.0)
 		monster.max_health = boss_health if as_boss else monster_health() * health_scale
+		monster.pressure_multiplier = pressure_multiplier()
 		monster.position = to_local(candidate)
 		add_child(monster)
 		monsters.append(monster)
@@ -236,19 +238,6 @@ func monster_spawn_weights() -> Dictionary:
 		weights = {"melee":74.0,"archer":18.0,"flyer":8.0}
 	elif survival_time >= archer_unlock_time:
 		weights = {"melee":80.0,"archer":20.0,"flyer":0.0}
-	var archers := 0
-	var flyers := 0
-	for monster in monsters:
-		if not is_instance_valid(monster) or monster.dead or monster.is_queued_for_deletion():
-			continue
-		if monster.is_in_group("archer_monsters"):
-			archers += 1
-		if monster.is_in_group("flying_monsters"):
-			flyers += 1
-	if archers >= max_archers:
-		weights["archer"] = 0.0
-	if flyers >= max_flyers:
-		weights["flyer"] = 0.0
 	return weights
 func pick_monster_type() -> String:
 	var weights := monster_spawn_weights()
@@ -265,4 +254,18 @@ func pick_monster_type() -> String:
 	return "melee"
 
 
+
+
+
+func overtime_minutes() -> float:
+	return maxf(0.0, survival_time - survival_duration) / 60.0
+func pressure_multiplier() -> float:
+	return 1.0 + 0.25 * overtime_minutes()
+func current_spawn_interval() -> float:
+	return maxf(1.0, spawn_interval / pressure_multiplier())
+func _update_overtime_pressure() -> void:
+	var multiplier := pressure_multiplier()
+	for monster in monsters:
+		if is_instance_valid(monster) and not monster.dead:
+			monster.pressure_multiplier = multiplier
 

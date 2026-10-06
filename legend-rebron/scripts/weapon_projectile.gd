@@ -11,6 +11,7 @@ var travel_remaining := INF
 var hit_radius := 0.04
 var piercing := false
 var critical := false
+var bow_volley_hits: Dictionary = {}
 var splash := 0.0
 var struck: Array[RID] = []
 var velocity := Vector3.ZERO
@@ -132,7 +133,13 @@ func impact(body: CollisionObject3D, point: Vector3) -> bool:
 	var damageable := body.has_method("take_damage")
 	if is_instance_valid(source):
 		if damageable:
-			source.deal_hit(body, damage, source_weapon, false, critical)
+			var dealt_damage := damage
+			if kind == "bow":
+				var target_id: RID = body.get_rid()
+				if bow_volley_hits.has(target_id):
+					dealt_damage *= 0.35
+				bow_volley_hits[target_id] = true
+			source.deal_hit(body, dealt_damage, source_weapon, false, critical)
 		if splash > 0.0:
 			source.explode(point - direction * 0.08, splash, damage, body, critical, source_weapon)
 	if piercing and damageable:
@@ -237,6 +244,7 @@ func _advance_sword_wave(displacement: Vector3) -> void:
 				global_position = point
 				return
 	global_position += displacement
+
 
 
 

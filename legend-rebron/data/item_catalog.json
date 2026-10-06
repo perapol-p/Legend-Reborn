@@ -31,8 +31,8 @@
                         "rarity_unlock_seconds":  {
                                                       "common":  0,
                                                       "rare":  0,
-                                                      "epic":  180,
-                                                      "legendary":  480
+                                                      "epic":  120,
+                                                      "legendary":  300
                                                   },
                         "rarity_time_stages":  [
                                                    {
@@ -51,7 +51,7 @@
                                                                        "rare":  27,
                                                                        "epic":  8
                                                                    },
-                                                       "seconds":  180
+                                                       "seconds":  120
                                                    },
                                                    {
                                                        "weights":  {
@@ -60,7 +60,7 @@
                                                                        "rare":  30,
                                                                        "epic":  12
                                                                    },
-                                                       "seconds":  480
+                                                       "seconds":  300
                                                    },
                                                    {
                                                        "weights":  {
@@ -69,10 +69,16 @@
                                                                        "rare":  35,
                                                                        "epic":  23
                                                                    },
-                                                       "seconds":  900
+                                                       "seconds":  600
                                                    }
                                                ],
-                        "epic_pity_offers":  5
+                        "epic_pity_offers":  5,
+                        "rarity_min_levels":  {
+                                                  "common":  1,
+                                                  "rare":  1,
+                                                  "epic":  8,
+                                                  "legendary":  15
+                                              }
                     },
     "weapons":  [
                     {
@@ -120,7 +126,7 @@
                       "rarity":  "common",
                       "icon":  "",
                       "effects":  {
-                                      "attack":  10
+                                      "attack":  3
                                   }
                   },
                   {
@@ -166,7 +172,7 @@
                       "rarity":  "rare",
                       "icon":  "",
                       "effects":  {
-                                      "attack":  30
+                                      "attack":  6
                                   }
                   },
                   {
@@ -212,7 +218,7 @@
                       "rarity":  "epic",
                       "icon":  "",
                       "effects":  {
-                                      "attack":  100
+                                      "attack":  12
                                   }
                   },
                   {
@@ -258,7 +264,7 @@
                       "rarity":  "legendary",
                       "icon":  "",
                       "effects":  {
-                                      "attack":  150
+                                      "attack":  20
                                   }
                   },
                   {

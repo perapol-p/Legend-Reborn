@@ -1,0 +1,8 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+AMBIENT_COLOR=2
+REFLECT_DISABLED=0
+ambient_light_energy=1.0
+fog_enabled=false
+fog_light_color=(0.518, 0.553, 0.608, 1.0)
+fog_density=0.00999999977648

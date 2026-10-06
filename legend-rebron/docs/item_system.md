@@ -3,13 +3,13 @@
 ## Items
 The 20 names come from item1.png / item2.png; bonuses are tuned for the survival game. Edit data/item_catalog.json to change names, colors, effects or optional icon paths. Stable IDs track item types independently of their display names.
 
-Items can repeat across level-up rounds without a stack cap. Each selection adds one stack and every stack adds the listed bonus. Pencil x10 adds 100 ATK (110 total with base ATK of 10). Different items' bonuses also add together. Inventory shows one colored name badge per type, with its stack count.
+Items can repeat across level-up rounds without a stack cap. Each selection adds one stack and every stack adds the listed bonus. Pencil x10 adds 30 ATK (40 total with base ATK of 10). Different items' bonuses also add together. Inventory shows one colored name badge per type, with its stack count.
 
 Each level-up offers three distinct types. Owned types remain eligible. Pick one; the other two return to the pool. Types remain eligible after being acquired, subject to their rarity unlock level. Pending multi-level rewards are queued; stale button callbacks cannot claim a later offer.
 
-Rarity progression uses active run time, independent of character level. Common/Rare unlock at 0:00, Epic at 3:00 and Legendary at 8:00. Normalized base weights interpolate across checkpoints: 0:00=75/25/0/0, 3:00=65/27/8/0, 8:00=55/30/12/3 and 15:00 onward=35/35/23/7 (Common/Rare/Epic/Legendary). Locked rarities are excluded before drawing. After five consecutive actual reward offers without Epic or Legendary, the sixth includes a guaranteed Epic; an offer containing either resets the streak. The streak only runs after Epic unlocks and fresh runs reset it. Skipping Epic in an offer does not advance pity.
+Rarity requires active run time and character level: Common/Rare from the start, Epic at 2:00 and LV8, Legendary at 5:00 and LV15. Weights grow across 0:00=75/25/0/0, 2:00=65/27/8/0, 5:00=55/30/12/3 and 10:00 onward=35/35/23/7. After five eligible offers without Epic or Legendary, the sixth includes Epic. See balance_15_minutes.md.
 Luck item bonuses remain +5/+10/+20/+30 percentage points. Eligible weights multiply by Rare (1+L/100), Epic (1+2L/100) and Legendary (1+4L/100); Common stays unchanged. Luck does not bypass time unlocks or modify critical chance. Pause, console and reward selection freeze active time; the three-choice level-up mechanism and original item stats are retained.
-Original item bonuses restored: ATK per Common/Rare/Epic/Legendary stack is 10/30/100/150; Max HP is 20/50/150/300. Crit chance bonuses are 1/2.5/5/10 points and crit damage 2/5/10/20 points. Speed and Luck bonuses are restored too. HP/ATK/crit/luck are stored stats used by combat. Speed bonuses now scale actual FPS movement relative to the base Speed of 100. Crit bonuses add percentage points. A fresh run clears levels and stacks. No between-run item save.
+Original item bonuses restored: ATK per Common/Rare/Epic/Legendary stack is 3/6/12/20; Max HP is 20/50/150/300. Crit chance bonuses are 1/2.5/5/10 points and crit damage 2/5/10/20 points. Speed and Luck bonuses are restored too. HP/ATK/crit/luck are stored stats used by combat. Speed bonuses now scale actual FPS movement relative to the base Speed of 100. Crit bonuses add percentage points. A fresh run clears levels and stacks. No between-run item save.
 
 XP threshold is temporarily 10 + 5 per existing level above 1. The test level button supplies enough XP for the next level. Monsters and XP drops are not implemented.
 
@@ -46,6 +46,7 @@ Bindings, mouse sensitivity/inversion and crosshair preferences save to user://s
 --headless --path <project> --script res://scripts/test_combo.gd
 
 The integration test covers real physics, key input, remapping and config reload, modal pausing, repeat rewards and inventory. It uses user://fps_test_settings.cfg so the player's settings.cfg is not overwritten. Without --headless it also captures preview PNGs in the ignored backups folder.
+
 
 
 

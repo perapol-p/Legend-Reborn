@@ -1,5 +1,6 @@
 ﻿extends CharacterBody3D
 signal damage_received(amount: float, source_position: Vector3)
+signal dash_started
 @export var move_speed := 9.0
 @export var sprint_multiplier := 1.5
 @export var jump_speed := 9.0
@@ -9,6 +10,9 @@ signal damage_received(amount: float, source_position: Vector3)
 @export var dash_speed := 25.0
 @export var dash_duration := 0.16
 @export var dash_cooldown := 0.65
+@export_range(0.0, 5.0, 0.1) var strafe_tilt_degrees := 0.2
+@export_range(0.0, 8.0, 0.1) var dash_tilt_degrees := 0.6
+var camera_side_offset := 0.0
 var input_enabled := true
 var run: Node
 var dash_remaining := 0.0
@@ -19,6 +23,7 @@ var jump_buffer := 0.0
 var spawn_position := Vector3(0, 0.1, 12)
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
+@onready var head_rest_position: Vector3 = $Head.position
 func bind_run(model: Node) -> void:
 	run = model
 func speed_multiplier() -> float:
@@ -60,6 +65,7 @@ func _physics_process(delta: float) -> void:
 		dash_direction = direction if direction.length_squared() > 0.01 else -global_basis.z
 		dash_remaining = dash_duration * (1.5 if run != null and run.equipped_weapon_id == "katana" and run.weapon_level("katana") >= 3 else 1.0)
 		dash_recovery = dash_cooldown
+		dash_started.emit()
 	if dash_remaining > 0 and input_enabled:
 		dash_remaining = maxf(0.0, dash_remaining - delta)
 		velocity.x = dash_direction.x * dash_speed * scale_speed
@@ -74,12 +80,16 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, direction.x * target_speed, acceleration * delta * scale_speed)
 		velocity.z = move_toward(velocity.z, direction.z * target_speed, acceleration * delta * scale_speed)
 	move_and_slide()
-	camera.fov = lerpf(camera.fov, 98.0 if dash_remaining > 0 else 90.0, 1.0 - exp(-8.0 * delta))
+	_slide_off_cover(delta)
+	camera.fov = 90.0
+	_update_camera_lean(delta, scale_speed)
 func respawn() -> void:
 	global_position = spawn_position
 	velocity = Vector3.ZERO
 	rotation = Vector3.ZERO
 	head.rotation = Vector3.ZERO
+	head.position = head_rest_position
+	camera_side_offset = 0.0
 	dash_remaining = 0
 	dash_recovery = 0
 	jump_buffer = 0
@@ -91,4 +101,30 @@ func receive_damage(amount: float, source_position: Vector3 = Vector3.INF) -> vo
 	if run.damage_player(amount):
 		input_enabled = false
 		velocity = Vector3.ZERO
+
+
+
+func _update_camera_lean(delta: float, scale_speed: float) -> void:
+	var dashing := dash_remaining > 0.0
+	var reference_speed := (dash_speed if dashing else move_speed) * maxf(scale_speed, 0.01)
+	var lateral := clampf(velocity.dot(global_basis.x) / reference_speed, -1.0, 1.0) if input_enabled else 0.0
+	var tilt := deg_to_rad(dash_tilt_degrees if dashing else strafe_tilt_degrees)
+	var weight := 1.0 - exp(-14.0 * delta)
+	head.rotation.z = lerpf(head.rotation.z, -lateral * tilt, weight)
+	camera_side_offset = lerpf(camera_side_offset, 0.0, weight)
+	head.position = head_rest_position + Vector3(camera_side_offset, 0.0, 0.0)
+
+
+func _slide_off_cover(delta: float) -> void:
+	for i in get_slide_collision_count():
+		var collision := get_slide_collision(i)
+		var body = collision.get_collider()
+		if body is Node3D and body.is_in_group("unstable_cover") and global_position.y > body.global_position.y and collision.get_normal().y > 0.0:
+			var outward: Vector3 = global_position - body.global_position
+			outward.y = 0.0
+			outward = outward.normalized() if outward.length_squared() > 0.0025 else Vector3.RIGHT
+			move_and_collide(outward * 4.0 * delta)
+			velocity.y = minf(velocity.y, -3.0)
+			break
+
 

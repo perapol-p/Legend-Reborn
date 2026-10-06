@@ -1,0 +1,3 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS both ranged types still spawn above former caps; unlock times retained; sample={ "melee": 3807, "archer": 829, "flyer": 364 }

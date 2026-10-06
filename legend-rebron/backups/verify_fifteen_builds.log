@@ -1,0 +1,7 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+Build @0.0 min ATK10.0 HP40.0 hits(noncrit) sword/gun/bow=4/4/2
+Build @5.0 min ATK22.0 HP85.0 hits(noncrit) sword/gun/bow=3/4/2
+Build @10.0 min ATK43.0 HP160.0 hits(noncrit) sword/gun/bow=3/4/2
+Build @15.0 min ATK84.0 HP265.0 hits(noncrit) sword/gun/bow=3/4/2
+PASS sample build hit counts and gated pity; guarantees=9

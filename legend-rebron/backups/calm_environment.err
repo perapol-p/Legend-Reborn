@@ -1,0 +1,4 @@
+ERROR: Condition "!found" is true. Returning: 0
+   at: class_get_integer_constant (core/core_bind.cpp:1762)
+   GDScript backtrace (most recent call first):
+       [0] _initialize (res://backups/inspect_calm_environment.gd:4)
