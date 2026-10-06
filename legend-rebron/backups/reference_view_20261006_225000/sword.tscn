@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/weapons/Hand_Sword.glb" id="1"]
+[ext_resource type="Script" path="res://scripts/sword_view.gd" id="2"]
+
+[node name="Sword" type="Node3D"]
+script = ExtResource("2")
+
+[node name="Model" parent="." instance=ExtResource("1")]
+position = Vector3(0.30, -0.13, -0.40)
+rotation = Vector3(0, 3.14159265, -0.16)
+scale = Vector3(0.085, 0.085, 0.085)
+
+

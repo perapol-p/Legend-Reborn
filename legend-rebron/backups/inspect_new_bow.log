@@ -1,0 +1,27 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ ┖╴Export_All
+    ┠╴Armature_002
+    ┃  ┖╴Skeleton3D
+    ┃     ┠╴Bow_001
+    ┃     ┖╴@PhysicalBoneSimulator3D@2
+    ┠╴Armature_003
+    ┃  ┖╴Skeleton3D
+    ┃     ┠╴Arrow_001
+    ┃     ┖╴@PhysicalBoneSimulator3D@3
+    ┠╴Arm_Rig_001
+    ┃  ┖╴Skeleton3D
+    ┃     ┠╴Arm_001
+    ┃     ┖╴@PhysicalBoneSimulator3D@4
+    ┖╴AnimationPlayer
+
+ANIMATION Bow_idle length=2.0 tracks=75
+ANIMATION Bow_shoot length=0.80000001192093 tracks=75
+ANIMATION Bow_walk length=0.80000001192093 tracks=75
+MESH Bow_001 transform=[X: (0.701299, 0.0, 0.0), Y: (0.0, -0.701299, -0.0), Z: (0.0, 0.0, -0.701299), O: (0.0, 0.0, 1.783232)] aabb=[P: (-0.135705, -3.714395, 1.017095), S: (0.271411, 7.428791, 1.20016)]
+MESH Arrow_001 transform=[X: (0.0, 0.0, -0.305419), Y: (0.0, 0.305419, 0.0), Z: (0.305419, 0.0, 0.0), O: (-0.721438, -1.579392, 1.66782)] aabb=[P: (-0.869307, -1.727262, -0.201601), S: (0.29574, 0.29574, 4.105967)]
+MESH Arm_001 transform=[X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)] aabb=[P: (-6.149248, -0.261496, -0.268952), S: (12.2985, 0.522993, 0.928566)]
+BONE /root/Export_All/Armature_002/Skeleton3D Root [X: (0.650396, 0.261896, 0.014676), Y: (0.04995, -0.162178, 0.680458), Z: (0.257507, -0.630023, -0.16906), O: (-0.925899, -1.919809, 2.335456)]
+BONE /root/Export_All/Arm_Rig_001/Skeleton3D hand_L [X: (-0.326713, 0.93871, 0.109916), Y: (0.041704, -0.101866, 0.993924), Z: (0.944203, 0.329312, -0.005867), O: (-0.478993, -2.073751, 0.767622)]
+BONE /root/Export_All/Arm_Rig_001/Skeleton3D hand_R [X: (0.492843, -0.819367, -0.292821), Y: (0.49949, -0.009144, 0.866272), Z: (-0.712471, -0.573197, 0.404759), O: (-1.349923, -1.959575, 1.839548)]
+BONE /root/Export_All/Arm_Rig_001/Skeleton3D Root [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)]

@@ -1,0 +1,6 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS sword LV2 first target hit; second target hit=false
+PASS sword LV3 first target hit; second target hit=false
+PASS sword LV4 first target hit; second target hit=false
+PASS sword LV5 first target hit; second target hit=true

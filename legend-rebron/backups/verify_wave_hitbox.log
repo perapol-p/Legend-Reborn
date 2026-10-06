@@ -1,0 +1,5 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS LV2 both outer edges hit, outside misses, yaw rotation and high-speed sweep
+PASS LV3 both outer edges hit, outside misses, yaw rotation and high-speed sweep
+PASS LV5 both outer edges hit, outside misses, yaw rotation and high-speed sweep

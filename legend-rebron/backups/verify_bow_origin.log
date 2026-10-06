@@ -1,0 +1,5 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS animated bow origin, aim convergence, rotated camera; release=(0.285627, 1.575783, 11.73933)
+PASS animated bow origin, aim convergence, rotated camera; release=(0.050531, 1.575783, 11.61662)
+PASS other projectile origins unchanged

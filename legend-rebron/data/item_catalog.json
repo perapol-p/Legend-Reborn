@@ -1,8 +1,7 @@
-{
+﻿{
   "base_stats": {
     "attack": 10,
     "max_hp": 100,
-    "max_mp": 50,
     "speed": 100,
     "luck": 0,
     "crit_chance": 5,
@@ -67,6 +66,7 @@
     }
   ],
   "character_weapons": {
+    "Mommy": "bow",
     "Knight": "sword",
     "Ninja": "katana",
     "อัศวิน": "sword",
@@ -259,3 +259,5 @@
     }
   ]
 }
+
+

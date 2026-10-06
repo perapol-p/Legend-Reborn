@@ -1,7 +1,7 @@
-extends RefCounted
+﻿extends RefCounted
 const DATA_PATH = "res://data/item_catalog.json"
 const STAT_NAMES = {
-	"attack": "ATK", "max_hp": "Max HP", "max_mp": "Max MP",
+	"attack": "ATK", "max_hp": "Max HP",
 	"speed": "Speed", "luck": "Luck", "crit_chance": "Crit chance",
 	"crit_damage": "Crit damage"
 }
@@ -33,3 +33,4 @@ func weapon_name(character: String) -> String:
 	return "Not assigned"
 static func format_number(value: float) -> String:
 	return ("%.2f" % value).trim_suffix("0").trim_suffix("0").trim_suffix(".")
+

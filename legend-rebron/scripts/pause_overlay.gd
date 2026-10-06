@@ -1,4 +1,4 @@
-extends Control
+﻿extends Control
 const Style = preload("res://scripts/ui_style.gd")
 signal pause_changed
 const SettingsPanel = preload("res://scripts/settings_panel.gd")
@@ -138,7 +138,6 @@ func show_stats() -> void:
 		["Character", run.character_name],
 		["Level", str(run.level)],
 		["Max HP", run.catalog.format_number(float(values["max_hp"]))],
-		["Max MP", run.catalog.format_number(float(values["max_mp"]))],
 		["ATK", run.catalog.format_number(float(values["attack"]))],
 		["Speed", run.catalog.format_number(float(values["speed"])) + " pts"],
 		["Base weapon", run.weapon_name()],
@@ -248,3 +247,4 @@ func return_to_menu() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+

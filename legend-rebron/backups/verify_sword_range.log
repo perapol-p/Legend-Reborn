@@ -1,0 +1,6 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS sword LV2 pierces two targets; range=6.0 m; beyond-range target unharmed
+PASS sword LV3 pierces two targets; range=12.0 m; beyond-range target unharmed
+PASS sword LV4 pierces two targets; range=20.0 m; beyond-range target unharmed
+PASS sword LV5 pierces two targets; range=32.0 m; beyond-range target unharmed

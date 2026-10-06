@@ -1,5 +1,10 @@
-extends Node
+﻿extends Node
 signal changed
+signal player_died
+var finished := false
+var elapsed_time := 0.0
+var monsters_killed := 0
+var regen_elapsed := 0.0
 signal offers_changed
 const Catalog = preload("res://scripts/item_catalog.gd")
 var catalog = Catalog.new()
@@ -115,9 +120,16 @@ var damage_taken := 0.0
 func current_health() -> float:
 	return maxf(0.0, float(stats()["max_hp"]) - damage_taken)
 func damage_player(amount: float) -> bool:
+	if finished:
+		return current_health() <= 0.0
 	damage_taken += maxf(0.0, amount)
+	var dead := current_health() <= 0.0
+	if dead:
+		finished = true
 	changed.emit()
-	return current_health() <= 0.0
+	if dead:
+		player_died.emit()
+	return dead
 func restore_health() -> void:
 	damage_taken = 0.0
 	changed.emit()
@@ -144,3 +156,40 @@ func upgrade_weapon() -> bool:
 
 func weapon_ability() -> String:
 	return preload("res://scripts/weapon_progression.gd").description(equipped_weapon_id, weapon_level())
+
+func _physics_process(delta: float) -> void:
+	if finished or get_tree().paused:
+		return
+	elapsed_time += delta
+	regen_elapsed += delta
+	var ticks := int(floorf(regen_elapsed))
+	if ticks <= 0:
+		return
+	regen_elapsed -= float(ticks)
+	if current_health() > 0.0 and damage_taken > 0.0:
+		damage_taken = maxf(0.0, damage_taken - float(ticks))
+		changed.emit()
+
+func record_monster_kill() -> void:
+	if finished:
+		return
+	monsters_killed += 1
+	changed.emit()
+
+func result_summary() -> Dictionary:
+	var inventory: Array[Dictionary] = []
+	for id in owned_ids:
+		var item: Dictionary = catalog.item_for(id)
+		inventory.append({"name": item["name"], "count": stack_count(id), "color": catalog.rarity_color(item["rarity"])})
+	return {
+		"elapsed_seconds": elapsed_time,
+		"monsters_killed": monsters_killed,
+		"character": character_name,
+		"level": level,
+		"weapon_name": weapon_name(),
+		"weapon_level": weapon_level(),
+		"items": inventory,
+		"item_total": total_items(),
+		"stats": stats().duplicate(true),
+		"health": current_health()
+	}

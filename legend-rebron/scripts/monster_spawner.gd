@@ -1,18 +1,28 @@
-extends Node3D
+﻿extends Node3D
 signal monster_spawned(monster: CharacterBody3D, distance: float)
-signal wave_changed
+signal difficulty_changed
+signal boss_spawned(boss: CharacterBody3D)
+signal round_completed
 const MONSTER = preload("res://scenes/monster.tscn")
+const BOSS = preload("res://scenes/boss.tscn")
 @export var enabled := true
 @export_range(1.0, 100.0, 0.5) var spawn_radius := 20.0
 @export_range(1.0, 150.0, 0.5) var outer_radius := 26.0
 @export_range(0.1, 30.0, 0.1) var spawn_interval := 2.0
 @export var initial_count := 4
-@export var max_alive := 16
-@export_range(1, 100, 1) var monsters_per_wave := 3
-@export_range(0.1, 30.0, 0.1) var wave_break := 5.0
-var wave_number := 1
-var wave_spawned := 0
-var between_waves := false
+@export_range(1.0, 600.0, 1.0) var growth_interval := 120.0
+@export var max_batch_size := 10
+@export var max_alive := 100
+@export var survival_duration := 1200.0
+@export var boss_health := 6000.0
+var boss_phase := false
+var boss_started := false
+var completed := false
+var boss: CharacterBody3D
+@export_range(0.0, 100.0, 1.0) var health_growth_per_minute := 25.0
+@export_range(0.0, 100.0, 1.0) var health_growth_curve := 5.0
+var survival_time := 0.0
+var difficulty_step := 0
 ## Disable for the real game. Release exports never draw debug helpers.
 @export var show_debug_radius := false
 var player: CharacterBody3D
@@ -66,49 +76,52 @@ func ring_mesh(radius: float, width: float, color: Color) -> ImmediateMesh:
 	mesh.surface_end()
 	return mesh
 func _physics_process(delta: float) -> void:
-	monsters = monsters.filter(func(m): return is_instance_valid(m) and not m.dead)
+	monsters = monsters.filter(func(m): return is_instance_valid(m) and not m.dead and not m.is_queued_for_deletion())
 	update_debug()
-	if not enabled or not is_instance_valid(player):
+	if not enabled or completed or not is_instance_valid(player) or get_tree().paused:
 		return
+	survival_time = minf(survival_time + delta, survival_duration)
+	if survival_time >= survival_duration:
+		if not boss_phase:
+			boss_phase = true
+			difficulty_changed.emit()
+		if not boss_started:
+			_try_spawn_boss()
+		return
+	var next_step := int(floor(survival_time / maxf(growth_interval, 0.1)))
+	if next_step != difficulty_step:
+		difficulty_step = next_step
+		difficulty_changed.emit()
 	for monster in monsters:
 		if monster.global_position.distance_to(player.global_position) > 85.0:
 			monster.queue_free()
-	if not between_waves and wave_spawned >= wave_size() and monsters.is_empty():
-		between_waves = true
-		countdown = wave_break
-		wave_changed.emit()
 	countdown -= delta
 	if countdown > 0.0:
 		return
-	if between_waves:
-		wave_number += 1
-		wave_spawned = 0
-		between_waves = false
-		started = false
-		wave_changed.emit()
-	if wave_spawned >= wave_size():
-		return
-	var count := mini(initial_count if not started else 1, wave_size() - wave_spawned)
+	var count := maxi(1, initial_count) if not started else spawn_batch_size()
 	started = true
 	for i in range(count):
-		if spawn_one() != null:
-			wave_spawned += 1
-	countdown = maxf(0.35, spawn_interval / (1.0 + 0.12 * (wave_number - 1)))
+		if spawn_one() == null:
+			break
+	countdown = maxf(spawn_interval, 0.1)
 
-func wave_size() -> int:
-	return maxi(1, initial_count) + (wave_number - 1) * monsters_per_wave
+func spawn_batch_size() -> int:
+	return mini(1 + difficulty_step, maxi(max_batch_size, 1))
 
-func wave_remaining() -> int:
-	return maxi(0, wave_size() - wave_spawned) + monsters.filter(func(m): return is_instance_valid(m) and not m.dead and not m.is_queued_for_deletion()).size()
-
-func spawn_one() -> CharacterBody3D:
+func monster_health() -> float:
+	# Advance in one-second increments while preserving the minute-based curve.
+	var minutes: float = floorf(maxf(survival_time, 0.0)) / 60.0
+	return 30.0 + health_growth_per_minute * minutes + health_growth_curve * minutes * minutes
+func spawn_one(as_boss: bool = false) -> CharacterBody3D:
 	monsters = monsters.filter(func(m): return is_instance_valid(m) and not m.dead and not m.is_queued_for_deletion())
-	if not enabled or get_tree().paused or monsters.size() >= max_alive or not is_instance_valid(player):
+	if not enabled or completed or get_tree().paused or not is_instance_valid(player):
+		return null
+	if not as_boss and (boss_phase or monsters.size() >= max_alive):
 		return null
 	var center := player.global_position
 	# Keep the entire 0.4 m collision capsule outside the boundary.
 	var inner := maxf(spawn_radius, 1.0) + 0.6
-	var outer := maxf(outer_radius, inner + 0.5)
+	var outer := maxf(outer_radius + (8.0 if as_boss else 0.0), inner + 0.5)
 	for attempt in range(24):
 		var angle := rng.randf_range(0, TAU)
 		var radius := sqrt(rng.randf_range(inner * inner, outer * outer))
@@ -126,21 +139,17 @@ func spawn_one() -> CharacterBody3D:
 		if crowded:
 			continue
 		var shape := CapsuleShape3D.new()
-		shape.radius = 0.45
-		shape.height = 1.9
+		shape.radius = 0.9 if as_boss else 0.45
+		shape.height = 3.8 if as_boss else 1.9
 		var occupancy := PhysicsShapeQueryParameters3D.new()
 		occupancy.shape = shape
-		occupancy.transform = Transform3D(Basis.IDENTITY, candidate + Vector3(0, 0.95, 0))
+		occupancy.transform = Transform3D(Basis.IDENTITY, candidate + Vector3(0, 1.9 if as_boss else 0.95, 0))
 		occupancy.collision_mask = 1
 		if not get_world_3d().direct_space_state.intersect_shape(occupancy, 1).is_empty():
 			continue
-		var monster: CharacterBody3D = MONSTER.instantiate()
+		var monster: CharacterBody3D = BOSS.instantiate() if as_boss else MONSTER.instantiate()
 		monster.player = player
-		var difficulty := float(wave_number - 1)
-		monster.max_health *= 1.0 + 0.25 * difficulty
-		monster.attack_damage *= 1.0 + 0.15 * difficulty
-		monster.move_speed *= 1.0 + 0.05 * difficulty
-		monster.attack_interval = maxf(0.5, monster.attack_interval / (1.0 + 0.03 * difficulty))
+		monster.max_health = boss_health if as_boss else monster_health()
 		add_child(monster)
 		monster.global_position = candidate
 		monsters.append(monster)
@@ -183,9 +192,31 @@ func reset_encounter() -> void:
 			monster.queue_free()
 	monsters.clear()
 	started = false
-	wave_number = 1
-	wave_spawned = 0
-	between_waves = false
+	boss_phase = false
+	boss_started = false
+	completed = false
+	boss = null
+	survival_time = 0.0
+	difficulty_step = 0
 	countdown = 2.0
-	wave_changed.emit()
+	difficulty_changed.emit()
 
+
+
+
+func _try_spawn_boss() -> void:
+	boss = spawn_one(true)
+	if not is_instance_valid(boss):
+		return
+	boss_started = true
+	boss.defeated.connect(_on_boss_defeated)
+	boss_spawned.emit(boss)
+
+func _on_boss_defeated() -> void:
+	if not boss_phase or completed:
+		return
+	completed = true
+	for monster in monsters:
+		if is_instance_valid(monster) and monster != boss:
+			monster.queue_free()
+	round_completed.emit()

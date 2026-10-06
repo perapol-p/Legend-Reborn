@@ -1,13 +1,19 @@
-extends Node3D
+﻿extends Node3D
 @export var auto_pause_on_focus_loss := true
 var cursor_released := false
 var command_console: PanelContainer
+var round_won := false
+var round_finished := false
+var result_overlay: Control
+var victory_overlay: Control
 func _ready() -> void:
 	$RunState.character_name = GameData.selected_character
+	$RunState.player_died.connect(_on_player_died)
 	$Player.bind_run($RunState)
 	$Interface/HUD.bind_combo($Combo)
 	$Interface/HUD.bind_run($RunState)
 	$Interface/HUD.bind_spawner($MonsterSpawner)
+	$MonsterSpawner.round_completed.connect(func(): call_deferred("_show_victory"))
 	
 	$Interface/PauseOverlay.bind_run($RunState)
 	$Interface/PauseOverlay.pause_changed.connect(_pause_changed)
@@ -20,7 +26,13 @@ func _ready() -> void:
 	$Interface.add_child(command_console)
 func _exit_tree() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	get_tree().paused = false
 func _sync_reward() -> void:
+	if round_finished:
+		$Interface/RewardOverlay.hide()
+		get_tree().paused = true
+		_update_pointer()
+		return
 	$Interface/RewardOverlay.refresh()
 	get_tree().paused = $Interface/RewardOverlay.visible or $Interface/PauseOverlay.visible or GameData.command_console_active
 	if not get_tree().paused:
@@ -32,11 +44,66 @@ func _pause_changed() -> void:
 		cursor_released = false
 	_update_pointer()
 func _update_pointer() -> void:
-	var locked := get_tree().paused or cursor_released
+	var locked := get_tree().paused or cursor_released or round_finished
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if locked else Input.MOUSE_MODE_CAPTURED
 	$Player.input_enabled = not locked
 	$Interface/Crosshair.visible = not locked
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_WM_WINDOW_FOCUS_OUT and auto_pause_on_focus_loss and is_node_ready():
+	if what == NOTIFICATION_WM_WINDOW_FOCUS_OUT and auto_pause_on_focus_loss and is_node_ready() and not round_finished:
 		if not get_tree().paused and not cursor_released:
 			$Interface/PauseOverlay.toggle_pause()
+
+func _show_victory() -> void:
+	if round_finished or not $MonsterSpawner.completed:
+		return
+	round_won = true
+	round_finished = true
+	$RunState.finished = true
+	GameData.games_completed += 1
+	GameData.save_progress()
+	GameData.characters_changed.emit()
+	_show_result(true)
+
+func _on_player_died() -> void:
+	if round_finished:
+		return
+	round_finished = true
+	get_tree().paused = true
+	_update_pointer()
+	call_deferred("_show_result", false)
+
+func _show_result(won: bool) -> void:
+	if is_instance_valid(result_overlay):
+		return
+	var summary: Dictionary = $RunState.result_summary()
+	if command_console.visible:
+		command_console.close_console()
+	command_console.set_process_input(false)
+	$Interface/PauseOverlay.set_process_input(false)
+	$Interface/PauseOverlay.hide()
+	$Interface/RewardOverlay.hide()
+	$MonsterSpawner.enabled = false
+	var layer := CanvasLayer.new()
+	layer.layer = 200
+	layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(layer)
+	var overlay = preload("res://scripts/run_result_overlay.gd").new()
+	overlay.summary = summary
+	overlay.won = won
+	overlay.name = "VictoryOverlay" if won else "GameOverOverlay"
+	overlay.retry_requested.connect(func(): _leave_result("res://scenes/game_placeholder.tscn"))
+	overlay.main_menu_requested.connect(func(): _leave_result("res://scenes/main_menu.tscn"))
+	result_overlay = overlay
+	if won:
+		victory_overlay = overlay
+	layer.add_child(overlay)
+	get_tree().paused = true
+	_update_pointer()
+	$Interface/HUD.refresh_survival()
+func _leave_result(scene: String) -> void:
+	get_tree().paused = false
+	get_tree().change_scene_to_file(scene)
+
+
+
+

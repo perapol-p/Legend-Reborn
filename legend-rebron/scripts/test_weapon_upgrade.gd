@@ -1,4 +1,4 @@
-extends Node
+﻿extends Node
 var failed := false
 var game: Node
 var run: Node
@@ -105,7 +105,7 @@ func _ready() -> void:
 					if level == 5:
 						check(nearby.health < 10000, "Explosive bullet hurts nearby target")
 				"bow":
-					var expected := 1 if level == 1 else (3 if level == 2 else (6 if level == 3 else 12))
+					var expected := [1, 3, 6, 12, 12][level - 1] as int
 					check(combat.projectiles_fired - shots == expected, "Bow arrow count")
 				"spellbook":
 					check(combat.tornadoes_created - tornadoes == (1 if level >= 3 else 0), "Spell tornado")
@@ -146,7 +146,7 @@ func _ready() -> void:
 	combat.bow_ammo = 0
 	combat.bow_reload = 1.0
 	await frames(2)
-	check(combat.bow_reload == 0 and combat.bow_ammo == 4, "LV5 bow has no reload")
+	check(combat.bow_reload == 0 and combat.bow_ammo == combat.bow_capacity(), "LV5 bow has no reload")
 	# Charged gun powers up rate/damage while consuming no ammunition.
 	await clear_effects()
 	combat.equip("gun")
@@ -204,4 +204,6 @@ func _ready() -> void:
 	get_tree().paused = false
 	print("REFERENCE WEAPON UPGRADE ", "FAILED" if failed else "PASSED")
 	get_tree().quit(1 if failed else 0)
+
+
 

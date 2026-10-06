@@ -1,4 +1,4 @@
-extends Node
+﻿extends Node
 var failed := false
 var samples: Array[float] = []
 var game: Node
@@ -118,7 +118,7 @@ func _ready() -> void:
 		await frames(60)
 		check(not is_instance_valid(monster), "Weapon kills monster: " + id)
 		check(run.xp == 3, "Monster grants XP: " + id)
-	# Contact attack changes real health and HUD, death resets encounter.
+	# Contact attack changes real health and HUD, death ends the run with a summary.
 	var attacker: CharacterBody3D = load("res://scenes/monster.tscn").instantiate()
 	attacker.player = player
 	attacker.move_speed = 0
@@ -134,9 +134,13 @@ func _ready() -> void:
 	spawner.countdown = 1000
 	spawner.spawn_one()
 	player.receive_damage(10000)
-	check(run.current_health() == run.stats()["max_hp"], "Death restores health for test respawn")
-	check(spawner.monsters.is_empty(), "Death clears encounter")
+	check(run.current_health() == 0 and run.finished, "Death leaves zero HP and finishes the run")
+	check(game.round_finished and get_tree().paused, "Death freezes the encounter")
 	await frames(3)
+	check(is_instance_valid(game.result_overlay) and game.result_overlay.visible, "Game Over summary is visible")
 	print("MONSTER INTEGRATION ", "FAILED" if failed else "PASSED", " | audited spawns: ", samples.size())
 	get_tree().quit(1 if failed else 0)
+
+
+
 

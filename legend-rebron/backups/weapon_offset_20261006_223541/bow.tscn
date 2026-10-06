@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/weapons/Hand_Bow.glb" id="1"]
+[ext_resource type="Script" path="res://scripts/bow_view.gd" id="2"]
+
+[node name="Bow" type="Node3D"]
+script = ExtResource("2")
+
+[node name="Model" parent="." instance=ExtResource("1")]
+position = Vector3(-0.22, 0.10, -0.40)
+rotation = Vector3(0, 3.14159265, 0)
+scale = Vector3(0.15, 0.15, 0.15)

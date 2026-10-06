@@ -1,4 +1,4 @@
-# Item and movement prototype
+﻿# Item and movement prototype
 
 ## Items
 The 20 names and bonuses come from item1.png / item2.png. Edit data/item_catalog.json to change names, colors, effects or optional icon paths. Stable IDs track item types independently of their display names.
@@ -9,7 +9,7 @@ Each level-up offers three distinct types. Owned types remain eligible. Pick one
 
 Rarity weights interpolate from Common/Rare/Epic/Legendary = 70/23/6/1 at level 2 to 15/30/35/20 at level 20, then remain constant. Within each offer, already shown types are excluded, with weights renormalized as needed. Luck is displayed as a percentage and does not modify reward weights yet.
 
-HP/MP/ATK/crit/luck are stored stats; combat is not implemented. Speed bonuses now scale actual FPS movement relative to the base Speed of 100. Crit bonuses add percentage points. A fresh run clears levels and stacks. No between-run item save.
+HP/ATK/crit/luck are stored stats; combat is not implemented. Speed bonuses now scale actual FPS movement relative to the base Speed of 100. Crit bonuses add percentage points. A fresh run clears levels and stacks. No between-run item save.
 
 XP threshold is temporarily 10 + 5 per existing level above 1. The test level button supplies enough XP for the next level. Monsters and XP drops are not implemented.
 
@@ -46,3 +46,4 @@ Bindings, mouse sensitivity/inversion and crosshair preferences save to user://s
 --headless --path <project> --script res://scripts/test_combo.gd
 
 The integration test covers real physics, key input, remapping and config reload, modal pausing, repeat rewards and inventory. It uses user://fps_test_settings.cfg so the player's settings.cfg is not overwritten. Without --headless it also captures preview PNGs in the ignored backups folder.
+

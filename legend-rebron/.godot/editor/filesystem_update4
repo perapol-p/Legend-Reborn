@@ -1,0 +1,9 @@
+res://scripts/bow_view.gd
+res://scripts/sword_view.gd
+res://scripts/fps_weapon_view.gd
+res://scripts/weapon_combat.gd
+res://scripts/weapon_projectile.gd
+res://scripts/game_data.gd
+res://scripts/main_menu.gd
+res://scripts/command_console.gd
+res://scripts/sword_wave_vfx.gd

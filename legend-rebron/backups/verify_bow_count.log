@@ -1,0 +1,13 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS bow spread LV1 volley 0 count=2 width=0.0175607316196
+PASS bow spread LV1 volley 1 count=2 width=0.02130972780287
+PASS bow spread LV2 volley 0 count=4 width=0.13559737801552
+PASS bow spread LV2 volley 1 count=4 width=0.13929640501738
+PASS bow spread LV3 volley 0 count=8 width=0.27801157534122
+PASS bow spread LV3 volley 1 count=8 width=0.29596577584744
+PASS bow spread LV4 volley 0 count=16 width=0.36765588819981
+PASS bow spread LV4 volley 1 count=16 width=0.36606700718403
+PASS bow spread LV5 volley 0 count=24 width=0.39532171189785
+PASS bow spread LV5 volley 1 count=24 width=0.40778551995754
+PASS increasing spread, bounded pitch jitter, unique volleys, all arrow counts

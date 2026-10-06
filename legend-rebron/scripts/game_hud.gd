@@ -1,4 +1,4 @@
-extends Control
+﻿extends Control
 const Style = preload("res://scripts/ui_style.gd")
 var run: Node
 var level_label: Label
@@ -13,8 +13,9 @@ var movement_hint: Label
 var combo: Node
 var elapsed := 0.0
 var clock_label: Label
-var wave_label: Label
+var survival_label: Label
 var spawner: Node
+var boss_bar: ProgressBar
 var rank_label: Label
 var combo_bar: ProgressBar
 var combo_info: Label
@@ -45,10 +46,14 @@ func _ready() -> void:
 	clock_label = Style.label(top, "00:00", 24, Style.PAPER)
 	clock_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	clock_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var wave_area := corner(Rect2(-220, 16, 440, 30), Vector2(0.5, 0))
-	wave_label = Style.label(wave_area, "WAVE 1", 24, Style.GOLD)
-	wave_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var survival_area := corner(Rect2(-220, 16, 440, 30), Vector2(0.5, 0))
+	survival_label = Style.label(survival_area, "SURVIVAL", 24, Style.GOLD)
+	survival_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	survival_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var boss_area := corner(Rect2(-220, 40, 440, 8), Vector2(0.5, 0))
+	boss_bar = Style.bar(boss_area, Color("b92e43"), 100, 8)
+	boss_bar.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	boss_bar.hide()
 	var rank_area := corner(Rect2(-286, 72, 242, 175), Vector2(1, 0))
 	flames = CPUParticles2D.new()
 	rank_area.add_child(flames)
@@ -77,7 +82,7 @@ func _ready() -> void:
 	combo_bar = Style.bar(rank_stack, Color("ed8649"), 0, 11)
 	combo_info = Style.label(rank_stack, "COMBO / READY", 14, Style.PAPER)
 	combo_info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var status := corner(Rect2(40, -200, 320, 170), Vector2(0, 1))
+	var status := corner(Rect2(40, -156, 320, 126), Vector2(0, 1))
 	var stack := VBoxContainer.new()
 	status.add_child(stack)
 	stack.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -100,8 +105,6 @@ func _ready() -> void:
 	weapon_ability_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hp_label = Style.label(stack, "HP    100 / 100", 14, Style.PAPER)
 	hp_bar = Style.bar(stack, Color("a73b29"), 100)
-	Style.label(stack, "MP      50 / 50", 14, Style.PAPER)
-	Style.bar(stack, Color("427e92"), 100)
 	var help_area := corner(Rect2(-240, -56, 480, 40), Vector2(0.5, 1))
 	movement_hint = Style.label(help_area, "", 14, Style.PAPER)
 	movement_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -137,8 +140,8 @@ func refresh_combo() -> void:
 	flames.emitting = rank == 8
 	rank_label.add_theme_color_override("font_color", Color("f36b26") if rank == 8 else Color("b9572b"))
 func _process(delta: float) -> void:
-	refresh_wave()
-	elapsed += delta
+	refresh_survival()
+	elapsed = run.elapsed_time if is_instance_valid(run) else elapsed + delta
 	clock_label.text = "%02d:%02d" % [int(elapsed) / 60, int(elapsed) % 60]
 func refresh_bindings() -> void:
 	movement_hint.text = "%s%s%s%s  Move  /  %s Jump  /  %s Sprint  /  %s Dash" % [
@@ -149,13 +152,20 @@ func refresh_bindings() -> void:
 
 func bind_spawner(model: Node) -> void:
 	spawner = model
-	spawner.wave_changed.connect(refresh_wave)
-	refresh_wave()
+	spawner.difficulty_changed.connect(refresh_survival)
+	refresh_survival()
 
-func refresh_wave() -> void:
+func refresh_survival() -> void:
 	if not is_instance_valid(spawner):
 		return
-	if spawner.between_waves:
-		wave_label.text = "WAVE %d CLEARED / NEXT IN %ds" % [spawner.wave_number, ceili(maxf(0.0, spawner.countdown))]
+	boss_bar.visible = spawner.boss_phase and is_instance_valid(spawner.boss) and not spawner.completed
+	if spawner.completed:
+		survival_label.text = "VICTORY"
+	elif spawner.boss_phase:
+		survival_label.text = "DEFEAT THE BOSS" if is_instance_valid(spawner.boss) else "BOSS INCOMING"
+		if is_instance_valid(spawner.boss):
+			boss_bar.value = spawner.boss.health / maxf(spawner.boss.max_health, 1.0) * 100.0
 	else:
-		wave_label.text = "WAVE %d / %d REMAINING" % [spawner.wave_number, spawner.wave_remaining()]
+		survival_label.text = "SURVIVAL / %d MONSTERS" % spawner.monsters.size()
+
+

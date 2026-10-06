@@ -1,4 +1,4 @@
-extends Node3D
+﻿extends Node3D
 ## Gameplay lives here; replace only the Models in scenes/weapons to swap art.
 const PROJECTILE = preload("res://scripts/weapon_projectile.gd")
 const TORNADO = preload("res://scripts/weapon_tornado.gd")
@@ -35,6 +35,7 @@ var gun_ammo := 12
 var gun_reload := 0.0
 var bow_ammo := 4
 var bow_reload := 0.0
+var known_bow_capacity := 4
 var rpg_ready := false
 var special_cooldown := 0.0
 var ability_status: Label
@@ -108,7 +109,7 @@ func bind_combat(body: CharacterBody3D, model: Node, meter: Node) -> void:
 	equip(str(run.catalog.data["character_weapons"].get(run.character_name, "sword")))
 
 func can_act() -> bool:
-	return is_instance_valid(player) and player.input_enabled and not get_tree().paused and not GameData.rebinding_active
+	return is_instance_valid(player) and player.input_enabled and not run.finished and not get_tree().paused and not GameData.rebinding_active
 
 func equip(id: String) -> void:
 	if not WEAPONS.has(id):
@@ -182,6 +183,11 @@ func try_attack() -> bool:
 func _physics_process(delta: float) -> void:
 	if run == null:
 		return
+	var capacity := bow_capacity()
+	if capacity != known_bow_capacity:
+		if bow_reload <= 0.0:
+			bow_ammo = clampi(bow_ammo + capacity - known_bow_capacity, 0, capacity)
+		known_bow_capacity = capacity
 	cooldown = maxf(0.0, cooldown - delta)
 	special_cooldown = maxf(0.0, special_cooldown - delta)
 	empowered = maxf(0.0, empowered - delta)
@@ -192,10 +198,10 @@ func _physics_process(delta: float) -> void:
 	if bow_reload > 0.0:
 		bow_reload = maxf(0.0, bow_reload - delta)
 		if bow_reload == 0.0:
-			bow_ammo = 4
+			bow_ammo = bow_capacity()
 	if weapon_level() >= 5 and weapon_id == "bow":
 		bow_reload = 0.0
-		bow_ammo = 4
+		bow_ammo = bow_capacity()
 	if can_act():
 		if attack_held and weapon_id == "gun" and weapon_level() >= 3 and charge_ready and gun_reload <= 0.0:
 			charge_time = minf(1.5, charge_time + delta)
@@ -230,6 +236,8 @@ func _physics_process(delta: float) -> void:
 	var walking := minf(Vector2(player.velocity.x, player.velocity.z).length() / 9.0, 1.0)
 	view.position = Vector3(sin(motion_time) * 0.012, absf(cos(motion_time)) * 0.012, 0) * walking
 	view.rotation = Vector3.ZERO
+	if weapon_id in ["sword", "bow"]:
+		view.position = Vector3.ZERO
 	if attack_active:
 		elapsed += delta
 		var t := clampf(elapsed / attack_cooldown(), 0, 1)
@@ -241,9 +249,6 @@ func _physics_process(delta: float) -> void:
 			"gun":
 				view.position.z += 0.10 * pow(1.0 - t, 3.0)
 				view.rotation.x = 0.12 * pow(1.0 - t, 3.0)
-			"bow":
-				view.position.z += 0.12 * swing
-				view.rotation.z = -0.08 * swing
 			"spellbook":
 				view.position.y += 0.10 * swing
 				view.rotation.x = -0.18 * swing
@@ -264,7 +269,8 @@ func resolve_attack() -> void:
 		if level == 1:
 			melee_attack(3.2)
 		else:
-			fire_projectile("sword_wave", forward, roll_damage(), 14.0, 0.4 if level == 2 else 1.05, true)
+			var wave = fire_projectile("sword_wave", forward, roll_damage(), 14.0, 0.4 if level == 2 else 1.05, true)
+			wave.travel_remaining = [6.0, 12.0, 20.0, 32.0][clampi(level, 2, 5) - 2]
 	elif weapon_id == "katana":
 		melee_attack(3.5)
 		var dash_scale := 1.5 if level >= 3 else 1.0
@@ -303,14 +309,26 @@ func resolve_attack() -> void:
 			bow_ammo -= 1
 			if bow_ammo == 0:
 				bow_reload = 1.3
+		if is_instance_valid(view) and view.has_method("release_arrow"):
+			view.release_arrow()
+		var release_position: Vector3 = view.arrow_release_position()
+		var aim_hit := ray(origin, origin + forward * 120.0)
+		var target_position: Vector3 = origin + forward * 120.0 if aim_hit.is_empty() else Vector3(aim_hit["position"])
+		var bow_forward := (target_position - release_position).normalized()
+		# Put the back of the flying arrow at the nock when it leaves the string.
+		var spawn_position := release_position + bow_forward * 0.45
 		var count := 1 if level == 1 else (3 if level == 2 else 6)
 		for row in range(2 if level >= 4 else 1):
 			for i in range(count):
-				var angle := (float(i) - float(count - 1) * 0.5) * 0.025
-				# Paired upper/lower volleys stay close enough to hit humanoid targets.
-				var pitch := (0.015 if row == 0 else -0.015) if level >= 4 else 0.0
-				var direction := (forward + camera.global_basis.x * angle + camera.global_basis.y * pitch).normalized()
-				fire_projectile("bow", direction, roll_damage(), 38.0, 0.04, level >= 3)
+				# Wider fans at higher levels, with bounded per-arrow human variation.
+				var half_spread := [0.012, 0.070, 0.150, 0.180, 0.200][clampi(level, 1, 5) - 1] as float
+				var spacing := half_spread * 2.0 / float(maxi(count - 1, 1))
+				var jitter := 0.004 if level == 1 else (0.010 if level == 2 else 0.014)
+				var angle := (float(i) - float(count - 1) * 0.5) * spacing + randf_range(-jitter, jitter)
+				var row_pitch := (0.035 if row == 0 else -0.035) if level >= 4 else 0.0
+				var pitch := row_pitch + randf_range(-jitter, jitter)
+				var direction := (bow_forward + camera.global_basis.x * angle + camera.global_basis.y * pitch).normalized()
+				fire_projectile("bow", direction, roll_damage(), 38.0, 0.04, level >= 3, 0.0, spawn_position)
 	else:
 		if level < 3:
 			fire_projectile("magic_wave", forward, roll_damage(), 22.0, 0.15 if level == 1 else 0.9, false)
@@ -372,6 +390,8 @@ func deal_hit(body: Object, damage: float, hit_weapon: String = "", grants_rpg: 
 	feedback.modulate = Color(1.0, 0.85, 0.35)
 	feedback_time = 0.55
 	if result == 2:
+		if monster_kill:
+			run.record_monster_kill()
 		combo.register_kill()
 		feedback.text = "TARGET DOWN"
 		if monster_kill and weapon_id == "gun" and weapon_level() >= 3 and (hit_weapon.is_empty() or hit_weapon == "gun"):
@@ -470,14 +490,14 @@ func update_status() -> void:
 		if weapon_level() >= 4:
 			ammo_hint.text += "\nRMB  RPG " + ("READY" if rpg_ready else "NOT READY")
 	elif weapon_id == "bow":
-		ammo_label.text = "∞ / 4" if weapon_level() >= 5 else "%d / 4" % bow_ammo
+		ammo_label.text = "\u221e / %d" % bow_capacity() if weapon_level() >= 5 else "%d / %d" % [bow_ammo, bow_capacity()]
 		ammo_hint.text = "ARROWS" if bow_reload <= 0.0 else "RELOADING  %.1fs" % bow_reload
 	elif weapon_id == "spellbook" and weapon_level() >= 4:
 		text = "RMB: Warp | %.1fs cooldown" % special_cooldown
 	elif weapon_id == "sword" and weapon_level() >= 4:
 		text = "Hold LMB: rapid sword waves"
 	ability_status.text = text
-func fire_projectile(kind: String, direction: Vector3, damage: float, speed: float, radius: float, piercing: bool, splash: float = 0.0) -> Node3D:
+func fire_projectile(kind: String, direction: Vector3, damage: float, speed: float, radius: float, piercing: bool, splash: float = 0.0, spawn_position: Vector3 = Vector3.INF) -> Node3D:
 	var shot := Node3D.new()
 	shot.set_script(PROJECTILE)
 	shot.direction = direction
@@ -491,8 +511,13 @@ func fire_projectile(kind: String, direction: Vector3, damage: float, speed: flo
 	shot.source_weapon = weapon_id
 	shot.excluded.assign([player.get_rid()])
 	get_tree().current_scene.add_child(shot)
-	shot.global_position = camera.global_position + (-camera.global_basis.z) * 0.15
+	shot.global_position = camera.global_position + (-camera.global_basis.z) * 0.15 if spawn_position == Vector3.INF else spawn_position
 	shot.look_at(shot.global_position + direction, camera.global_basis.y)
+	# A close wall between the player and bow must still block the shot.
+	if kind == "bow":
+		var obstruction := ray(camera.global_position, shot.global_position)
+		if not obstruction.is_empty():
+			shot.impact(obstruction["collider"], obstruction["position"] )
 	projectiles_fired += 1
 	return shot
 
@@ -597,3 +622,17 @@ func flash(center: Vector3, radius: float, color: Color) -> void:
 	tween.tween_property(effect, "scale", Vector3.ONE, 0.15)
 	tween.tween_property(effect, "scale", Vector3.ONE * 0.01, 0.15)
 	tween.tween_callback(effect.queue_free)
+
+
+
+
+
+
+
+
+func bow_capacity() -> int:
+	var level: int = run.weapon_level("bow") if is_instance_valid(run) else 1
+	return [4, 6, 8, 10, 12][clampi(level, 1, 5) - 1]
+
+
+

@@ -1,0 +1,7 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS LV1 capacity=4 volley=1 reload and HUD
+PASS LV2 capacity=6 volley=3 reload and HUD
+PASS LV3 capacity=8 volley=6 reload and HUD
+PASS LV4 capacity=10 volley=12 reload and HUD
+PASS LV5 capacity=12 volley=12 reload and HUD

@@ -1,5 +1,9 @@
-extends Node
+﻿extends Node
 signal settings_changed
+signal characters_changed
+const CHARACTERS := ["Daddy", "Mommy", "Son"]
+var progress_path := "user://progress.cfg"
+var unlocked_characters: Array[String] = ["Daddy"]
 const SAVE_PATH := "user://settings.cfg"
 const ACTIONS = {
 	"move_forward": {"label": "Move forward", "key": KEY_W},
@@ -37,6 +41,7 @@ var command_console_active := false
 func _ready() -> void:
 	bindings = default_bindings()
 	load_settings()
+	load_progress()
 	apply_settings()
 func default_bindings() -> Dictionary:
 	var result: Dictionary = {}
@@ -133,3 +138,31 @@ func restore_defaults() -> void:
 	bindings = default_bindings()
 	apply_settings()
 	save_settings()
+
+func is_character_unlocked(character: String) -> bool:
+	return unlocked_characters.has(character) or (character == "Mommy" and games_completed >= 1)
+
+func unlock_character(character: String) -> bool:
+	if character not in CHARACTERS:
+		return false
+	if not unlocked_characters.has(character):
+		unlocked_characters.append(character)
+	save_progress()
+	characters_changed.emit()
+	return true
+
+func save_progress() -> void:
+	var cfg := ConfigFile.new()
+	cfg.set_value("characters", "unlocked", unlocked_characters)
+	cfg.set_value("progress", "games_completed", games_completed)
+	cfg.save(progress_path)
+
+func load_progress() -> void:
+	var cfg := ConfigFile.new()
+	if cfg.load(progress_path) != OK:
+		return
+	unlocked_characters.assign(["Daddy"])
+	for character in cfg.get_value("characters", "unlocked", []):
+		if character in CHARACTERS and not unlocked_characters.has(character):
+			unlocked_characters.append(character)
+	games_completed = maxi(0, int(cfg.get_value("progress", "games_completed", 0)))

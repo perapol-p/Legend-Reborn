@@ -1,0 +1,4 @@
+ERROR: res://scenes/boss.tscn:1 - Parse Error: Expected '['.
+   at: _printerr (scene/resources/resource_format_text.cpp:41)
+ERROR: Plugin is not attached to debugger.
+   at: is_active (editor/debugger/editor_debugger_plugin.cpp:102)

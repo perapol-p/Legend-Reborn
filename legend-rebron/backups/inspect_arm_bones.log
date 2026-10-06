@@ -1,0 +1,26 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ ┖╴Godot_Export_Baked
+    ┠╴Arm_Rig_Godot
+    ┃  ┖╴Skeleton3D
+    ┃     ┠╴Arm_Godot
+    ┃     ┖╴@PhysicalBoneSimulator3D@2
+    ┠╴Armature_Godot
+    ┃  ┖╴Skeleton3D
+    ┃     ┠╴sword_Godot
+    ┃     ┖╴@PhysicalBoneSimulator3D@3
+    ┖╴AnimationPlayer
+
+ANIMATION FP_ref_pose length=0.0333333350718 tracks=38
+ANIMATION Sword_Swing length=0.80000001192093 tracks=38
+ANIMATION Sword_Walk length=0.80000001192093 tracks=38
+ANIMATION Sword_idle length=2.0 tracks=38
+ANIMATION Sword_idle_ref length=0.0333333350718 tracks=38
+MESH Arm_Godot transform=[X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)] aabb=[P: (-6.149248, -0.261496, -0.268952), S: (12.2985, 0.522993, 0.928566)]
+MESH sword_Godot transform=[X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)] aabb=[P: (-0.72585, -1.242496, 1.616277), S: (1.4517, 7.735967, 0.196715)]
+BONE /root/Godot_Export_Baked/Arm_Rig_Godot/Skeleton3D upper_arm_L [X: (-0.932349, 0.187874, 0.308917), Y: (-0.040622, -0.90342, 0.426829), Z: (0.359271, 0.385404, 0.849934), O: (1.003529, 0.001067, 0.0)]
+BONE /root/Godot_Export_Baked/Arm_Rig_Godot/Skeleton3D lower_arm_L [X: (-0.15967, 0.931755, -0.326095), Y: (-0.928204, -0.029247, 0.37092), Z: (0.33607, 0.361907, 0.869529), O: (0.926159, -1.719615, 0.812952)]
+BONE /root/Godot_Export_Baked/Arm_Rig_Godot/Skeleton3D hand_L [X: (0.026158, 0.998952, 0.037571), Y: (-0.680779, -0.009721, 0.732424), Z: (0.732021, -0.044736, 0.679812), O: (-0.832039, -1.775015, 1.515547)]
+BONE /root/Godot_Export_Baked/Arm_Rig_Godot/Skeleton3D upper_arm_R [X: (-0.008801, 0.247226, -0.968918), Y: (-0.580342, -0.790338, -0.196389), Z: (-0.814325, 0.560576, 0.150431), O: (-1.003529, 0.001067, 0.0)]
+BONE /root/Godot_Export_Baked/Arm_Rig_Godot/Skeleton3D lower_arm_R [X: (-0.45873, -0.832653, 0.310253), Y: (0.321282, 0.170112, 0.93158), Z: (-0.82846, 0.527022, 0.189481), O: (-2.108868, -1.504237, -0.374048)]
+BONE /root/Godot_Export_Baked/Arm_Rig_Godot/Skeleton3D hand_R [X: (0.033282, -0.995666, 0.086847), Y: (0.252281, 0.09245, 0.963228), Z: (-0.967082, -0.010148, 0.254265), O: (-1.500298, -1.182012, 1.390544)]

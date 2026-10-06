@@ -1,4 +1,4 @@
-extends CharacterBody3D
+﻿extends CharacterBody3D
 @export var move_speed := 9.0
 @export var sprint_multiplier := 1.5
 @export var jump_speed := 9.0
@@ -84,11 +84,8 @@ func respawn() -> void:
 	jump_buffer = 0
 
 func receive_damage(amount: float) -> void:
-	if run == null or get_tree().paused:
+	if run == null or run.finished or get_tree().paused:
 		return
 	if run.damage_player(amount):
-		run.restore_health()
-		respawn()
-		var spawner := get_parent().get_node_or_null("MonsterSpawner")
-		if spawner != null:
-			spawner.reset_encounter()
+		input_enabled = false
+		velocity = Vector3.ZERO
