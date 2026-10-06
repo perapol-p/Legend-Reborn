@@ -65,15 +65,10 @@ func _ready() -> void:
 		spawner.countdown = 0.0
 		spawner._physics_process(0.0)
 	check(spawner.monsters.size() > 16, "Population can exceed 16")
-	spawner.max_alive = spawner.monsters.size()
-	var capped: int = spawner.monsters.size()
-	check(spawner.spawn_one() == null, "No spawn at population cap")
-	spawner.monsters[0].queue_free()
-	await get_tree().process_frame
-	check(spawner.spawn_one() != null, "A freed population slot can spawn again")
-	check(spawner.monsters.size() == capped, "Population stays within cap")
+	check(spawner.spawn_one() != null, "Spawns continue without a population cap")
 	print("SURVIVAL SPAWNING ", "FAILED" if failed else "PASSED")
 	get_tree().quit(1 if failed else 0)
+
 
 
 

@@ -18,7 +18,6 @@ const FLYER = preload("res://scenes/flying_monster.tscn")
 @export var initial_count := 6
 @export_range(1.0, 600.0, 1.0) var growth_interval := 90.0
 @export var max_batch_size := 12
-@export var max_alive := 100
 @export var survival_duration := 1200.0
 @export var boss_health := 6000.0
 var boss_phase := false
@@ -122,7 +121,7 @@ func spawn_one(as_boss: bool = false) -> CharacterBody3D:
 	monsters = monsters.filter(func(m): return is_instance_valid(m) and not m.dead and not m.is_queued_for_deletion())
 	if not enabled or completed or get_tree().paused or not is_instance_valid(player):
 		return null
-	if not as_boss and (boss_phase or monsters.size() >= max_alive):
+	if not as_boss and boss_phase:
 		return null
 	var enemy_type := "boss" if as_boss else pick_monster_type()
 	var center := player.global_position
@@ -180,7 +179,7 @@ func update_debug() -> void:
 	info.visible = false
 	if is_instance_valid(player):
 		ring.global_position = Vector3(player.global_position.x, 0.035, player.global_position.z)
-	info.text = "SPAWN DEBUG\nCyan ring: %.0f m | Spawn outside ring\nAlive: %d / %d | Last spawn: %.1f m\nMonsters can walk inside after spawning" % [spawn_radius, monsters.size(), max_alive, last_distance]
+	info.text = "SPAWN DEBUG\nCyan ring: %.0f m | Spawn outside ring\nAlive: %d (unlimited) | Last spawn: %.1f m\nMonsters can walk inside after spawning" % [spawn_radius, monsters.size(), last_distance]
 func spawn_marker(point: Vector3, distance: float) -> void:
 	var marker := MeshInstance3D.new()
 	marker.mesh = ring_mesh(0.85, 0.12, Color(1, 0.65, 0.1))
@@ -264,5 +263,6 @@ func pick_monster_type() -> String:
 		if choice <= 0.0:
 			return enemy_type
 	return "melee"
+
 
 

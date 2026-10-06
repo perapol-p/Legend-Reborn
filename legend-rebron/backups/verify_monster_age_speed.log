@@ -1,0 +1,7 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS unlimited total population: 126
+PASS monster base=2.6 10min speed=5.2 pause freezes age
+PASS archer_monster base=2.2 10min speed=4.4 pause freezes age
+PASS flying_monster base=2.8 10min speed=5.6 pause freezes age
+PASS boss base=2.2 10min speed=4.4 pause freezes age

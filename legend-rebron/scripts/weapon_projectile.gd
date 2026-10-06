@@ -10,6 +10,7 @@ var remaining := 5.0
 var travel_remaining := INF
 var hit_radius := 0.04
 var piercing := false
+var critical := false
 var splash := 0.0
 var struck: Array[RID] = []
 var velocity := Vector3.ZERO
@@ -131,9 +132,9 @@ func impact(body: CollisionObject3D, point: Vector3) -> bool:
 	var damageable := body.has_method("take_damage")
 	if is_instance_valid(source):
 		if damageable:
-			source.deal_hit(body, damage, source_weapon)
+			source.deal_hit(body, damage, source_weapon, false, critical)
 		if splash > 0.0:
-			source.explode(point - direction * 0.08, splash, damage, body)
+			source.explode(point - direction * 0.08, splash, damage, body, critical, source_weapon)
 	if piercing and damageable:
 		return false
 	queue_free()
@@ -236,5 +237,6 @@ func _advance_sword_wave(displacement: Vector3) -> void:
 				global_position = point
 				return
 	global_position += displacement
+
 
 

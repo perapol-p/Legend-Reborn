@@ -128,7 +128,7 @@ func submit(raw: String) -> void:
 	var combat = game.get_node("Player/Head/Camera3D/Combat")
 	var spawner = game.get_node("MonsterSpawner")
 	if name == "/spawninfo" and args.size() == 1:
-		write("Spawn radius: %.0f m | Alive: %d / %d | Last spawn: %.1f m | Total spawned: %d" % [spawner.spawn_radius, spawner.monsters.size(), spawner.max_alive, spawner.last_distance, spawner.total_spawned])
+		write("Spawn radius: %.0f m | Alive: %d (unlimited) | Last spawn: %.1f m | Total spawned: %d" % [spawner.spawn_radius, spawner.monsters.size(), spawner.last_distance, spawner.total_spawned])
 		return
 	if not run.offers.is_empty():
 		write("Choose your pending level-up item before using gameplay commands.")
@@ -186,6 +186,7 @@ static func attach_to_lobby(host: Control) -> PanelContainer:
 	layer.add_child(hint)
 	console.visibility_changed.connect(func(): hint.visible = not console.visible)
 	return console
+
 
 
 

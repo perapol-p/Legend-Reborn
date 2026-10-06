@@ -1,0 +1,21 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS luck=0.0 LV1 3000 cards={ "common": 3000, "rare": 0, "epic": 0, "legendary": 0 }
+PASS luck=0.0 LV5 3000 cards={ "common": 2522, "rare": 478, "epic": 0, "legendary": 0 }
+PASS luck=0.0 LV12 3000 cards={ "common": 2426, "rare": 525, "epic": 49, "legendary": 0 }
+PASS luck=0.0 LV25 3000 cards={ "common": 2286, "rare": 600, "epic": 99, "legendary": 15 }
+PASS luck=0.0 LV60 3000 cards={ "common": 1865, "rare": 791, "epic": 289, "legendary": 55 }
+Legendary chance/card at LV60 luck0.0=2.0%
+PASS luck=30.0 LV1 3000 cards={ "common": 3000, "rare": 0, "epic": 0, "legendary": 0 }
+PASS luck=30.0 LV5 3000 cards={ "common": 2413, "rare": 587, "epic": 0, "legendary": 0 }
+PASS luck=30.0 LV12 3000 cards={ "common": 2274, "rare": 651, "epic": 75, "legendary": 0 }
+PASS luck=30.0 LV25 3000 cards={ "common": 2099, "rare": 692, "epic": 172, "legendary": 37 }
+PASS luck=30.0 LV60 3000 cards={ "common": 1580, "rare": 923, "epic": 396, "legendary": 101 }
+Legendary chance/card at LV60 luck30.0=3.76712328767123%
+PASS luck=100.0 LV1 3000 cards={ "common": 3000, "rare": 0, "epic": 0, "legendary": 0 }
+PASS luck=100.0 LV5 3000 cards={ "common": 2198, "rare": 802, "epic": 0, "legendary": 0 }
+PASS luck=100.0 LV12 3000 cards={ "common": 1997, "rare": 877, "epic": 126, "legendary": 0 }
+PASS luck=100.0 LV25 3000 cards={ "common": 1746, "rare": 929, "epic": 251, "legendary": 74 }
+PASS luck=100.0 LV60 3000 cards={ "common": 1196, "rare": 1051, "epic": 576, "legendary": 177 }
+Legendary chance/card at LV60 luck100.0=6.41025641025641%
+PASS actual equipped Luck item affects rarity weights, gates and crit chance unchanged

@@ -19,6 +19,8 @@ var boss_bar: ProgressBar
 var rank_label: Label
 var combo_bar: ProgressBar
 var combo_info: Label
+var critical_label: Label
+var critical_remaining := 0.0
 var flames: CPUParticles2D
 func corner(rect: Rect2, anchor: Vector2 = Vector2.ZERO) -> Control:
 	var n := Control.new()
@@ -82,6 +84,17 @@ func _ready() -> void:
 	combo_bar = Style.bar(rank_stack, Color("ed8649"), 0, 11)
 	combo_info = Style.label(rank_stack, "COMBO / READY", 14, Style.PAPER)
 	combo_info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var critical_area := corner(Rect2(-286, 218, 242, 64), Vector2(1, 0))
+	critical_area.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	critical_label = Style.label(critical_area, "", 22, Color("ffcf65"))
+	critical_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	critical_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	critical_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	critical_label.add_theme_color_override("font_shadow_color", Color(0.15, 0.04, 0.0))
+	critical_label.add_theme_constant_override("shadow_offset_x", 2)
+	critical_label.add_theme_constant_override("shadow_offset_y", 2)
+	critical_label.pivot_offset = Vector2(121, 26)
+	critical_label.hide()
 	var status := corner(Rect2(40, -156, 320, 126), Vector2(0, 1))
 	var stack := VBoxContainer.new()
 	status.add_child(stack)
@@ -140,6 +153,10 @@ func refresh_combo() -> void:
 	flames.emitting = rank == 8
 	rank_label.add_theme_color_override("font_color", Color("f36b26") if rank == 8 else Color("b9572b"))
 func _process(delta: float) -> void:
+	critical_remaining = maxf(0.0, critical_remaining - delta)
+	critical_label.visible = critical_remaining > 0.0
+	critical_label.modulate.a = minf(critical_remaining / 0.20, 1.0)
+	critical_label.scale = critical_label.scale.lerp(Vector2.ONE, 1.0 - exp(-14.0 * delta))
 	refresh_survival()
 	elapsed = run.elapsed_time if is_instance_valid(run) else elapsed + delta
 	clock_label.text = "%02d:%02d" % [int(elapsed) / 60, int(elapsed) % 60]
@@ -168,4 +185,14 @@ func refresh_survival() -> void:
 	else:
 		survival_label.text = "SURVIVAL / %d MONSTERS" % spawner.monsters.size()
 
+
+
+func bind_combat(combat: Node) -> void:
+	combat.critical_hit.connect(show_critical)
+func show_critical(damage: float) -> void:
+	critical_remaining = 1.1
+	critical_label.text = "CRITICAL!\n%d DAMAGE" % roundi(damage)
+	critical_label.modulate.a = 1.0
+	critical_label.scale = Vector2.ONE * 1.08
+	critical_label.show()
 

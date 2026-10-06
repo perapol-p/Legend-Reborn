@@ -1,0 +1,10 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS timed loot 0.0s cards={ "common": 2229, "rare": 771, "epic": 0, "legendary": 0 }
+PASS timed loot 179.99s cards={ "common": 2132, "rare": 868, "epic": 0, "legendary": 0 }
+PASS timed loot 180.0s cards={ "common": 1953, "rare": 820, "epic": 227, "legendary": 0 }
+PASS timed loot 479.99s cards={ "common": 1702, "rare": 944, "epic": 354, "legendary": 0 }
+PASS timed loot 480.0s cards={ "common": 1671, "rare": 881, "epic": 356, "legendary": 92 }
+PASS timed loot 900.0s cards={ "common": 1050, "rare": 1039, "epic": 713, "legendary": 198 }
+PASS timed loot 1200.0s cards={ "common": 1036, "rare": 1023, "epic": 710, "legendary": 231 }
+PASS level-independent unlocks, pity triggered 26 times, no early pity bypass, Luck still improves rewards

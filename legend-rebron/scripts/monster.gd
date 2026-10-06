@@ -2,6 +2,9 @@
 signal defeated
 @export var max_health := 30.0
 @export var move_speed := 2.6
+@export var speed_growth_per_minute := 0.10
+var alive_seconds := 0.0
+var base_move_speed := 0.0
 @export var attack_damage := 8.0
 @export var attack_interval := 1.2
 @export var attack_range := 1.55
@@ -15,6 +18,7 @@ var hit_flash := 0.0
 @onready var health_label: Label3D = $Health
 func _ready() -> void:
 	health = max_health
+	base_move_speed = move_speed
 	add_to_group("monsters")
 	refresh()
 func aim_point() -> Vector3:
@@ -39,6 +43,7 @@ func refresh() -> void:
 func _physics_process(delta: float) -> void:
 	if dead or not is_instance_valid(player):
 		return
+	advance_age(delta)
 	hit_flash = maxf(0, hit_flash - delta)
 	if hit_flash == 0:
 		model.scale = Vector3.ONE
@@ -65,3 +70,9 @@ func _physics_process(delta: float) -> void:
 
 
 
+
+func advance_age(delta: float) -> void:
+	if dead or get_tree().paused:
+		return
+	alive_seconds += maxf(delta, 0.0)
+	move_speed = base_move_speed * (1.0 + speed_growth_per_minute * alive_seconds / 60.0)

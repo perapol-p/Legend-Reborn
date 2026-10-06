@@ -1,4 +1,6 @@
 ﻿extends Node3D
+signal critical_hit(damage: float)
+var last_damage_critical := false
 ## Gameplay lives here; replace only the Models in scenes/weapons to swap art.
 const PROJECTILE = preload("res://scripts/weapon_projectile.gd")
 const TORNADO = preload("res://scripts/weapon_tornado.gd")
@@ -213,7 +215,7 @@ func _physics_process(delta: float) -> void:
 		if volley["time"] <= 0.0:
 			volley_queue.erase(volley)
 			if can_act() and weapon_id == "katana":
-				tornado_round(int(volley["count"]), float(volley["damage"]))
+				tornado_round(int(volley["count"]), float(volley["damage"]), bool(volley.get("critical", false)))
 	feedback_time = maxf(0.0, feedback_time - delta)
 	feedback.visible = feedback_time > 0.0
 	if not can_act():
@@ -269,7 +271,7 @@ func resolve_attack() -> void:
 		if level == 1:
 			melee_attack(3.2)
 		else:
-			var wave = fire_projectile("sword_wave", forward, roll_damage(), 14.0, 0.4 if level == 2 else 1.05, true)
+			var wave = fire_projectile("sword_wave", forward, roll_damage(), 14.0, 0.4 if level == 2 else 1.05, true, 0.0, Vector3.INF, last_damage_critical)
 			wave.travel_remaining = [6.0, 12.0, 20.0, 32.0][clampi(level, 2, 5) - 2]
 	elif weapon_id == "katana":
 		melee_attack(3.5)
@@ -281,9 +283,9 @@ func resolve_attack() -> void:
 			var count := 3 if level >= 5 else (2 if level >= 4 else 1)
 			var rounds := 5 if level >= 5 else (2 if level >= 4 else 1)
 			var damage := roll_damage() * 0.4
-			tornado_round(count, damage)
+			tornado_round(count, damage, last_damage_critical)
 			for i in range(1, rounds):
-				volley_queue.append({"time": float(i) * 0.2, "count": count, "damage": damage})
+				volley_queue.append({"time": float(i) * 0.2, "count": count, "damage": damage, "critical": last_damage_critical})
 	elif weapon_id == "gun":
 		if empowered <= 0.0:
 			if gun_ammo <= 0:
@@ -299,9 +301,9 @@ func resolve_attack() -> void:
 				hit["collider"].collect_charge(self)
 				return
 			var damage := roll_damage()
-			deal_hit(hit["collider"], damage, "gun", true)
+			deal_hit(hit["collider"], damage, "gun", true, last_damage_critical)
 			if level >= 5:
-				explode(end - forward * 0.06, 3.0, damage * 0.7, hit["collider"])
+				explode(end - forward * 0.06, 3.0, damage * 0.7, hit["collider"], last_damage_critical, "gun")
 	elif weapon_id == "bow":
 		if level < 5:
 			if bow_ammo <= 0:
@@ -328,17 +330,17 @@ func resolve_attack() -> void:
 				var row_pitch := (0.035 if row == 0 else -0.035) if level >= 4 else 0.0
 				var pitch := row_pitch + randf_range(-jitter, jitter)
 				var direction := (bow_forward + camera.global_basis.x * angle + camera.global_basis.y * pitch).normalized()
-				fire_projectile("bow", direction, roll_damage(), 38.0, 0.04, level >= 3, 0.0, spawn_position)
+				fire_projectile("bow", direction, roll_damage(), 38.0, 0.04, level >= 3, 0.0, spawn_position, last_damage_critical)
 	else:
 		if level < 3:
-			fire_projectile("magic_wave", forward, roll_damage(), 22.0, 0.15 if level == 1 else 0.9, false)
+			fire_projectile("magic_wave", forward, roll_damage(), 22.0, 0.15 if level == 1 else 0.9, false, 0.0, Vector3.INF, last_damage_critical)
 		else:
-			spawn_tornado(aim_point(12.0), roll_damage() * 0.45, 3.5, 2.5)
+			spawn_tornado(aim_point(12.0), roll_damage() * 0.45, 3.5, 2.5, last_damage_critical)
 			if level >= 5:
 				for i in range(3):
 					var direction := (forward + camera.global_basis.x * float(i - 1) * 0.13).normalized()
-					fire_projectile("magic_wave", direction, roll_damage(), 22.0, 0.6, true)
-				fire_projectile("nuke", forward, roll_damage() * 3.0, 18.0, 0.25, false, 8.0)
+					fire_projectile("magic_wave", direction, roll_damage(), 22.0, 0.6, true, 0.0, Vector3.INF, last_damage_critical)
+				fire_projectile("nuke", forward, roll_damage() * 3.0, 18.0, 0.25, false, 8.0, Vector3.INF, last_damage_critical)
 
 func melee_attack(reach: float) -> void:
 	var origin := camera.global_position
@@ -364,18 +366,19 @@ func melee_attack(reach: float) -> void:
 		var obstruction := ray(origin, center)
 		if not obstruction.is_empty() and obstruction["collider"] == body:
 			struck.append(body)
-			deal_hit(body, roll_damage())
+			deal_hit(body, roll_damage(), weapon_id, false, last_damage_critical)
 
 func roll_damage() -> float:
 	var stats: Dictionary = run.stats()
 	var damage: float = float(stats["attack"]) * float(WEAPONS[weapon_id]["damage"])
-	if run.rng.randf() * 100.0 < float(stats["crit_chance"]):
+	last_damage_critical = run.rng.randf() * 100.0 < clampf(float(stats["crit_chance"]), 0.0, 100.0)
+	if last_damage_critical:
 		damage *= float(stats["crit_damage"]) / 100.0
 	if weapon_id == "gun" and empowered > 0.0:
 		damage *= 2.0
 	return damage
 
-func deal_hit(body: Object, damage: float, hit_weapon: String = "", grants_rpg: bool = false) -> void:
+func deal_hit(body: Object, damage: float, hit_weapon: String = "", grants_rpg: bool = false, critical: bool = false) -> void:
 	if not is_instance_valid(body) or not body.has_method("take_damage"):
 		return
 	var monster_kill: bool = body.is_in_group("monsters")
@@ -383,6 +386,8 @@ func deal_hit(body: Object, damage: float, hit_weapon: String = "", grants_rpg: 
 	var result: int = body.take_damage(damage)
 	if result == 0:
 		return
+	if critical:
+		critical_hit.emit(damage)
 	if hit_weapon == "gun" and grants_rpg and run.weapon_level("gun") >= 4:
 		rpg_ready = true
 	combo.register_hit()
@@ -497,7 +502,7 @@ func update_status() -> void:
 	elif weapon_id == "sword" and weapon_level() >= 4:
 		text = "Hold LMB: rapid sword waves"
 	ability_status.text = text
-func fire_projectile(kind: String, direction: Vector3, damage: float, speed: float, radius: float, piercing: bool, splash: float = 0.0, spawn_position: Vector3 = Vector3.INF) -> Node3D:
+func fire_projectile(kind: String, direction: Vector3, damage: float, speed: float, radius: float, piercing: bool, splash: float = 0.0, spawn_position: Vector3 = Vector3.INF, critical: bool = false) -> Node3D:
 	var shot := Node3D.new()
 	shot.set_script(PROJECTILE)
 	shot.direction = direction
@@ -509,6 +514,7 @@ func fire_projectile(kind: String, direction: Vector3, damage: float, speed: flo
 	shot.piercing = piercing
 	shot.splash = splash
 	shot.source_weapon = weapon_id
+	shot.critical = critical
 	shot.excluded.assign([player.get_rid()])
 	get_tree().current_scene.add_child(shot)
 	shot.global_position = camera.global_position + (-camera.global_basis.z) * 0.15 if spawn_position == Vector3.INF else spawn_position
@@ -527,17 +533,19 @@ func aim_point(distance: float) -> Vector3:
 	var hit := ray(origin, end)
 	return end if hit.is_empty() else Vector3(hit["position"]) + Vector3(hit["normal"]) * 0.5
 
-func tornado_round(count: int, damage: float) -> void:
+func tornado_round(count: int, damage: float, critical: bool = false) -> void:
 	var center := aim_point(5.0)
 	for i in range(count):
 		var point := center + camera.global_basis.x * (float(i) - float(count - 1) * 0.5) * 1.8
-		spawn_tornado(point, damage, 2.8, 1.1)
+		spawn_tornado(point, damage, 2.8, 1.1, critical)
 
-func spawn_tornado(point: Vector3, damage: float, radius: float, lifetime: float) -> Node3D:
+func spawn_tornado(point: Vector3, damage: float, radius: float, lifetime: float, critical: bool = false) -> Node3D:
 	var tornado := Node3D.new()
 	tornado.set_script(TORNADO)
 	tornado.source = self
 	tornado.damage = damage
+	tornado.critical = critical
+	tornado.source_weapon = weapon_id
 	tornado.radius = radius
 	tornado.remaining = lifetime
 	get_tree().current_scene.add_child(tornado)
@@ -551,7 +559,7 @@ func try_special() -> bool:
 	if weapon_id == "gun" and weapon_level() >= 4 and rpg_ready:
 		rpg_ready = false
 		special_cooldown = 1.0
-		fire_projectile("rpg", -camera.global_basis.z, roll_damage() * 3.0, 28.0, 0.15, false, 4.0)
+		fire_projectile("rpg", -camera.global_basis.z, roll_damage() * 3.0, 28.0, 0.15, false, 4.0, Vector3.INF, last_damage_critical)
 		return true
 	if weapon_id == "spellbook" and weapon_level() >= 4:
 		return warp()
@@ -598,11 +606,11 @@ func damageables(center: Vector3, radius: float) -> Array:
 				result.append(body)
 	return result
 
-func explode(center: Vector3, radius: float, damage: float, ignored: Object = null) -> void:
+func explode(center: Vector3, radius: float, damage: float, ignored: Object = null, critical: bool = false, hit_weapon: String = "") -> void:
 	flash(center, radius, Color(1.0, 0.45, 0.1))
 	for body in damageables(center, radius):
 		if body != ignored:
-			deal_hit(body, damage)
+			deal_hit(body, damage, hit_weapon, false, critical)
 
 func flash(center: Vector3, radius: float, color: Color) -> void:
 	var effect := MeshInstance3D.new()
@@ -633,6 +641,7 @@ func flash(center: Vector3, radius: float, color: Color) -> void:
 func bow_capacity() -> int:
 	var level: int = run.weapon_level("bow") if is_instance_valid(run) else 1
 	return [4, 6, 8, 10, 12][clampi(level, 1, 5) - 1]
+
 
 
 

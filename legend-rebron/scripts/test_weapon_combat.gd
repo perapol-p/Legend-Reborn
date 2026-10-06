@@ -1,4 +1,4 @@
-extends Node
+﻿extends Node
 var game: Node
 var combat: Node
 var failed := false
@@ -91,7 +91,7 @@ func _ready() -> void:
 	combat.cooldown = 0.0
 	combat.try_attack()
 	await frames(3)
-	check(combat.dummy.health <= 80.0, "ATK item increases gun damage")
+	check(combat.dummy.health <= 100.0 - float(run.stats()["attack"]), "ATK item increases gun damage")
 	check(combo.points > 0, "Hits feed combo")
 	# Target behind the shooter must not take melee damage.
 	combat.equip("katana")
@@ -117,4 +117,5 @@ func _ready() -> void:
 	check(not is_instance_valid(doomed), "Dead target removed")
 	print("WEAPON INTEGRATION ", "FAILED" if failed else "PASSED")
 	get_tree().quit(1 if failed else 0)
+
 

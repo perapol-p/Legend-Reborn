@@ -1,4 +1,4 @@
-extends Node
+﻿extends Node
 var game: Node
 func frames(count: int) -> void:
 	for i in range(count):
@@ -107,7 +107,7 @@ func _ready() -> void:
 	await frames(10)
 	combo.register_hit()
 	assert(hud.rank_label.text == "F")
-	for i in range(9):
+	for i in range(54):
 		combo.register_kill()
 	assert(hud.rank_label.text == "SSS" and hud.flames.emitting)
 	pause.toggle_pause()
@@ -170,7 +170,7 @@ func _ready() -> void:
 	var chosen: String = run.offers[0]
 	reward.choice_buttons[0].pressed.emit()
 	assert(run.stack_count(chosen) == 1 and not get_tree().paused)
-	for i in range(9):
+	for i in range(54):
 		run.test_level_up()
 		run.offers.assign([chosen])
 		game._sync_reward()
@@ -207,3 +207,4 @@ func _event(keycode: int) -> InputEventKey:
 	var key := InputEventKey.new()
 	key.physical_keycode = keycode
 	return key
+

@@ -1,6 +1,8 @@
-extends Node3D
+﻿extends Node3D
 var source: Node
 var damage := 4.0
+var critical := false
+var source_weapon := ""
 var radius := 3.0
 var remaining := 2.0
 var pulse := 0.0
@@ -41,4 +43,5 @@ func _physics_process(delta: float) -> void:
 			if offset.length() > 0.3:
 				body.move_and_collide(offset.normalized() * minf(offset.length(), 5.0 * delta))
 		if tick:
-			source.deal_hit(body, damage)
+			source.deal_hit(body, damage, source_weapon, false, critical)
+

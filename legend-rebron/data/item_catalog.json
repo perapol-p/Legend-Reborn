@@ -28,26 +28,51 @@
     "progression":  {
                         "xp_initial":  10,
                         "xp_per_level":  5,
-                        "rarity_level_start":  2,
-                        "rarity_level_end":  60,
-                        "early_weights":  {
-                                              "common":  85,
-                                              "rare":  15,
-                                              "epic":  0,
-                                              "legendary":  0
-                                          },
-                        "late_weights":  {
-                                             "common":  60,
-                                             "rare":  28,
-                                             "epic":  10,
-                                             "legendary":  2
-                                         },
-                        "rarity_min_levels":  {
-                                                  "common":  1,
-                                                  "rare":  5,
-                                                  "epic":  12,
-                                                  "legendary":  25
-                                              }
+                        "rarity_unlock_seconds":  {
+                                                      "common":  0,
+                                                      "rare":  0,
+                                                      "epic":  180,
+                                                      "legendary":  480
+                                                  },
+                        "rarity_time_stages":  [
+                                                   {
+                                                       "weights":  {
+                                                                       "common":  75,
+                                                                       "legendary":  0,
+                                                                       "rare":  25,
+                                                                       "epic":  0
+                                                                   },
+                                                       "seconds":  0
+                                                   },
+                                                   {
+                                                       "weights":  {
+                                                                       "common":  65,
+                                                                       "legendary":  0,
+                                                                       "rare":  27,
+                                                                       "epic":  8
+                                                                   },
+                                                       "seconds":  180
+                                                   },
+                                                   {
+                                                       "weights":  {
+                                                                       "common":  55,
+                                                                       "legendary":  3,
+                                                                       "rare":  30,
+                                                                       "epic":  12
+                                                                   },
+                                                       "seconds":  480
+                                                   },
+                                                   {
+                                                       "weights":  {
+                                                                       "common":  35,
+                                                                       "legendary":  7,
+                                                                       "rare":  35,
+                                                                       "epic":  23
+                                                                   },
+                                                       "seconds":  900
+                                                   }
+                                               ],
+                        "epic_pity_offers":  5
                     },
     "weapons":  [
                     {
@@ -85,7 +110,7 @@
                       "rarity":  "common",
                       "icon":  "",
                       "effects":  {
-                                      "crit_chance":  0.5,
+                                      "crit_chance":  1,
                                       "crit_damage":  2
                                   }
                   },
@@ -95,7 +120,7 @@
                       "rarity":  "common",
                       "icon":  "",
                       "effects":  {
-                                      "attack":  2
+                                      "attack":  10
                                   }
                   },
                   {
@@ -104,7 +129,7 @@
                       "rarity":  "common",
                       "icon":  "",
                       "effects":  {
-                                      "max_hp":  10
+                                      "max_hp":  20
                                   }
                   },
                   {
@@ -113,7 +138,7 @@
                       "rarity":  "common",
                       "icon":  "",
                       "effects":  {
-                                      "speed":  2
+                                      "speed":  3
                                   }
                   },
                   {
@@ -122,7 +147,7 @@
                       "rarity":  "common",
                       "icon":  "",
                       "effects":  {
-                                      "luck":  0.25
+                                      "luck":  5
                                   }
                   },
                   {
@@ -131,8 +156,8 @@
                       "rarity":  "rare",
                       "icon":  "",
                       "effects":  {
-                                      "crit_chance":  1,
-                                      "crit_damage":  4
+                                      "crit_chance":  2.5,
+                                      "crit_damage":  5
                                   }
                   },
                   {
@@ -141,7 +166,7 @@
                       "rarity":  "rare",
                       "icon":  "",
                       "effects":  {
-                                      "attack":  5
+                                      "attack":  30
                                   }
                   },
                   {
@@ -150,7 +175,7 @@
                       "rarity":  "rare",
                       "icon":  "",
                       "effects":  {
-                                      "max_hp":  20
+                                      "max_hp":  50
                                   }
                   },
                   {
@@ -159,7 +184,7 @@
                       "rarity":  "rare",
                       "icon":  "",
                       "effects":  {
-                                      "speed":  3
+                                      "speed":  5
                                   }
                   },
                   {
@@ -168,7 +193,7 @@
                       "rarity":  "rare",
                       "icon":  "",
                       "effects":  {
-                                      "luck":  0.5
+                                      "luck":  10
                                   }
                   },
                   {
@@ -177,8 +202,8 @@
                       "rarity":  "epic",
                       "icon":  "",
                       "effects":  {
-                                      "crit_chance":  2,
-                                      "crit_damage":  6
+                                      "crit_chance":  5,
+                                      "crit_damage":  10
                                   }
                   },
                   {
@@ -187,7 +212,7 @@
                       "rarity":  "epic",
                       "icon":  "",
                       "effects":  {
-                                      "attack":  10
+                                      "attack":  100
                                   }
                   },
                   {
@@ -196,7 +221,7 @@
                       "rarity":  "epic",
                       "icon":  "",
                       "effects":  {
-                                      "max_hp":  35
+                                      "max_hp":  150
                                   }
                   },
                   {
@@ -205,7 +230,7 @@
                       "rarity":  "epic",
                       "icon":  "",
                       "effects":  {
-                                      "speed":  4
+                                      "speed":  7
                                   }
                   },
                   {
@@ -214,7 +239,7 @@
                       "rarity":  "epic",
                       "icon":  "",
                       "effects":  {
-                                      "luck":  1
+                                      "luck":  20
                                   }
                   },
                   {
@@ -223,8 +248,8 @@
                       "rarity":  "legendary",
                       "icon":  "",
                       "effects":  {
-                                      "crit_chance":  3,
-                                      "crit_damage":  10
+                                      "crit_chance":  10,
+                                      "crit_damage":  20
                                   }
                   },
                   {
@@ -233,7 +258,7 @@
                       "rarity":  "legendary",
                       "icon":  "",
                       "effects":  {
-                                      "attack":  15
+                                      "attack":  150
                                   }
                   },
                   {
@@ -242,7 +267,7 @@
                       "rarity":  "legendary",
                       "icon":  "",
                       "effects":  {
-                                      "max_hp":  60
+                                      "max_hp":  300
                                   }
                   },
                   {
@@ -251,7 +276,7 @@
                       "rarity":  "legendary",
                       "icon":  "",
                       "effects":  {
-                                      "speed":  5
+                                      "speed":  10
                                   }
                   },
                   {
@@ -260,7 +285,7 @@
                       "rarity":  "legendary",
                       "icon":  "",
                       "effects":  {
-                                      "luck":  2
+                                      "luck":  30
                                   }
                   }
               ]

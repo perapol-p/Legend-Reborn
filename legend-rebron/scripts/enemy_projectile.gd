@@ -1,4 +1,5 @@
 ﻿extends Node3D
+const TARGETING = preload("res://scripts/enemy_targeting.gd")
 var player: CharacterBody3D
 var velocity := Vector3.ZERO
 var damage := 6.0
@@ -84,14 +85,17 @@ func _physics_process(delta: float) -> void:
 	var space := get_world_3d().direct_space_state
 	for i in steps:
 		var next := global_position + step
-		var ray := PhysicsRayQueryParameters3D.create(global_position, next, 1, excluded)
-		var hit := space.intersect_ray(ray)
+		var hit := TARGETING.ray_hit(space, global_position, next, excluded)
 		if not hit.is_empty():
 			_impact(hit["collider"])
 			return
 		query.transform = Transform3D(Basis.IDENTITY, next)
+		query.exclude = excluded
 		for overlap in space.intersect_shape(query, 8):
-			_impact(overlap["collider"])
+			var body = overlap["collider"]
+			if body is Node and body.is_in_group("monsters"):
+				continue
+			_impact(body)
 			return
 		global_position = next
 	distance_travelled += length
@@ -130,3 +134,4 @@ func _create_trail() -> void:
 	trail.mesh = mesh
 	trail.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(trail)
+

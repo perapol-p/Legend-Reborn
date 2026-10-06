@@ -81,11 +81,10 @@ func _ready() -> void:
 	spawner.reset_encounter()
 	await frames(2)
 	spawner.countdown = 1000
-	spawner.max_alive = 3
-	for i in range(8):
+	for i in range(24):
 		spawner.spawn_one()
-	check(spawner.monsters.size() == 3, "Population cap")
-	check(spawner.spawn_one() == null, "No spawn beyond cap")
+	check(spawner.monsters.size() >= 24, "Population grows without an alive cap")
+	check(spawner.spawn_one() != null, "Spawns continue without a population cap")
 	spawner.reset_encounter()
 	await frames(2)
 	player.position = Vector3(1000, 0.1, 1000)
@@ -140,6 +139,7 @@ func _ready() -> void:
 	check(is_instance_valid(game.result_overlay) and game.result_overlay.visible, "Game Over summary is visible")
 	print("MONSTER INTEGRATION ", "FAILED" if failed else "PASSED", " | audited spawns: ", samples.size())
 	get_tree().quit(1 if failed else 0)
+
 
 
 

@@ -29,6 +29,7 @@ func _ready() -> void:
 	$RunState.offers_changed.connect(_sync_reward)
 	_update_pointer()
 	$Player/Head/Camera3D/Combat.bind_combat($Player, $RunState, $Combo)
+	$Interface/HUD.bind_combat($Player/Head/Camera3D/Combat)
 	command_console = preload("res://scripts/command_console.gd").new()
 	command_console.game = self
 	$Interface.add_child(command_console)
@@ -111,6 +112,7 @@ func _show_result(won: bool) -> void:
 func _leave_result(scene: String) -> void:
 	get_tree().paused = false
 	get_tree().change_scene_to_file(scene)
+
 
 
 

@@ -1,5 +1,6 @@
 ﻿extends "res://scripts/monster.gd"
 const PROJECTILE = preload("res://scripts/enemy_projectile.gd")
+const TARGETING = preload("res://scripts/enemy_targeting.gd")
 @export var enemy_type := "archer"
 @export var preferred_distance := 11.0
 @export var retreat_distance := 6.0
@@ -42,6 +43,7 @@ func refresh() -> void:
 func _physics_process(delta: float) -> void:
 	if dead or not is_instance_valid(player) or player.run.finished:
 		return
+	advance_age(delta)
 	hit_flash = maxf(0.0, hit_flash - delta)
 	if hit_flash == 0.0:
 		model.scale = Vector3.ONE
@@ -86,8 +88,8 @@ func can_fire() -> bool:
 	var target := player.global_position + Vector3(0,1.0,0)
 	if muzzle.global_position.distance_to(target) > attack_range:
 		return false
-	var query := PhysicsRayQueryParameters3D.create(muzzle.global_position, target, 1, [get_rid()])
-	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	var ignored: Array[RID] = [get_rid()]
+	var hit := TARGETING.ray_hit(get_world_3d().direct_space_state, muzzle.global_position, target, ignored)
 	return not hit.is_empty() and hit["collider"] == player
 func _fire_projectile() -> void:
 	var shot = PROJECTILE.new()
@@ -149,4 +151,6 @@ func _build_wings() -> void:
 		wing.material_override = _material(Color("41295c"))
 		$Model.add_child(wing)
 		wings.append(wing)
+
+
 
