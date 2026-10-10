@@ -1,6 +1,6 @@
 extends PanelContainer
 const Style = preload("res://scripts/ui_style.gd")
-const HELP := "/help — list commands\n/unlock mommy — unlock Mommy (Archer / Bow)\n/unlock son — unlock Son\n/unlock daddy — unlock Daddy\n/unlock all — unlock every character\nUnlocks are saved. Available in lobby and gameplay.\n/weapon <sword|bow|spellbook> — equip weapon\n/target — create training target\n/hit — test combo hit\n/kill — test combo kill\n/reset — reset combo\n/levelup — level up and choose an item\n/weaponlevel — upgrade current weapon (max 5)\n/spawndebug <on|off> — show/hide spawn ring and markers\n/spawninfo — show spawn counts and distance\n/spawn <melee|archer|flyer|boss> [1-10] — Practice enemies\n/clear — clear console"
+const HELP := "/help — list commands\n/unlock mommy — unlock Mommy (Archer / Bow)\n/unlock son — unlock Son\n/unlock daddy — unlock Daddy\n/unlock all — unlock every character\nUnlocks are saved. Available in lobby and gameplay.\n/weapon <sword|bow|staff> — equip weapon\n/target — create training target\n/hit — test combo hit\n/kill — test combo kill\n/reset — reset combo\n/levelup — level up and choose an item\n/weaponlevel — upgrade current weapon (max 5)\n/spawndebug <on|off> — show/hide spawn ring and markers\n/spawninfo — show spawn counts and distance\n/spawn <melee|archer|flyer|boss> [1-10] — Practice enemies\n/clear — clear console"
 var game: Node
 var previous_focus: Control
 var output: RichTextLabel
@@ -160,8 +160,9 @@ func submit(raw: String) -> void:
 					created += 1
 			write("Spawned %d %s enemies." % [created,args[1]])
 		"/weapon":
+			if args.size() == 2 and args[1] == "staff": args[1] = "spellbook"
 			if args.size() != 2 or not combat.WEAPONS.has(args[1]):
-				write("Usage: /weapon sword|bow|spellbook")
+				write("Usage: /weapon sword|bow|staff")
 				return
 			combat.equip(args[1])
 			write("Equipped " + run.weapon_name())

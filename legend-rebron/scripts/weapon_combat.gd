@@ -116,6 +116,7 @@ func can_act() -> bool:
 	return is_instance_valid(player) and player.input_enabled and not run.finished and not get_tree().paused and not GameData.rebinding_active
 
 func equip(id: String) -> void:
+	if id == "staff": id = "spellbook"
 	if not WEAPONS.has(id):
 		return
 	pending = -1.0
@@ -237,7 +238,7 @@ func _physics_process(delta: float) -> void:
 	motion_time += delta * 9.0
 	view.position = Vector3.ZERO
 	view.rotation = Vector3.ZERO
-	if weapon_id in ["sword", "bow"]:
+	if weapon_id in ["sword", "bow", "spellbook"]:
 		view.position = Vector3.ZERO
 	if attack_active:
 		elapsed += delta
@@ -251,8 +252,7 @@ func _physics_process(delta: float) -> void:
 				view.position.z += 0.10 * pow(1.0 - t, 3.0)
 				view.rotation.x = 0.12 * pow(1.0 - t, 3.0)
 			"spellbook":
-				view.position.y += 0.10 * swing
-				view.rotation.x = -0.18 * swing
+				pass # Staff uses its original arm and casting animation.
 		if t >= 1.0:
 			attack_active = false
 
@@ -333,15 +333,19 @@ func resolve_attack() -> void:
 				var direction := (bow_forward + camera.global_basis.x * angle + camera.global_basis.y * pitch).normalized()
 				fire_projectile("bow", direction, roll_damage(), 38.0, 0.04, level >= 3, 0.0, spawn_position, last_damage_critical, volley_hits)
 	else:
+		if view.has_method("release_magic"): view.release_magic()
+		var cast_origin: Vector3 = view.cast_position() if view.has_method("cast_position") else Vector3.INF
+		var cast_aim := aim_point(120.0)
+		var cast_direction := (cast_aim-cast_origin).normalized() if cast_origin != Vector3.INF else forward
 		if level < 3:
-			fire_projectile("magic_wave", forward, roll_damage(), 22.0, 0.15 if level == 1 else 0.9, false, 0.0, Vector3.INF, last_damage_critical)
+			fire_projectile("magic_wave", cast_direction, roll_damage(), 22.0, 0.15 if level == 1 else 0.9, false, 0.0, cast_origin, last_damage_critical)
 		else:
 			spawn_tornado(aim_point(12.0), roll_damage() * 0.45, 3.5, 2.5, last_damage_critical)
 			if level >= 5:
 				for i in range(3):
-					var direction := (forward + camera.global_basis.x * float(i - 1) * 0.13).normalized()
-					fire_projectile("magic_wave", direction, roll_damage(), 22.0, 0.6, true, 0.0, Vector3.INF, last_damage_critical)
-				fire_projectile("nuke", forward, roll_damage() * 3.0, 18.0, 0.25, false, 8.0, Vector3.INF, last_damage_critical)
+					var direction := (cast_direction + camera.global_basis.x * float(i - 1) * 0.13).normalized()
+					fire_projectile("magic_wave", direction, roll_damage(), 22.0, 0.6, true, 0.0, cast_origin, last_damage_critical)
+				fire_projectile("nuke", cast_direction, roll_damage() * 3.0, 18.0, 0.25, false, 8.0, cast_origin, last_damage_critical)
 
 func melee_attack(reach: float) -> void:
 	var origin := camera.global_position
@@ -524,7 +528,7 @@ func fire_projectile(kind: String, direction: Vector3, damage: float, speed: flo
 	shot.global_position = camera.global_position + (-camera.global_basis.z) * 0.15 if spawn_position == Vector3.INF else spawn_position
 	shot.look_at(shot.global_position + direction, camera.global_basis.y)
 	# A close wall between the player and bow must still block the shot.
-	if kind == "bow":
+	if kind == "bow" or weapon_id == "spellbook":
 		var obstruction := ray(camera.global_position, shot.global_position)
 		if not obstruction.is_empty():
 			shot.impact(obstruction["collider"], obstruction["position"] )
@@ -552,8 +556,9 @@ func spawn_tornado(point: Vector3, damage: float, radius: float, lifetime: float
 	tornado.source_weapon = weapon_id
 	tornado.radius = radius
 	tornado.remaining = lifetime
-	get_tree().current_scene.add_child(tornado)
-	tornado.global_position = point
+	var world: Node3D = get_tree().current_scene
+	tornado.position = world.to_local(point)
+	world.add_child(tornado)
 	tornadoes_created += 1
 	return tornado
 
@@ -588,8 +593,8 @@ func warp() -> bool:
 	player.global_position += motion
 	player.velocity = Vector3.ZERO
 	special_cooldown = 3.0
-	flash(old_position + Vector3.UP, 1.0, Color(0.3, 0.5, 1))
-	flash(player.global_position + Vector3.UP, 1.0, Color(0.3, 0.5, 1))
+	preload("res://scripts/magic_vfx.gd").burst(get_tree().current_scene,old_position+Vector3.UP,1.2,true)
+	preload("res://scripts/magic_vfx.gd").burst(get_tree().current_scene,player.global_position+Vector3.UP,1.2,true)
 	return true
 
 func damageables(center: Vector3, radius: float) -> Array:
@@ -611,7 +616,10 @@ func damageables(center: Vector3, radius: float) -> Array:
 	return result
 
 func explode(center: Vector3, radius: float, damage: float, ignored: Object = null, critical: bool = false, hit_weapon: String = "") -> void:
-	flash(center, radius, Color(1.0, 0.45, 0.1))
+	if hit_weapon == "spellbook":
+		preload("res://scripts/magic_vfx.gd").burst(get_tree().current_scene,center,radius,true)
+	else:
+		flash(center, radius, Color(1.0, 0.45, 0.1))
 	for body in damageables(center, radius):
 		if body != ignored:
 			deal_hit(body, damage, hit_weapon, false, critical)

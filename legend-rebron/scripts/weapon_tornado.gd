@@ -1,4 +1,4 @@
-﻿extends Node3D
+extends Node3D
 var source: Node
 var damage := 4.0
 var critical := false
@@ -9,23 +9,9 @@ var pulse := 0.0
 var model: Node3D
 func _ready() -> void:
 	add_to_group("weapon_tornadoes")
-	model = Node3D.new()
+	model = preload("res://scripts/magic_vortex_vfx.gd").new()
+	model.radius = radius
 	add_child(model)
-	var material := StandardMaterial3D.new()
-	material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	material.albedo_color = Color(0.25, 0.8, 1.0, 0.35)
-	for i in range(5):
-		var ring := MeshInstance3D.new()
-		var mesh := TorusMesh.new()
-		var size := 0.22 + float(i) * radius * 0.12
-		mesh.inner_radius = size
-		mesh.outer_radius = size + 0.12
-		ring.mesh = mesh
-		ring.material_override = material
-		ring.position.y = float(i) * 0.38 - 0.7
-		ring.position.x = sin(float(i)) * 0.2
-		model.add_child(ring)
 func _physics_process(delta: float) -> void:
 	remaining -= delta
 	if remaining <= 0.0 or not is_instance_valid(source):

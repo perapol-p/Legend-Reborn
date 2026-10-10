@@ -14,3 +14,6 @@ res://scripts/stage_arena.gd
 res://scripts/stage_select.gd
 res://scripts/run_state.gd
 res://scripts/healing_pickups.gd
+res://scripts/staff_view.gd
+res://scripts/weapon_projectile.gd
+res://scripts/weapon_tornado.gd

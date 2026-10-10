@@ -80,7 +80,7 @@ func _ready() -> void:
 	weapon_slot.add_child(weapon_stack)
 	Style.label(weapon_stack, "BASE WEAPON", 16, Style.GOLD)
 	weapon_summary = Style.label(weapon_stack, "Not assigned", 22)
-	Style.label(weapon_stack, "Sword / Bow / Spellbook", 14)
+	Style.label(weapon_stack, "Sword / Bow / Staff", 14)
 	var item_slot := PanelContainer.new()
 	item_slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	item_slot.add_theme_stylebox_override("panel", Style.box(Color("25292e"), Style.GOLD))

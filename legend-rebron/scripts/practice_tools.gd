@@ -47,7 +47,7 @@ func _ready() -> void:
 	weapon_grid.add_theme_constant_override("v_separation",6)
 	weapons.add_child(weapon_grid)
 	for id in ["sword","bow","spellbook"]:
-		_command_button(weapon_grid,id.capitalize(),"/weapon " + id)
+		_command_button(weapon_grid,"Staff" if id == "spellbook" else id.capitalize(),"/weapon " + ("staff" if id == "spellbook" else id))
 	_command_button(weapons,"Character Level +1 (Choose Item)","/levelup")
 	_command_button(weapons,"Weapon Level +1","/weaponlevel")
 	Style.label(weapons,"COMBO",18,Style.GOLD)
