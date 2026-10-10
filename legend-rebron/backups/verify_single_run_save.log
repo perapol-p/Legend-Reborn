@@ -1,0 +1,5 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS real Save/Go Back/Continue: stage, LV10, XP, items, weapon levels, health, ammo, combo and actor state
+PASS newest Normal replaces one slot; Practice does not overwrite
+PASS boss HP/time preserved; victory clears the active save

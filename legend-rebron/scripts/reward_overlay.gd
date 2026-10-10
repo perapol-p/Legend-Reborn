@@ -1,4 +1,4 @@
-extends Control
+﻿extends Control
 const Style = preload("res://scripts/ui_style.gd")
 var run: Node
 var heading: Label
@@ -79,7 +79,7 @@ func _choose(id: String, generation: int) -> void:
 		button.disabled = true
 	run.choose_item(id, generation)
 func _input(event: InputEvent) -> void:
-	if GameData.command_console_active:
+	if GameData.command_console_active or GameData.practice_ui_active:
 		return
 	if not visible:
 		return
@@ -94,3 +94,4 @@ func _input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 		elif event.physical_keycode == KEY_ESCAPE:
 			get_viewport().set_input_as_handled()
+

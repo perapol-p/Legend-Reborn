@@ -1,7 +1,9 @@
-﻿extends Node3D
+extends Node3D
 signal critical_hit(damage: float)
+signal hit_confirmed(critical: bool, killed: bool)
 signal attack_started(weapon: String)
 signal bow_released
+signal monster_defeated(position: Vector3)
 var last_damage_critical := false
 ## Gameplay lives here; replace only the Models in scenes/weapons to swap art.
 const PROJECTILE = preload("res://scripts/weapon_projectile.gd")
@@ -10,12 +12,10 @@ const CHARGE_TARGET = preload("res://scripts/gun_charge_target.gd")
 const TARGET = preload("res://scenes/training_dummy.tscn")
 const WEAPONS = {
 	"sword": {"cooldown": 0.55, "damage": 1.3, "reach": 3.2, "delay": 0.16},
-	"katana": {"cooldown": 0.34, "damage": 0.85, "reach": 3.5, "delay": 0.10},
-	"gun": {"cooldown": 0.22, "damage": 1.0, "reach": 150.0, "delay": 0.0},
 	"bow": {"cooldown": 0.8, "damage": 2.0, "speed": 38.0, "delay": 0.20},
 	"spellbook": {"cooldown": 0.65, "damage": 1.6, "speed": 22.0, "delay": 0.18}
 }
-const ORDER = ["sword", "katana", "gun", "bow", "spellbook"]
+const ORDER = ["sword", "bow", "spellbook"]
 var player: CharacterBody3D
 var camera: Camera3D
 var run: Node
@@ -207,11 +207,8 @@ func _physics_process(delta: float) -> void:
 	if weapon_level() >= 5 and weapon_id == "bow":
 		bow_reload = 0.0
 		bow_ammo = bow_capacity()
-	if can_act():
-		if attack_held and weapon_id == "gun" and weapon_level() >= 3 and charge_ready and gun_reload <= 0.0:
-			charge_time = minf(1.5, charge_time + delta)
-		elif (attack_held and (weapon_id == "gun" or (weapon_id == "sword" and weapon_level() >= 4) or (weapon_id == "bow" and weapon_level() >= 5))) or (weapon_id == "gun" and empowered > 0.0):
-			try_attack()
+	if can_act() and attack_held:
+		try_attack()
 	update_status()
 	for volley in volley_queue.duplicate():
 		volley["time"] -= delta
@@ -390,6 +387,7 @@ func deal_hit(body: Object, damage: float, hit_weapon: String = "", grants_rpg: 
 	var result: int = body.take_damage(damage)
 	if result == 0:
 		return
+	hit_confirmed.emit(critical, result == 2)
 	if critical:
 		critical_hit.emit(damage)
 	if hit_weapon == "gun" and grants_rpg and run.weapon_level("gun") >= 4:
@@ -401,6 +399,7 @@ func deal_hit(body: Object, damage: float, hit_weapon: String = "", grants_rpg: 
 	if result == 2:
 		if monster_kill:
 			run.record_monster_kill()
+			monster_defeated.emit(death_position)
 		combo.register_kill()
 		feedback.text = "TARGET DOWN"
 		if monster_kill and weapon_id == "gun" and weapon_level() >= 3 and (hit_weapon.is_empty() or hit_weapon == "gun"):
@@ -494,7 +493,7 @@ func update_status() -> void:
 		elif charge_ready:
 			ammo_hint.text += " | CHARGE READY"
 		elif empowered > 0.0:
-			ammo_label.text = "∞ / 12"
+			ammo_label.text = "ÃƒÆ’Ã‚Â¢Ãƒâ€¹Ã¢â‚¬Â Ãƒâ€¦Ã‚Â¾ / 12"
 			ammo_hint.text = "POWER BURST  %.1fs" % empowered
 		if weapon_level() >= 4:
 			ammo_hint.text += "\nRMB  RPG " + ("READY" if rpg_ready else "NOT READY")
@@ -653,3 +652,7 @@ func bow_capacity() -> int:
 
 
 
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PAUSED:
+		attack_held = false

@@ -1,0 +1,5 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 581.57 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 4060 Laptop GPU
+
+AIM WEAPON BASIS [X: (-0.644887, -0.001554, 0.01196), Y: (-0.001402, 0.644946, 0.008207), Z: (-0.011979, 0.00818, -0.644836)] MUZZLE (0.353225, 0.89357, -0.774525)
+PASS: Rogue rig/texture, crossbow hand mount, aim/shoot animations, actual arrow fire, death cleanup; zombie/flyer preserved

@@ -1,0 +1,6 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 581.57 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 4060 Laptop GPU
+
+PASS grassland terrain, slopes, spawn all enemy types, save clearance; obstacle count 74 batches 6
+PASS desert terrain, slopes, spawn all enemy types, save clearance; obstacle count 49 batches 6
+PASS Practice retains original grid, ramps and pyramids

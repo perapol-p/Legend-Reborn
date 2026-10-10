@@ -1,4 +1,4 @@
-﻿extends Node
+extends Node
 signal settings_changed
 signal characters_changed
 const CHARACTERS := ["Daddy", "Mommy", "Son"]
@@ -14,7 +14,8 @@ const ACTIONS = {
 	"sprint": {"label": "Sprint (hold)", "key": KEY_SHIFT},
 	"dash": {"label": "Dash", "key": KEY_Q},
 	"toggle_cursor": {"label": "Stats & equipment (hold)", "key": KEY_TAB},
-	"reload": {"label": "Reload weapon", "key": KEY_R}
+	"reload": {"label": "Reload weapon", "key": KEY_R},
+	"interact": {"label": "Open supplies", "key": KEY_E}
 
 }
 const CROSSHAIR_COLORS = {
@@ -24,6 +25,9 @@ const CROSSHAIR_COLORS = {
 const CROSSHAIR_STYLES = ["plus", "dot", "gap"]
 var settings_path := SAVE_PATH
 var selected_character := "Daddy"
+const STAGES := ["grassland","desert","practice"]
+const STAGE_NAMES := {"grassland":"Grassland","desert":"Desert","practice":"Practice"}
+var selected_stage := "grassland"
 var games_completed := 0
 var master_volume := 0.8
 var music_volume := 0.7
@@ -38,6 +42,7 @@ var tab_ui_opacity := 0.65
 var bindings: Dictionary = {}
 var rebinding_active := false
 var command_console_active := false
+var practice_ui_active := false
 func _ready() -> void:
 	bindings = default_bindings()
 	load_settings()
@@ -60,8 +65,8 @@ func rebuild_input_map() -> void:
 		event.physical_keycode = int(bindings[action])
 		InputMap.action_add_event(action, event)
 func rebind(action: String, keycode: int) -> String:
-	if not ACTIONS.has(action) or keycode == KEY_NONE or keycode in [KEY_ESCAPE, KEY_F1]:
-		return "Escape and F1 are reserved for pause / console."
+	if not ACTIONS.has(action) or keycode == KEY_NONE or keycode in [KEY_ESCAPE, KEY_F1, KEY_U]:
+		return "Escape, F1 and U are reserved for menus / practice tools."
 	var old_key: int = bindings[action]
 	var message := "%s: %s" % [ACTIONS[action]["label"], OS.get_keycode_string(keycode)]
 	for other in bindings:
@@ -109,7 +114,7 @@ func load_settings() -> void:
 	bindings = default_bindings()
 	for action in ACTIONS:
 		var keycode := int(cfg.get_value("bindings", action, bindings[action]))
-		if keycode <= 0 or keycode in [KEY_ESCAPE, KEY_F1]:
+		if keycode <= 0 or keycode in [KEY_ESCAPE, KEY_F1, KEY_U]:
 			continue
 		var previous: int = bindings[action]
 		for other in bindings:
@@ -177,3 +182,41 @@ func load_progress() -> void:
 	games_completed = maxi(0, int(cfg.get_value("progress", "games_completed", 0)))
 
 
+
+
+
+var active_run_path := "user://active_run.save"
+var pending_resume: Dictionary = {}
+func load_active_run() -> Dictionary:
+	if not FileAccess.file_exists(active_run_path):
+		return {}
+	var file := FileAccess.open(active_run_path,FileAccess.READ)
+	if file == null:
+		return {}
+	var value: Variant = file.get_var(false)
+	file.close()
+	if not value is Dictionary or value.get("version",0) != 1 or value.get("stage","") not in ["grassland","desert"]:
+		return {}
+	for key in ["run","combat","spawner","player","combo"]:
+		if not value.get(key) is Dictionary:
+			return {}
+	if int(value["run"].get("level",0)) < 1 or value["run"].get("character_name","") not in CHARACTERS:
+		return {}
+	load("res://scripts/run_save_codec.gd").migrate_removed_weapons(value)
+	return value
+func save_active_run(data: Dictionary) -> Error:
+	var temp := active_run_path + ".tmp"
+	var file := FileAccess.open(temp,FileAccess.WRITE)
+	if file == null:
+		return FileAccess.get_open_error()
+	file.store_var(data,false)
+	file.flush()
+	var error := file.get_error()
+	file.close()
+	if error != OK:
+		return error
+	return DirAccess.rename_absolute(ProjectSettings.globalize_path(temp),ProjectSettings.globalize_path(active_run_path))
+func clear_active_run() -> void:
+	pending_resume.clear()
+	if FileAccess.file_exists(active_run_path):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(active_run_path))

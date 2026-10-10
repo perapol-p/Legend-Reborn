@@ -1,4 +1,4 @@
-﻿extends "res://scripts/monster.gd"
+extends "res://scripts/monster.gd"
 const PROJECTILE = preload("res://scripts/enemy_projectile.gd")
 const TARGETING = preload("res://scripts/enemy_targeting.gd")
 @export var enemy_type := "archer"
@@ -11,6 +11,7 @@ var windup_remaining := -1.0
 var locked_target := Vector3.ZERO
 var hover_time := 0.0
 var shots_fired := 0
+var archer_visual: Node3D
 var muzzle: Marker3D
 var charge_visual: MeshInstance3D
 var wings: Array[MeshInstance3D] = []
@@ -20,7 +21,7 @@ func _ready() -> void:
 	attack_timer = randf_range(1.0, 2.0)
 	var skin := _material(Color("ac853d") if enemy_type == "archer" else Color("6b3b94"))
 	for mesh in $Model.find_children("*", "MeshInstance3D", true, false):
-		if not "Eye" in mesh.name:
+		if enemy_type == "flyer" and not "Eye" in mesh.name:
 			mesh.material_override = skin
 	muzzle = Marker3D.new()
 	$Model.add_child(muzzle)
@@ -34,7 +35,7 @@ func _ready() -> void:
 	muzzle.add_child(charge_visual)
 	charge_visual.hide()
 	if enemy_type == "archer":
-		_build_bow()
+		_build_archer()
 	else:
 		motion_mode = CharacterBody3D.MOTION_MODE_FLOATING
 		_build_wings()
@@ -70,6 +71,11 @@ func _physics_process(delta: float) -> void:
 	else:
 		velocity.y -= 25.0 * delta
 	move_and_slide()
+	if is_instance_valid(archer_visual):
+		if windup_remaining >= 0.0:
+			archer_visual.aim(windup_remaining, windup_duration)
+		else:
+			archer_visual.update_locomotion(absf(movement) > 0.01, move_speed * movement)
 	if global_position.y < -25.0:
 		queue_free()
 		return
@@ -81,11 +87,15 @@ func _physics_process(delta: float) -> void:
 			charge_visual.hide()
 			if can_fire():
 				_fire_projectile()
+			elif is_instance_valid(archer_visual):
+				archer_visual.cancel_aim()
 			attack_timer = attack_interval + randf_range(0.0, 0.4)
 	elif attack_timer <= 0.0 and can_fire():
 		locked_target = player.global_position + Vector3(0, 1.0, 0)
 		windup_remaining = windup_duration
 		charge_visual.show()
+		if is_instance_valid(archer_visual):
+			archer_visual.aim(windup_duration, windup_duration)
 func can_fire() -> bool:
 	var target := player.global_position + Vector3(0,1.0,0)
 	if muzzle.global_position.distance_to(target) > attack_range:
@@ -94,6 +104,8 @@ func can_fire() -> bool:
 	var hit := TARGETING.ray_hit(get_world_3d().direct_space_state, muzzle.global_position, target, ignored)
 	return not hit.is_empty() and hit["collider"] == player
 func _fire_projectile() -> void:
+	if is_instance_valid(archer_visual):
+		archer_visual.release()
 	var shot = PROJECTILE.new()
 	shot.player = player
 	shot.kind = "arrow" if enemy_type == "archer" else "fireball"
@@ -157,3 +169,15 @@ func _build_wings() -> void:
 
 
 
+
+func _build_archer() -> void:
+	for child in model.get_children():
+		if child is GeometryInstance3D:
+			child.hide()
+	archer_visual = preload("res://scripts/skeleton_archer_visual.gd").new()
+	archer_visual.name = "SkeletonArcher"
+	model.add_child(archer_visual)
+	death_visual = archer_visual
+	muzzle.reparent(archer_visual.weapon,false)
+	muzzle.position = Vector3(0,0.07,1.12)
+	damage_flash.bind_model(model)

@@ -1,6 +1,7 @@
-﻿extends Node
+extends Node
 signal changed
 signal player_died
+signal health_restored(amount: float, burst: bool)
 var finished := false
 var elapsed_time := 0.0
 var monsters_killed := 0
@@ -202,8 +203,10 @@ func _physics_process(delta: float) -> void:
 		return
 	regen_elapsed -= float(ticks)
 	if current_health() > 0.0 and damage_taken > 0.0:
-		damage_taken = maxf(0.0, damage_taken - float(ticks))
+		var healed := minf(damage_taken,float(ticks))
+		damage_taken = maxf(0.0, damage_taken - healed)
 		changed.emit()
+		health_restored.emit(healed,false)
 
 func record_monster_kill() -> void:
 	if finished:
@@ -232,3 +235,14 @@ func result_summary() -> Dictionary:
 
 
 
+
+func heal_fraction(fraction: float) -> float:
+	if finished or get_tree().paused or current_health() <= 0.0 or fraction <= 0.0:
+		return 0.0
+	var amount := minf(damage_taken,float(stats()["max_hp"])*fraction)
+	if amount <= 0.0:
+		return 0.0
+	damage_taken = maxf(0.0,damage_taken-amount)
+	changed.emit()
+	health_restored.emit(amount,true)
+	return amount

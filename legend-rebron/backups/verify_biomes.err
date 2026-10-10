@@ -1,0 +1,8 @@
+WARNING: 'res://assets/monsters/skeleton_archer/Skeleton_Rogue.glb': In external resource #0, invalid UID: 'uid://c00ui14kv1lhw' - using text path instead: 'res://assets/monsters/skeleton_archer/Skeleton_Rogue_skeleton_texture.png'.
+   at: open (core/io/resource_format_binary.cpp:1025)
+   GDScript backtrace (most recent call first):
+       [0] verify (res://backups/verify_biomes.gd:11)
+ERROR: Texture with GL ID of 27: leaked 349524 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 28: leaked 349524 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)

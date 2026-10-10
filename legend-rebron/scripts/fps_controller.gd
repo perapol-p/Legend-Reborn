@@ -1,6 +1,7 @@
-﻿extends CharacterBody3D
+extends CharacterBody3D
 signal damage_received(amount: float, source_position: Vector3)
 signal dash_started
+signal dash_ready
 @export var move_speed := 9.0
 @export var sprint_multiplier := 1.5
 @export var jump_speed := 9.0
@@ -18,6 +19,10 @@ var run: Node
 var dash_remaining := 0.0
 var dash_recovery := 0.0
 var dash_direction := Vector3.ZERO
+const DASH_BUFFER_WINDOW := 0.15
+var dash_buffer := 0.0
+var dash_buffer_direction := Vector3.ZERO
+var dash_total_duration := 0.16
 var coyote_remaining := 0.0
 var jump_buffer := 0.0
 var spawn_position := Vector3(0, 0.1, 12)
@@ -59,18 +64,25 @@ func _physics_process(delta: float) -> void:
 	var direction: Vector3 = global_basis * Vector3(axis.x, 0, axis.y)
 	direction.y = 0
 	direction = direction.normalized()
+	var previous_recovery := dash_recovery
 	dash_recovery = maxf(0.0, dash_recovery - delta)
 	var scale_speed := speed_multiplier()
-	if input_enabled and Input.is_action_just_pressed("dash") and dash_recovery <= 0:
-		dash_direction = direction if direction.length_squared() > 0.01 else -global_basis.z
-		dash_remaining = dash_duration * (1.5 if run != null and run.equipped_weapon_id == "katana" and run.weapon_level("katana") >= 3 else 1.0)
-		dash_recovery = dash_cooldown
-		dash_started.emit()
+	if not input_enabled:
+		dash_buffer = 0.0
+	elif Input.is_action_just_pressed("dash"):
+		request_dash(direction)
+	_try_start_dash()
+	if dash_recovery <= 0.0 and previous_recovery > 0.0:
+		dash_ready.emit()
+	dash_buffer = maxf(0.0, dash_buffer - delta)
 	if dash_remaining > 0 and input_enabled:
-		dash_remaining = maxf(0.0, dash_remaining - delta)
-		velocity.x = dash_direction.x * dash_speed * scale_speed
-		velocity.z = dash_direction.z * dash_speed * scale_speed
+		# Midpoint sampling keeps the original distance while easing the speed.
+		var progress := clampf(1.0 - (dash_remaining - delta * 0.5) / dash_total_duration, 0.0, 1.0)
+		var speed := dash_speed * scale_speed * dash_speed_factor(progress)
+		velocity.x = dash_direction.x * speed
+		velocity.z = dash_direction.z * speed
 		velocity.y = 0
+		dash_remaining = maxf(0.0, dash_remaining - delta)
 	else:
 		dash_remaining = 0
 		var target_speed := move_speed * scale_speed
@@ -92,6 +104,7 @@ func respawn() -> void:
 	camera_side_offset = 0.0
 	dash_remaining = 0
 	dash_recovery = 0
+	dash_buffer = 0
 	jump_buffer = 0
 
 func receive_damage(amount: float, source_position: Vector3 = Vector3.INF) -> void:
@@ -128,3 +141,30 @@ func _slide_off_cover(delta: float) -> void:
 			break
 
 
+
+func current_dash_duration() -> float:
+	return dash_duration
+
+func request_dash(direction: Vector3) -> void:
+	if not input_enabled or get_tree().paused or (run != null and run.finished):
+		return
+	direction.y = 0.0
+	dash_buffer_direction = direction.normalized() if direction.length_squared() > 0.01 else -global_basis.z.normalized()
+	dash_buffer = DASH_BUFFER_WINDOW
+
+func _try_start_dash() -> void:
+	if dash_buffer <= 0.0 or dash_recovery > 0.0 or dash_remaining > 0.0 or not input_enabled:
+		return
+	dash_direction = dash_buffer_direction
+	dash_total_duration = current_dash_duration()
+	dash_remaining = dash_total_duration
+	dash_recovery = dash_cooldown
+	dash_buffer = 0.0
+	dash_started.emit()
+
+func dash_speed_factor(progress: float) -> float:
+	return lerpf(1.3, 0.7, smoothstep(0.0, 1.0, progress))
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PAUSED:
+		dash_buffer = 0.0

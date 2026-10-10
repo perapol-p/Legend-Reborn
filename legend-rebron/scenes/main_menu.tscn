@@ -43,6 +43,10 @@ custom_minimum_size = Vector2(0, 45)
 [node name="Play" type="Button" parent="Center/Menu"]
 custom_minimum_size = Vector2(0, 58)
 text = "PLAY"
+[node name="Continue" type="Button" parent="Center/Menu"]
+custom_minimum_size = Vector2(0, 76)
+text = "CONTINUE"
+visible = false
 [node name="Setting" type="Button" parent="Center/Menu"]
 custom_minimum_size = Vector2(0, 58)
 text = "SETTING"

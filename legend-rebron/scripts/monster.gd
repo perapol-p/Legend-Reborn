@@ -1,4 +1,4 @@
-﻿extends CharacterBody3D
+extends CharacterBody3D
 signal defeated
 @export var max_health := 30.0
 @export var move_speed := 2.6
@@ -17,6 +17,9 @@ var health := 30.0
 var dead := false
 var attack_timer := 0.6
 var hit_flash := 0.0
+var zombie_visual: Node3D
+var death_visual: Node3D
+var damage_flash: Node
 @onready var model: Node3D = $Model
 @onready var health_label: Label3D = $Health
 func _ready() -> void:
@@ -25,6 +28,18 @@ func _ready() -> void:
 	base_attack_damage = attack_damage
 	base_attack_interval = attack_interval
 	add_to_group("monsters")
+	# Derived ranged monsters and the boss keep their existing model.
+	if get_script().resource_path == "res://scripts/monster.gd":
+		for child in model.get_children():
+			if child is GeometryInstance3D:
+				child.hide()
+		zombie_visual = Node3D.new()
+		zombie_visual.set_script(preload("res://scripts/zombie_visual.gd"))
+		model.add_child(zombie_visual)
+		death_visual = zombie_visual
+	damage_flash = preload("res://scripts/enemy_hit_flash.gd").new()
+	add_child(damage_flash)
+	damage_flash.bind_model(model)
 	refresh()
 func aim_point() -> Vector3:
 	return global_position + Vector3(0, 1.25 * scale.y, 0)
@@ -33,14 +48,22 @@ func take_damage(amount: float) -> int:
 		return 0
 	health = maxf(0, health - amount)
 	hit_flash = 0.12
-	model.scale = Vector3.ONE * 1.12
+	damage_flash.flash()
 	refresh()
 	if health <= 0:
 		dead = true
 		collision_layer = 0
-		hide()
+		collision_mask = 0
 		defeated.emit()
-		queue_free()
+		if is_instance_valid(death_visual):
+			model.scale = Vector3.ONE
+			health_label.hide()
+			death_visual.die()
+			var death_time: float = death_visual.death_duration() if death_visual.has_method("death_duration") else 0.85
+			get_tree().create_timer(death_time, false).timeout.connect(queue_free)
+		else:
+			hide()
+			queue_free()
 		return 2
 	return 1
 func refresh() -> void:
@@ -63,6 +86,8 @@ func _physics_process(delta: float) -> void:
 	velocity.z = direction.z * move_speed if distance > stop_distance else 0.0
 	velocity.y -= 25.0 * delta
 	move_and_slide()
+	if is_instance_valid(zombie_visual):
+		zombie_visual.update_locomotion(Vector2(velocity.x, velocity.z).length() > 0.1, move_speed)
 	if global_position.y < -25:
 		queue_free()
 		return
@@ -70,6 +95,8 @@ func _physics_process(delta: float) -> void:
 		var query := PhysicsRayQueryParameters3D.create(aim_point(), player.global_position + Vector3.UP, 1, [get_rid()])
 		var hit := get_world_3d().direct_space_state.intersect_ray(query)
 		if not hit.is_empty() and hit["collider"] == player:
+			if is_instance_valid(zombie_visual):
+				zombie_visual.attack()
 			player.receive_damage(attack_damage, global_position)
 			attack_timer = attack_interval
 
