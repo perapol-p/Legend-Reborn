@@ -1,4 +1,4 @@
-﻿extends Node3D
+extends Node3D
 var direction := Vector3.FORWARD
 var speed := 30.0
 var damage := 10.0
@@ -17,6 +17,7 @@ var struck: Array[RID] = []
 var velocity := Vector3.ZERO
 var flight_time := 0.0
 var wave_vfx: Node3D
+var magic_vfx: Node3D
 var wind_rings: Array[MeshInstance3D] = []
 const ARROW_GRAVITY := 8.0
 const ARROW_DRAG := 0.10
@@ -59,6 +60,13 @@ func _ready() -> void:
 		wave.radius = maxf(hit_radius * 2.2, 1.25)
 		add_child(wave)
 		wave_vfx = wave
+		visual.free()
+		return
+	elif kind in ["magic_wave","nuke"]:
+		magic_vfx = preload("res://scripts/magic_orb_vfx.gd").new()
+		magic_vfx.radius = maxf(hit_radius,0.15)
+		magic_vfx.purple = kind == "nuke"
+		add_child(magic_vfx)
 		visual.free()
 		return
 	elif kind == "rpg":
@@ -131,6 +139,10 @@ func impact(body: CollisionObject3D, point: Vector3) -> bool:
 		return false
 	struck.append(body.get_rid())
 	var damageable := body.has_method("take_damage")
+	if kind in ["magic_wave","nuke"]:
+		if kind != "nuke":
+			preload("res://scripts/magic_vfx.gd").burst(get_tree().current_scene,point,clampf(hit_radius*1.4,0.6,1.5))
+		if is_instance_valid(magic_vfx) and not (piercing and damageable): magic_vfx.release_trail()
 	if is_instance_valid(source):
 		if damageable:
 			var dealt_damage := damage

@@ -1,4 +1,4 @@
-﻿{
+{
     "base_stats":  {
                        "attack":  10,
                        "max_hp":  100,
@@ -86,28 +86,20 @@
                         "name":  "Sword"
                     },
                     {
-                        "id":  "katana",
-                        "name":  "Katana"
-                    },
-                    {
-                        "id":  "gun",
-                        "name":  "Gun"
-                    },
-                    {
                         "id":  "bow",
                         "name":  "Bow"
                     },
                     {
                         "id":  "spellbook",
-                        "name":  "Spellbook"
+                        "name":  "Staff"
                     }
                 ],
     "character_weapons":  {
                               "Mommy":  "bow",
                               "Knight":  "sword",
-                              "Ninja":  "katana",
+                              "Ninja":  "sword",
                               "อัศวิน":  "sword",
-                              "นินจา":  "katana"
+                              "นินจา":  "sword"
                           },
     "items":  [
                   {

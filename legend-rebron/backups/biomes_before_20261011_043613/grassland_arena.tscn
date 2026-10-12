@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3]
+[ext_resource type="PackedScene" path="res://scenes/fps_arena.tscn" id="1"]
+[ext_resource type="Script" path="res://scripts/stage_arena.gd" id="2"]
+[sub_resource type="Environment" id="StageEnvironment"]
+background_mode = 1
+background_color = Color(0.471,0.537,0.494,1)
+ambient_light_source = 2
+ambient_light_color = Color(0.70,0.76,0.72,1)
+ambient_light_energy = 0.7
+fog_enabled = true
+fog_light_color = Color(0.471,0.537,0.494,1)
+fog_density = 0.0025
+fog_sun_scatter = 0.0
+[node name="Arena" instance=ExtResource("1")]
+script = ExtResource("2")
+biome = "grassland"
+[node name="WorldEnvironment" parent="." index="0"]
+environment = SubResource("StageEnvironment")

@@ -1,4 +1,4 @@
-﻿extends Control
+extends Control
 const Style = preload("res://scripts/ui_style.gd")
 signal pause_changed
 const SettingsPanel = preload("res://scripts/settings_panel.gd")
@@ -11,6 +11,9 @@ var item_flow: HFlowContainer
 var content: VBoxContainer
 var heading: Label
 var resume: Button
+var return_button: Button
+var quit_button: Button
+var save_status: Label
 var menu: VBoxContainer
 var menu_center: CenterContainer
 var stats_panel: PanelContainer
@@ -48,8 +51,9 @@ func _ready() -> void:
 	Style.label(menu, "Paused", 58)
 	resume = Style.button(menu, "Resume", toggle_pause)
 	Style.button(menu, "Settings", show_settings)
-	Style.button(menu, "Return to Main Menu", return_to_menu)
-	Style.button(menu, "Quit to Desktop", func(): get_tree().quit())
+	return_button = Style.button(menu, "Return to Main Menu", return_to_menu)
+	quit_button = Style.button(menu, "Quit to Desktop", quit_to_desktop)
+	save_status = Style.label(menu, "",14)
 	var panel := PanelContainer.new()
 	stats_panel = panel
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -76,7 +80,7 @@ func _ready() -> void:
 	weapon_slot.add_child(weapon_stack)
 	Style.label(weapon_stack, "BASE WEAPON", 16, Style.GOLD)
 	weapon_summary = Style.label(weapon_stack, "Not assigned", 22)
-	Style.label(weapon_stack, "Sword / Katana / Gun / Bow / Spellbook", 14)
+	Style.label(weapon_stack, "Sword / Bow / Staff", 14)
 	var item_slot := PanelContainer.new()
 	item_slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	item_slot.add_theme_stylebox_override("panel", Style.box(Color("25292e"), Style.GOLD))
@@ -100,6 +104,9 @@ func _ready() -> void:
 	show_menu()
 func bind_run(model: Node) -> void:
 	run = model
+	var game = get_parent().get_parent()
+	return_button.text = "Save and Go Back to Main Menu" if game.stage_id != "practice" else "Go Back to Main Menu"
+	quit_button.text = "Save and Quit to Desktop" if game.stage_id != "practice" else "Quit to Desktop"
 	run.changed.connect(refresh_run)
 	refresh_run()
 func refresh_run() -> void:
@@ -224,7 +231,7 @@ func toggle_pause() -> void:
 		get_tree().paused = true
 		pause_changed.emit()
 func _input(event: InputEvent) -> void:
-	if GameData.command_console_active:
+	if GameData.command_console_active or GameData.practice_ui_active:
 		return
 	if GameData.rebinding_active:
 		return
@@ -244,7 +251,23 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_WINDOW_FOCUS_OUT and is_node_ready() and visible and overlay_mode == "stats":
 		show_menu()
 func return_to_menu() -> void:
+	if not _save_before_leaving():
+		return
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 
+
+
+func _save_before_leaving() -> bool:
+	var game = get_parent().get_parent()
+	if game.stage_id == "practice" or game.round_finished:
+		return true
+	var error: Error = game.save_checkpoint()
+	if error != OK:
+		save_status.text = "Could not save (error %d). Please try again." % error
+		return false
+	return true
+func quit_to_desktop() -> void:
+	if _save_before_leaving():
+		get_tree().quit()

@@ -1,0 +1,52 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+NODE zombie LOCAL [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)]
+NODE Armature LOCAL [X: (1.0, 0.0, 0.0), Y: (0.0, 0.0, -1.0), Z: (0.0, 1.0, 0.0), O: (0.0, 0.0, 0.0)]
+NODE Skeleton3D LOCAL [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)]
+BONES 27
+Root [X: (-1.0, 0.0, -0.0), Y: (0.0, 0.0, 1.0), Z: (0.0, 1.0, -0.0), O: (0.0, 0.0, 0.405956)]
+Spine1 [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.178861, 0.0)]
+Spine2 [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.167897, 0.0)]
+Shoulder.L [X: (-0.466239, -0.884659, -0.0), Y: (0.884659, -0.466239, 0.0), Z: (-0.0, -0.0, 1.0), O: (0.0, 0.207328, 0.0)]
+UpperArm.L [X: (0.985525, 0.169531, 0.0), Y: (-0.169531, 0.985525, -0.0), Z: (-0.0, -0.0, 1.0), O: (-0.0, 0.319189, -0.0)]
+LowerArm.L [X: (0.999766, 0.021614, -0.0), Y: (-0.021614, 0.999766, 0.0), Z: (0.0, 0.0, 1.0), O: (-0.0, 0.312675, 0.0)]
+LowerArm.L_end [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.314504, 0.0)]
+Head [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.207328, 0.0)]
+NODE Zombie LOCAL [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)]
+MESH  AABB [P: (-0.921305, -0.264335, 0.002756), S: (1.842609, 0.569246, 1.633752)] GLOBAL [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)]
+ANIM Armature|Attack LEN 0.95833333333333 TRACKS 34
+Armature/Skeleton3D:Root
+Armature/Skeleton3D:Root
+Armature/Skeleton3D:Root
+Armature/Skeleton3D:UpperLeg.L
+Armature/Skeleton3D:UpperLeg.L
+Armature/Skeleton3D:UpperLeg.L
+Armature/Skeleton3D:IkLegTarget.L
+Armature/Skeleton3D:IkLegTarget.L
+ANIM Armature|Death LEN 0.75 TRACKS 34
+Armature/Skeleton3D:Root
+Armature/Skeleton3D:Root
+Armature/Skeleton3D:Root
+Armature/Skeleton3D:UpperLeg.L
+Armature/Skeleton3D:UpperLeg.L
+Armature/Skeleton3D:UpperLeg.L
+Armature/Skeleton3D:IkLegTarget.L
+Armature/Skeleton3D:IkLegTarget.L
+ANIM Armature|Tpose LEN 0.04166666666667 TRACKS 34
+Armature/Skeleton3D:Root
+Armature/Skeleton3D:Root
+Armature/Skeleton3D:Root
+Armature/Skeleton3D:UpperLeg.L
+Armature/Skeleton3D:UpperLeg.L
+Armature/Skeleton3D:UpperLeg.L
+Armature/Skeleton3D:IkLegTarget.L
+Armature/Skeleton3D:IkLegTarget.L
+ANIM Armature|Walk LEN 0.95833333333333 TRACKS 34
+Armature/Skeleton3D:Root
+Armature/Skeleton3D:Root
+Armature/Skeleton3D:Root
+Armature/Skeleton3D:UpperLeg.L
+Armature/Skeleton3D:UpperLeg.L
+Armature/Skeleton3D:UpperLeg.L
+Armature/Skeleton3D:IkLegTarget.L
+Armature/Skeleton3D:IkLegTarget.L

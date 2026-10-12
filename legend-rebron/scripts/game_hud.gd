@@ -175,6 +175,10 @@ func bind_spawner(model: Node) -> void:
 func refresh_survival() -> void:
 	if not is_instance_valid(spawner):
 		return
+	if spawner.sandbox_mode:
+		survival_label.text = "PRACTICE / %d MONSTERS" % spawner.monsters.size()
+		boss_bar.hide()
+		return
 	boss_bar.visible = spawner.boss_phase and is_instance_valid(spawner.boss) and not spawner.completed
 	if spawner.completed:
 		survival_label.text = "VICTORY"
@@ -195,5 +199,6 @@ func show_critical(damage: float) -> void:
 	critical_label.modulate.a = 1.0
 	critical_label.scale = Vector2.ONE * 1.08
 	critical_label.show()
+
 
 

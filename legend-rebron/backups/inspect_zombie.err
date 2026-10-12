@@ -1,0 +1,16 @@
+ERROR: Cannot get path of node as it is not in a scene tree.
+   at: get_path (scene/main/node.cpp:2431)
+   GDScript backtrace (most recent call first):
+       [0] inspect (res://backups/inspect_zombie.gd:10)
+       [1] inspect (res://backups/inspect_zombie.gd:19)
+       [2] inspect (res://backups/inspect_zombie.gd:19)
+       [3] inspect (res://backups/inspect_zombie.gd:19)
+       [4] _initialize (res://backups/inspect_zombie.gd:5)
+ERROR: Condition "!is_inside_tree()" is true. Returning: Transform3D()
+   at: get_global_transform (scene/3d/node_3d.cpp:649)
+   GDScript backtrace (most recent call first):
+       [0] inspect (res://backups/inspect_zombie.gd:10)
+       [1] inspect (res://backups/inspect_zombie.gd:19)
+       [2] inspect (res://backups/inspect_zombie.gd:19)
+       [3] inspect (res://backups/inspect_zombie.gd:19)
+       [4] _initialize (res://backups/inspect_zombie.gd:5)

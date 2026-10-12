@@ -1,6 +1,6 @@
-﻿extends PanelContainer
+extends PanelContainer
 const Style = preload("res://scripts/ui_style.gd")
-const HELP := "/help — list commands\n/unlock mommy — unlock Mommy (Archer / Bow)\n/unlock son — unlock Son\n/unlock daddy — unlock Daddy\n/unlock all — unlock every character\nUnlocks are saved. Available in lobby and gameplay.\n/weapon <sword|katana|gun|bow|spellbook> — equip weapon\n/target — create training target\n/hit — test combo hit\n/kill — test combo kill\n/reset — reset combo\n/levelup — level up and choose an item\n/weaponlevel — upgrade current weapon (max 5)\n/spawndebug <on|off> — show/hide spawn ring and markers\n/spawninfo — show spawn counts and distance\n/clear — clear console"
+const HELP := "/help — list commands\n/unlock mommy — unlock Mommy (Archer / Bow)\n/unlock son — unlock Son\n/unlock daddy — unlock Daddy\n/unlock all — unlock every character\nUnlocks are saved. Available in lobby and gameplay.\n/weapon <sword|bow|staff> — equip weapon\n/target — create training target\n/hit — test combo hit\n/kill — test combo kill\n/reset — reset combo\n/levelup — level up and choose an item\n/weaponlevel — upgrade current weapon (max 5)\n/spawndebug <on|off> — show/hide spawn ring and markers\n/spawninfo — show spawn counts and distance\n/spawn <melee|archer|flyer|boss> [1-10] — Practice enemies\n/clear — clear console"
 var game: Node
 var previous_focus: Control
 var output: RichTextLabel
@@ -38,6 +38,8 @@ func write(message: String) -> void:
 		output.clear()
 		output.add_text(message + "\n")
 func open_console() -> void:
+	if not is_instance_valid(game) or game.stage_id != "practice":
+		return
 	if GameData.rebinding_active:
 		return
 	previous_focus = get_viewport().gui_get_focus_owner()
@@ -63,6 +65,10 @@ func close_console() -> void:
 	elif pause.visible:
 		pause.resume.grab_focus()
 func _input(event: InputEvent) -> void:
+	if not is_instance_valid(game) or game.stage_id != "practice":
+		return
+	if GameData.practice_ui_active:
+		return
 	if GameData.rebinding_active:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -86,6 +92,9 @@ func _unhandled_input(_event: InputEvent) -> void:
 	if visible:
 		get_viewport().set_input_as_handled()
 func submit(raw: String) -> void:
+	if not is_instance_valid(game) or game.stage_id != "practice":
+		write("Gameplay commands are available in Practice only.")
+		return
 	var command := raw.strip_edges()
 	entry.clear()
 	if command.is_empty():
@@ -134,9 +143,26 @@ func submit(raw: String) -> void:
 		write("Choose your pending level-up item before using gameplay commands.")
 		return
 	match name:
+		"/spawn":
+			if game.stage_id != "practice":
+				write("/spawn is available in Practice (Sandbox).")
+				return
+			if args.size() < 2 or args.size() > 3 or args[1] not in ["melee","archer","flyer","boss"]:
+				write("Usage: /spawn melee|archer|flyer|boss [1-10]")
+				return
+			if args.size() == 3 and (not args[2].is_valid_int() or int(args[2]) < 1 or int(args[2]) > 10):
+				write("Count must be 1-10.")
+				return
+			var count := int(args[2]) if args.size() == 3 else 1
+			var created := 0
+			for i in count:
+				if spawner.spawn_one(args[1] == "boss", args[1], true) != null:
+					created += 1
+			write("Spawned %d %s enemies." % [created,args[1]])
 		"/weapon":
+			if args.size() == 2 and args[1] == "staff": args[1] = "spellbook"
 			if args.size() != 2 or not combat.WEAPONS.has(args[1]):
-				write("Usage: /weapon sword|katana|gun|bow|spellbook")
+				write("Usage: /weapon sword|bow|staff")
 				return
 			combat.equip(args[1])
 			write("Equipped " + run.weapon_name())
@@ -167,26 +193,4 @@ func submit(raw: String) -> void:
 		_: write("Unknown command. Type /help.")
 func _exit_tree() -> void:
 	GameData.command_console_active = false
-static func attach_to_lobby(host: Control) -> PanelContainer:
-	var layer := CanvasLayer.new()
-	layer.layer = 100
-	host.add_child(layer)
-	var blocker := ColorRect.new()
-	blocker.color = Color(0, 0, 0, 0.35)
-	blocker.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	layer.add_child(blocker)
-	blocker.hide()
-	var console := load("res://scripts/command_console.gd").new() as PanelContainer
-	layer.add_child(console)
-	console.visibility_changed.connect(func(): blocker.visible = console.visible)
-	var hint := Label.new()
-	hint.text = "F1  COMMAND CONSOLE"
-	hint.position = Vector2(24, 12)
-	hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	layer.add_child(hint)
-	console.visibility_changed.connect(func(): hint.visible = not console.visible)
-	return console
-
-
-
 

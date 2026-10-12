@@ -10,6 +10,7 @@ const FLYER = preload("res://scenes/flying_monster.tscn")
 @export var archer_unlock_time := 300.0
 @export var flyer_unlock_time := 600.0
 @export var enabled := true
+var sandbox_mode := false
 @export_range(1.0, 100.0, 0.5) var spawn_radius := 20.0
 @export_range(1.0, 150.0, 0.5) var outer_radius := 26.0
 @export_range(0.1, 30.0, 0.1) var spawn_interval := 2.0
@@ -117,11 +118,11 @@ func monster_health() -> float:
 	var minutes: float = floorf(maxf(survival_time, 0.0)) / 60.0
 	var base_hp := 40.0 + health_growth_per_minute * minutes + health_growth_curve * minutes * minutes
 	return base_hp * pow(1.0 + 0.30 * overtime_minutes(), 2.0)
-func spawn_one(as_boss: bool = false) -> CharacterBody3D:
+func spawn_one(as_boss: bool = false, forced_type: String = "", manual: bool = false) -> CharacterBody3D:
 	monsters = monsters.filter(func(m): return is_instance_valid(m) and not m.dead and not m.is_queued_for_deletion())
-	if not enabled or completed or get_tree().paused or not is_instance_valid(player):
+	if (not enabled and not manual) or completed or (get_tree().paused and not manual) or not is_instance_valid(player):
 		return null
-	var enemy_type := "boss" if as_boss else pick_monster_type()
+	var enemy_type := "boss" if as_boss else (forced_type if forced_type in ["melee","archer","flyer"] else pick_monster_type())
 	var center := player.global_position
 	# Keep the entire 0.4 m collision capsule outside the boundary.
 	var inner := maxf(spawn_radius, 1.0) + 0.6
@@ -268,4 +269,5 @@ func _update_overtime_pressure() -> void:
 	for monster in monsters:
 		if is_instance_valid(monster) and not monster.dead:
 			monster.pressure_multiplier = multiplier
+
 

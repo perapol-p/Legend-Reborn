@@ -1,4 +1,4 @@
-extends SceneTree
+﻿extends SceneTree
 var failed := false
 func _initialize() -> void:
 	call_deferred("check_console")
@@ -20,6 +20,7 @@ func capture(name: String) -> void:
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://backups/" + name + ".png")
 func check_console() -> void:
+	root.get_node("GameData").selected_stage = "practice"
 	var game = load("res://scenes/game_placeholder.tscn").instantiate()
 	game.auto_pause_on_focus_loss = false
 	root.add_child(game)

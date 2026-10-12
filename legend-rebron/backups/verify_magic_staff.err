@@ -1,0 +1,15 @@
+ERROR: Condition "!is_inside_tree()" is true. Returning: Transform3D()
+   at: get_global_transform (scene/3d/node_3d.cpp:649)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/magic_orb_vfx.gd:43)
+       [1] _ready (res://scripts/weapon_projectile.gd:69)
+       [2] fire_projectile (res://scripts/weapon_combat.gd:527)
+       [3] resolve_attack (res://scripts/weapon_combat.gd:341)
+       [4] _physics_process (res://scripts/weapon_combat.gd:235)
+ERROR: Condition "!is_inside_tree()" is true. Returning: Transform3D()
+   at: get_global_transform (scene/3d/node_3d.cpp:649)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scripts/magic_orb_vfx.gd:43)
+       [1] _ready (res://scripts/weapon_projectile.gd:69)
+       [2] restore_world (res://scripts/run_save_codec.gd:180)
+       [3] verify (res://backups/verify_staff.gd:49)
