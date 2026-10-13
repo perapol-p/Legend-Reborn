@@ -347,7 +347,7 @@ func resolve_attack() -> void:
 		var cast_direction := (cast_aim-cast_origin).normalized() if cast_origin != Vector3.INF else forward
 		var damage := roll_damage()
 		var critical := last_damage_critical
-		fire_projectile("magic_wave", cast_direction, damage, 22.0, 0.15 if level == 1 else 0.9, false, 0.0, cast_origin, critical)
+		fire_projectile("magic_wave", cast_direction, damage, 22.0, 0.15 if level == 1 else 0.9, level <= 2, 0.0, cast_origin, critical)
 		var chance := staff_tornado_chance()
 		if chance >= 1.0 or (chance > 0.0 and run.rng.randf() < chance):
 			spawn_tornado(aim_point(12.0), damage * 0.45, 3.5, 2.5, critical)
@@ -537,6 +537,9 @@ func fire_projectile(kind: String, direction: Vector3, damage: float, speed: flo
 	shot.source = self
 	shot.hit_radius = radius
 	shot.piercing = piercing
+	if kind == "magic_wave" and weapon_id == "spellbook" and weapon_level() <= 2:
+		shot.piercing = true
+		shot.damage_falloff = 0.75
 	if kind == "bow":
 		shot.piercing = true
 		var bow_level: int = run.weapon_level("bow")

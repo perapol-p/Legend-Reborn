@@ -12,6 +12,7 @@ var hit_radius := 0.04
 var piercing := false
 # -1 is unlimited; positive values count bodies the arrow can pass through.
 var pierces_remaining := -1
+var damage_falloff := 1.0
 var critical := false
 var bow_volley_hits: Dictionary = {}
 var splash := 0.0
@@ -141,6 +142,7 @@ func impact(body: CollisionObject3D, point: Vector3) -> bool:
 		return false
 	struck.append(body.get_rid())
 	var damageable := body.has_method("take_damage")
+	var previous_health: Variant = body.get("health") if damageable else null
 	if kind in ["magic_wave","nuke"]:
 		if kind != "nuke":
 			preload("res://scripts/magic_vfx.gd").burst(get_tree().current_scene,point,clampf(hit_radius*1.4,0.6,1.5))
@@ -157,6 +159,10 @@ func impact(body: CollisionObject3D, point: Vector3) -> bool:
 		if splash > 0.0:
 			source.explode(point - direction * 0.08, splash, damage, body, critical, source_weapon)
 	if piercing and damageable and pierces_remaining != 0:
+		if damage_falloff < 1.0 and previous_health is float:
+			var current_health: Variant = body.get("health") if is_instance_valid(body) else 0.0
+			if current_health is float and current_health < previous_health:
+				damage *= damage_falloff
 		if pierces_remaining > 0: pierces_remaining -= 1
 		return false
 	queue_free()

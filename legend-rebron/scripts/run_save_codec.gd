@@ -3,7 +3,7 @@ const RUN_FIELDS = ["level","xp","character_name","equipped_weapon_id","elapsed_
 const COMBAT_FIELDS = ["cooldown","pending","elapsed","attack_active","charge_ready","charge_time","empowered","gun_ammo","gun_reload","bow_ammo","bow_reload","known_bow_capacity","rpg_ready","special_cooldown","explosion_cooldown","volley_queue","attack_serial","projectiles_fired","tornadoes_created"]
 const SPAWN_FIELDS = ["enabled","survival_time","difficulty_step","countdown","started","total_spawned","last_distance","boss_phase","boss_started"]
 const ACTOR_FIELDS = ["health","max_health","alive_seconds","pressure_multiplier","base_move_speed","base_attack_damage","base_attack_interval","attack_timer","hit_flash","velocity"]
-const SHOT_FIELDS = ["kind","direction","speed","damage","source_weapon","remaining","hit_radius","piercing","pierces_remaining","critical","splash","velocity","flight_time","travel_remaining"]
+const SHOT_FIELDS = ["kind","direction","speed","damage","damage_falloff","source_weapon","remaining","hit_radius","piercing","pierces_remaining","critical","splash","velocity","flight_time","travel_remaining"]
 const ENEMY_SHOT_FIELDS = ["kind","velocity","damage","source_position","gravity","remaining","max_distance","distance_travelled"]
 static func fields(node: Object, keys: Array) -> Dictionary:
 	var values: Dictionary = {}

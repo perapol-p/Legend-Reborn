@@ -4,7 +4,7 @@ signal characters_changed
 const CHARACTERS := ["Saber", "Archer", "Wizard god"]
 const CHARACTER_IMAGES := {"Saber":"res://assets/characters/portraits/Knight.png","Archer":"res://assets/characters/portraits/Archer.jpg","Wizard god":"res://assets/characters/portraits/Wizard.jpg"}
 var progress_path := "user://progress.cfg"
-var unlocked_characters: Array[String] = ["Saber"]
+var unlocked_characters: Array[String] = ["Saber","Archer","Wizard god"]
 const SAVE_PATH := "user://settings.cfg"
 const ACTIONS = {
 	"move_forward": {"label": "Move forward", "key": KEY_W},
@@ -156,7 +156,7 @@ func restore_defaults() -> void:
 
 func is_character_unlocked(character: String) -> bool:
 	character = normalize_character(character)
-	return unlocked_characters.has(character) or (character == "Archer" and games_completed >= 1)
+	return character in CHARACTERS
 
 func unlock_character(character: String) -> bool:
 	character = normalize_character(character)
@@ -175,19 +175,11 @@ func save_progress() -> void:
 	cfg.save(progress_path)
 
 func load_progress() -> void:
+	# Every class is playable on fresh installations and existing profiles.
+	unlocked_characters.assign(CHARACTERS)
 	var cfg := ConfigFile.new()
-	if cfg.load(progress_path) != OK:
-		return
-	unlocked_characters.assign(["Saber"])
-	for old_character in cfg.get_value("characters", "unlocked", []):
-		var character := normalize_character(str(old_character))
-		if character in CHARACTERS and not unlocked_characters.has(character):
-			unlocked_characters.append(character)
-	games_completed = maxi(0, int(cfg.get_value("progress", "games_completed", 0)))
-
-
-
-
+	if cfg.load(progress_path) == OK:
+		games_completed = maxi(0,int(cfg.get_value("progress","games_completed",0)))
 
 var active_run_path := "user://active_run.save"
 var pending_resume: Dictionary = {}
