@@ -1,7 +1,7 @@
 78098b89c88a74ebe8c20117b8754620
 ::res://::1791905781
 default_bus_layout.tres::AudioBusLayout::-1::1791318286::0::1::::<><><>0<>0<><>::
-export_presets.cfg::TextFile::-1::1791912754::0::1::::<><><>0<>0<><>::
+export_presets.cfg::TextFile::-1::1791914022::0::1::::<><><>0<>0<><>::
 README.md::TextFile::-1::1791051673::0::1::::<><><>0<>0<><>::
 ::res://assets/::1791883124
 ::res://assets/audio/::1791318282
@@ -108,12 +108,13 @@ Hand_Bow.glb::PackedScene::8798347872660166835::1791300505::1791300659::1::::<><
 Hand_Staff.glb::PackedScene::5072277475139870455::1791665974::1791669795::1::::<><><>0<>0<>d35d576601cd1877935d0b7c868a1312<>res://.godot/imported/Hand_Staff.glb-cf3ab670b0946379d6b3e6a592194c1c.scn::
 Hand_Sword.glb::PackedScene::1241158592461956474::1791300505::1791227602::1::::<><><>0<>0<>95645fbbdb5f33f5a7b3fa476eedb39e<>res://.godot/imported/Hand_Sword.glb-891cc93886dbb0f2c500ae5a2dee3f66.scn::uid://bw1ovgp7ypgvv::::res://assets/weapons/Hand_Sword_Sword_Texture.png
 Hand_Sword_Sword_Texture.png::CompressedTexture2D::3985136944704870959::1791042672::1791908809::1::::<><><>0<>0<>9d8d0a83f222e4de2dacd5370413de23<>res://.godot/imported/Hand_Sword_Sword_Texture.png-cecafa2cdead062f6d415ac2eede9447.s3tc.ctex::
-::res://build/::1791908594
+::res://build/::1791914022
 WEB-README.txt::TextFile::-1::1791908594::0::1::::<><><>0<>0<><>::
-::res://build/web/::1791912337
-index.png::CompressedTexture2D::404461368622014411::1791912337::1791906085::1::::<><><>0<>0<>b603363a7e36f2efd7ed4c3ab43c0f1a<>res://.godot/imported/index.png-7e97af7272d6fa0065ffc53e96463470.ctex::
+::res://build/web/::1791913079
+index.png::CompressedTexture2D::404461368622014411::1791913079::1791906085::1::::<><><>0<>0<>b603363a7e36f2efd7ed4c3ab43c0f1a<>res://.godot/imported/index.png-7e97af7272d6fa0065ffc53e96463470.ctex::
 ::res://build/web-validation/::1791908067
 index.png::CompressedTexture2D::18255268528440835::1791908067::1791907347::1::::<><><>0<>0<>226be792a11777270bf759cb01f45d67<>res://.godot/imported/index.png-01f562efde2408dba812c018f4742162.ctex::
+::res://build/windows/::1791914022
 ::res://data/::1790275119
 item_catalog.json::JSON::-1::1791890797::0::1::::<><><>0<>0<><>::
 ::res://docs/::1791908594
