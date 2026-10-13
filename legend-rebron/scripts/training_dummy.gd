@@ -4,6 +4,7 @@ var health := 100.0
 var dead := false
 @onready var label: Label3D = $Health
 func _ready() -> void:
+	label.font = preload("res://assets/ui/fonts/Font.ttf")
 	health = max_health
 	refresh()
 func aim_point() -> Vector3:

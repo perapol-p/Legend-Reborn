@@ -1,4 +1,5 @@
 extends RefCounted
+const FONT = preload("res://assets/ui/fonts/Font.ttf")
 const INK = Color("171b20")
 const GOLD = Color("dfbc79")
 const MUTED = Color("a9b5ba")
@@ -6,6 +7,8 @@ const PAPER = Color("eee6d1")
 const FRAME = preload("res://assets/ui/TextBox2.png")
 const INSET = preload("res://assets/ui/TextBox3.png")
 const HERO = preload("res://assets/ui/TextBox-export.png")
+const GAME_LOGO = preload("res://assets/ui/BigGameLogo.png")
+static var cropped_logo: AtlasTexture
 static func box(color: Color, border: Color = Color.TRANSPARENT, _radius: int = 8) -> StyleBoxTexture:
 	var s := StyleBoxTexture.new()
 	s.texture = FRAME
@@ -97,3 +100,21 @@ static func caption(parent: Node, text: String, size: int = 14, color: Color = M
 	var n := label(parent,text,size,color)
 	n.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return n
+
+static func logo_texture() -> AtlasTexture:
+	if cropped_logo == null:
+		cropped_logo = AtlasTexture.new()
+		cropped_logo.atlas = GAME_LOGO
+		cropped_logo.region = Rect2(GAME_LOGO.get_image().get_used_rect()).grow(8.0)
+	return cropped_logo
+static func game_logo(parent: Node, minimum: Vector2) -> TextureRect:
+	var logo := TextureRect.new()
+	logo.name = "GameLogo"
+	logo.texture = logo_texture()
+	logo.custom_minimum_size = minimum
+	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	logo.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(logo)
+	return logo

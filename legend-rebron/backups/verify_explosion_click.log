@@ -1,0 +1,3 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS: chant duration 3.43 seconds; blast begins on final click; natural audio tail retained; pause synchronised; Continue resumes at saved audio offset; Explosion follows once and still deals ten hits

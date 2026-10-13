@@ -9,8 +9,7 @@ func _ready():
     background.name = "HomeWorlds"
     add_child(background)
     move_child(background,0)
-    $Center/Menu/Title.add_theme_color_override("font_color",Style.PAPER)
-    $Center/Menu/Subtitle.add_theme_color_override("font_color",Color("bdc9c2"))
+    $Center/Menu/Title.texture = Style.logo_texture()
     for button in [$Center/Menu/Play,$Center/Menu/Continue,$Center/Menu/Setting,$Center/Menu/Credit,$Center/Menu/Exit]:
         button.add_theme_font_size_override("font_size",18)
         button.add_theme_color_override("font_color",Style.PAPER)

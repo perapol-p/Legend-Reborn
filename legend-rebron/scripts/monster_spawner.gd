@@ -196,6 +196,7 @@ func spawn_marker(point: Vector3, distance: float) -> void:
 	markers.add_child(marker)
 	marker.global_position = point + Vector3(0, 0.025, 0)
 	var label := Label3D.new()
+	label.font = preload("res://assets/ui/fonts/Font.ttf")
 	label.text = "SPAWN %.1f m" % distance
 	label.font_size = 48
 	label.pixel_size = 0.008

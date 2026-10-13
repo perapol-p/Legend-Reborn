@@ -1,0 +1,8 @@
+ERROR: Format not supported for WAVE file (not PCM). Save WAVE files as uncompressed PCM or IEEE float instead.
+   at: load_from_buffer (scene/resources/audio_stream_wav.cpp:738)
+ERROR: Can't save empty resource to path 'res://.godot/imported/wizard_pre_explosion.wav-74017f8dfd2abc5f627994a01df22dc4.sample'.
+   at: save (core/io/resource_saver.cpp:103)
+ERROR: Condition "f.is_null()" is true. Continuing.
+   at: get_multiple_md5 (core/io/file_access.cpp:967)
+ERROR: Plugin is not attached to debugger.
+   at: is_active (editor/debugger/editor_debugger_plugin.cpp:102)

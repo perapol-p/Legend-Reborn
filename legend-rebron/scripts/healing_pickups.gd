@@ -140,6 +140,7 @@ func spawn_heart(point: Vector3, lifetime := HEART_LIFETIME) -> Node3D:
  visual.position.y = 0.8
  root.add_child(visual)
  var label := Label3D.new()
+ label.font = preload("res://assets/ui/fonts/Font.ttf")
  label.text = "+8% HP"
  label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
  label.font_size = 32
@@ -201,6 +202,7 @@ func _create_supply(index: int, point: Vector3) -> void:
  collision.position.y = 0.41
  body.add_child(collision)
  var label := Label3D.new()
+ label.font = preload("res://assets/ui/fonts/Font.ttf")
  label.text = "SUPPLIES"
  label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
  label.font_size = 32

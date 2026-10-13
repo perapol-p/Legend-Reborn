@@ -4,6 +4,8 @@ signal damage_dealt(amount: float)
 signal hit_confirmed(critical: bool, killed: bool)
 signal attack_started(weapon: String)
 signal bow_released
+signal staff_fired
+signal explosion_detonated
 signal monster_defeated(position: Vector3)
 var last_damage_critical := false
 ## Gameplay lives here; replace only the Models in scenes/weapons to swap art.
@@ -348,6 +350,7 @@ func resolve_attack() -> void:
 		var damage := roll_damage()
 		var critical := last_damage_critical
 		fire_projectile("magic_wave", cast_direction, damage, 22.0, 0.15 if level == 1 else 0.9, level <= 2, 0.0, cast_origin, critical)
+		staff_fired.emit()
 		var chance := staff_tornado_chance()
 		if chance >= 1.0 or (chance > 0.0 and run.rng.randf() < chance):
 			spawn_tornado(aim_point(12.0), damage * 0.45, 3.5, 2.5, critical)

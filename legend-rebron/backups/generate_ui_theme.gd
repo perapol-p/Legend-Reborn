@@ -3,6 +3,9 @@ func _initialize():
  var theme := Theme.new()
  var style = preload("res://scripts/ui_style.gd")
  theme.default_font_size = 18
+ theme.default_font = style.FONT
+ for key in ["normal_font","bold_font","italics_font","bold_italics_font","mono_font"]:
+  theme.set_font(key,"RichTextLabel",style.FONT)
  for type in ["Button","OptionButton","CheckButton","CheckBox","MenuButton"]:
   theme.set_stylebox("normal",type,style.box(Color("25292e"),Color("4c473b")))
   theme.set_stylebox("hover",type,style.box(Color("474031"),style.GOLD))

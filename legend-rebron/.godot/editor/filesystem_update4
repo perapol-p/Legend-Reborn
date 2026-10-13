@@ -33,3 +33,17 @@ res://scripts/character_widgets.gd
 res://scripts/settings_panel.gd
 res://scripts/staff_explosion.gd
 res://scripts/fps_controller.gd
+res://scripts/arena_layout.gd
+res://scripts/enemy_hit_flash.gd
+res://scripts/magic_orb_vfx.gd
+res://scripts/magic_vfx.gd
+res://scripts/magic_vortex_vfx.gd
+res://scripts/skeleton_archer_visual.gd
+res://scripts/stage_arena.gd
+res://scripts/weapon_tornado.gd
+res://scripts/zombie_visual.gd
+res://scripts/game_sfx.gd
+res://scripts/level_up_party.gd
+res://scripts/credits.gd
+res://scripts/healing_pickups.gd
+res://scripts/training_dummy.gd

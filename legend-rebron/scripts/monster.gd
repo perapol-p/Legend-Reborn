@@ -29,6 +29,7 @@ var damage_flash: Node
 @onready var model: Node3D = $Model
 @onready var health_label: Label3D = $Health
 func _ready() -> void:
+	health_label.font = preload("res://assets/ui/fonts/Font.ttf")
 	health = max_health
 	collision_layer = 4
 	collision_mask = 7

@@ -28,15 +28,12 @@ offset_right = 468.0
 custom_minimum_size = Vector2(400, 0)
 theme_override_constants/separation = 12
 
-[node name="Title" type="Label" parent="Center/Menu"]
-theme_override_font_sizes/font_size = 44
-text = "LEGEND REBORN"
-horizontal_alignment = 0
-
-[node name="Subtitle" type="Label" parent="Center/Menu"]
-text = "Survive the horde. Defeat the golem."
-horizontal_alignment = 0
-
+[node name="Title" type="TextureRect" parent="Center/Menu"]
+custom_minimum_size = Vector2(400,172)
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+texture_filter = 1
 [node name="Spacer" type="Control" parent="Center/Menu"]
 custom_minimum_size = Vector2(0, 22)
 

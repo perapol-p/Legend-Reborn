@@ -29,7 +29,7 @@ const server = http.createServer((req,res) => {
   console.log('WEB_BOOT_LOCAL_MS '+(Date.now()-start));
   await page.screenshot({path:path.join(out,'web_home.png')});
   const canvas = page.locator('#canvas');
-  await canvas.click({position:{x:260,y:342}});
+  await canvas.click({position:{x:260,y:380}});
   await page.waitForTimeout(1800);
   await page.screenshot({path:path.join(out,'web_stages.png')});
   await canvas.click({position:{x:280,y:380}});

@@ -5,6 +5,9 @@ var run: Node
 var heading: Label
 var cards: GridContainer
 var choice_buttons: Array[Button] = []
+var celebration: Control
+var level_title: Control
+var celebrated_generation := -1
 func _ready() -> void:
 	hide()
 	var shade := ColorRect.new()
@@ -19,11 +22,12 @@ func _ready() -> void:
 	var center := CenterContainer.new()
 	margin.add_child(center)
 	var stack := VBoxContainer.new()
-	stack.add_theme_constant_override("separation", 14)
+	stack.add_theme_constant_override("separation",12)
 	center.add_child(stack)
-	var title := Style.label(stack, "LEVEL UP", 18, Style.GOLD)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	heading = Style.label(stack, "Choose one item", 40)
+	level_title = preload("res://scripts/level_up_title.gd").new()
+	level_title.name = "LevelUpTitle"
+	stack.add_child(level_title)
+	heading = Style.label(stack,"Choose one item",24)
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var subtitle := Style.label(stack, "Choose one. Its bonus is yours for this run.", 18)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -34,6 +38,9 @@ func _ready() -> void:
 	var help := Style.label(stack, "Press 1, 2 or 3 to choose  /  Game paused", 16, Color("a3aab4"))
 	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	stack.add_child(Control.new())
+	celebration = preload("res://scripts/level_up_party.gd").new()
+	celebration.name = "LevelUpParty"
+	add_child(celebration)
 func bind_run(model: Node) -> void:
 	run = model
 func refresh() -> void:
@@ -43,6 +50,7 @@ func refresh() -> void:
 	choice_buttons.clear()
 	visible = run != null and not run.offers.is_empty()
 	if not visible:
+		celebration.stop()
 		return
 	heading.text = "Level %d  /  Choose one item" % run.reward_level
 	for index in range(run.offers.size()):
@@ -75,6 +83,10 @@ func refresh() -> void:
 		button.add_theme_stylebox_override("normal", Style.box(Color("2a303b"), color))
 		choice_buttons.append(button)
 	choice_buttons[0].grab_focus()
+	if celebrated_generation != run.offer_generation:
+		celebrated_generation = run.offer_generation
+		celebration.celebrate()
+		level_title.restart()
 func _choose(id: String, generation: int) -> void:
 	if not visible or generation != run.offer_generation:
 		return
@@ -85,6 +97,7 @@ func _input(event: InputEvent) -> void:
 	if GameData.command_console_active or GameData.practice_ui_active:
 		return
 	if not visible:
+		celebration.stop()
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		var index := -1

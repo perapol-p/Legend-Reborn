@@ -47,7 +47,7 @@ func _ready() -> void:
 	menu.custom_minimum_size.x = 390
 	menu.add_theme_constant_override("separation",14)
 	menu_center.add_child(menu)
-	Style.label(menu, "LEGEND REBORN", 22, Style.GOLD)
+	Style.game_logo(menu,Vector2(240,100))
 	Style.label(menu, "PAUSED",46)
 	resume = Style.button(menu,"RESUME",toggle_pause)
 	Style.primary(resume)

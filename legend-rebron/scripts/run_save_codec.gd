@@ -114,7 +114,7 @@ static func capture(game: Node3D) -> Dictionary:
 	var explosions: Array = []
 	for effect in game.get_tree().get_nodes_in_group("staff_explosions"):
 		if effect.source == combat and not effect.is_queued_for_deletion():
-			var saved := fields(effect,["age","damage","critical","radius","damage_applied","hits_done"])
+			var saved := fields(effect,["age","damage","critical","radius","damage_applied","hits_done","cast_duration"])
 			saved["transform"] = effect.global_transform
 			explosions.append(saved)
 	data["staff_explosions"] = explosions
@@ -209,9 +209,13 @@ static func restore_world(game: Node3D, data: Dictionary) -> void:
 		tornado.model.rotation.y = saved["spin"]
 	for saved in data.get("staff_explosions",[]):
 		var effect = preload("res://scripts/staff_explosion.gd").new()
-		apply(effect,saved,["age","damage","critical","radius","damage_applied","hits_done"])
+		apply(effect,saved,["age","damage","critical","radius","damage_applied","hits_done","cast_duration"])
 		# Old single-hit saves already dealt their full damage.
 		if not saved.has("hits_done") and effect.damage_applied: effect.hits_done = effect.HIT_COUNT
+		if not saved.has("cast_duration") and effect.hits_done > 0: effect.cast_duration = 3.0
+		if effect.hits_done == 0:
+			effect.cast_duration = effect.FINAL_CLICK_TIME+effect.POST_CLICK_DELAY
+			effect.age = minf(effect.age,effect.cast_duration-0.001)
 		effect.source = combat
 		effect.transform = game.global_transform.affine_inverse()*saved["transform"]
 		game.add_child(effect)
