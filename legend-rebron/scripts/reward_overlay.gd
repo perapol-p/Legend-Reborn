@@ -127,12 +127,21 @@ func _refresh_weapon_choices() -> void:
 		panel.add_theme_stylebox_override("panel", Style.box(Color("1b2029"), Style.PAPER, 12))
 		cards.add_child(panel)
 		var stack := VBoxContainer.new()
-		stack.add_theme_constant_override("separation", 18)
+		stack.add_theme_constant_override("separation", 10)
 		panel.add_child(stack)
 		var title := Style.label(stack, option["name"], 24)
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		var detail := Style.label(stack, option["description"], 20)
+		var artwork := TextureRect.new()
+		artwork.name = "UpgradeArtwork"
+		artwork.texture = load(run.Progression.UPGRADE_ICONS[run.upgrade_weapon_id][id])
+		artwork.custom_minimum_size = Vector2(0, 112)
+		artwork.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		artwork.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		artwork.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		artwork.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		stack.add_child(artwork)
+		var detail := Style.label(stack, option["description"], 18)
 		detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		detail.size_flags_vertical = Control.SIZE_EXPAND_FILL

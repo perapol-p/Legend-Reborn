@@ -71,3 +71,9 @@ static func stat_text(values: Dictionary, id: String) -> String:
 		return "Attack Speed : %.2f /sec\nArrow Per Shot : %d\nPierce Per Shot : %d" % [values["attack_speed"], values["arrow_count"], values["pierce_count"]]
 	return "Cast Speed : %.2f /sec\nStorm : Lv.%d\n  Cooldown : %.2f s\n  Per Spawn : %d\n  Spawn Radius : %.2f m\nExplosion Size : %.2f m" % [values["cast_speed"], values["storm_level"], values["storm_cooldown"], values["storm_spawn_count"], values["storm_spawn_radius"], values["explosion_size"]]
 
+
+const UPGRADE_ICONS = {
+	"sword": {"attack_speed": "res://assets/ui/weapon_upgrades/SwordQuickAtk.png", "wave_size": "res://assets/ui/weapon_upgrades/SwordAreaAtk.png", "wave_range_speed": "res://assets/ui/weapon_upgrades/SwordRange.png"},
+	"bow": {"attack_speed": "res://assets/ui/weapon_upgrades/BowAtkSpeed.png", "projectile_count": "res://assets/ui/weapon_upgrades/BowArrow+.png", "pierce_count": "res://assets/ui/weapon_upgrades/BowPierce.png"},
+	"spellbook": {"cast_speed": "res://assets/ui/weapon_upgrades/MagicSpeedAtk.png", "storm_cooldown": "res://assets/ui/weapon_upgrades/TornadoCd.png", "explosion_size": "res://assets/ui/weapon_upgrades/Explosion.png"}
+}

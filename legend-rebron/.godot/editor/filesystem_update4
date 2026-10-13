@@ -1,8 +1,0 @@
-res://scripts/bow_view.gd
-res://scripts/game_data.gd
-res://scripts/run_state.gd
-res://scripts/test_character_weapon_progression.gd
-res://scripts/test_weapon_upgrade.gd
-res://scripts/weapon_progression.gd
-res://scripts/run_save_codec.gd
-res://scripts/weapon_tornado.gd
