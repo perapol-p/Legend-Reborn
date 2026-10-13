@@ -1,0 +1,6 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 581.57 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 4060 Laptop GPU
+
+golem MATERIAL Material.002 COLOR (1.0, 1.0, 1.0, 1.0) TEXTURE (res://assets/monsters/golem/golem_0.png):<CompressedTexture2D#-9223372008954264095>
+golem MATERIAL Emission COLOR (1.0, 1.0, 1.0, 1.0) TEXTURE (res://assets/monsters/golem/golem_0.png):<CompressedTexture2D#-9223372008954264095>
+eye MATERIAL Material #50 COLOR (1.0, 1.0, 1.0, 1.0) TEXTURE (res://assets/monsters/flying_eye/source/flying_eye_stand_0.png):<CompressedTexture2D#-9223372007679195661>

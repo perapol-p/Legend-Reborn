@@ -12,12 +12,15 @@ var base_attack_interval := 0.0
 @export var attack_interval := 1.2
 @export var attack_range := 1.55
 @export var stop_distance := 1.1
+@export var climb_speed := 2.8
+var climbing := false
 var player: CharacterBody3D
 var health := 30.0
 var dead := false
 var attack_timer := 0.6
 var hit_flash := 0.0
 var zombie_visual: Node3D
+var melee_visual: Node3D
 var death_visual: Node3D
 var damage_flash: Node
 @onready var model: Node3D = $Model
@@ -37,6 +40,7 @@ func _ready() -> void:
 		zombie_visual.set_script(preload("res://scripts/zombie_visual.gd"))
 		model.add_child(zombie_visual)
 		death_visual = zombie_visual
+		melee_visual = zombie_visual
 	damage_flash = preload("res://scripts/enemy_hit_flash.gd").new()
 	add_child(damage_flash)
 	damage_flash.bind_model(model)
@@ -82,12 +86,13 @@ func _physics_process(delta: float) -> void:
 	var direction := movement_direction(player.global_position)
 	if distance > 0.05:
 		rotation.y = atan2(-direction.x, -direction.z)
-	velocity.x = direction.x * move_speed if distance > stop_distance else 0.0
-	velocity.z = direction.z * move_speed if distance > stop_distance else 0.0
+	velocity.x = direction.x * move_speed if distance > stop_distance or offset.y > 1.1 else 0.0
+	velocity.z = direction.z * move_speed if distance > stop_distance or offset.y > 1.1 else 0.0
 	velocity.y -= 25.0 * delta
+	apply_climbing(delta)
 	move_and_slide()
-	if is_instance_valid(zombie_visual):
-		zombie_visual.update_locomotion(Vector2(velocity.x, velocity.z).length() > 0.1, move_speed)
+	if is_instance_valid(melee_visual):
+		melee_visual.update_locomotion(Vector2(velocity.x, velocity.z).length() > 0.1, move_speed)
 	if global_position.y < -25:
 		queue_free()
 		return
@@ -95,8 +100,8 @@ func _physics_process(delta: float) -> void:
 		var query := PhysicsRayQueryParameters3D.create(aim_point(), player.global_position + Vector3.UP, 1, [get_rid()])
 		var hit := get_world_3d().direct_space_state.intersect_ray(query)
 		if not hit.is_empty() and hit["collider"] == player:
-			if is_instance_valid(zombie_visual):
-				zombie_visual.attack()
+			if is_instance_valid(melee_visual):
+				melee_visual.attack()
 			player.receive_damage(attack_damage, global_position)
 			attack_timer = attack_interval
 
@@ -113,6 +118,11 @@ func advance_age(delta: float) -> void:
 
 
 func movement_direction(target: Vector3) -> Vector3:
+	# Pursue elevated players directly over walls and other monsters.
+	var direct := target - global_position
+	direct.y = 0.0
+	if target.y > global_position.y + 0.6 and direct.length_squared() > 0.001:
+		return direct.normalized()
 	var current_scene = get_tree().current_scene
 	var arena = current_scene.get_node_or_null("Arena") if is_instance_valid(current_scene) else null
 	if arena == null:
@@ -123,3 +133,30 @@ func movement_direction(target: Vector3) -> Vector3:
 	direction = direction.normalized()
 	return arena.steer_direction(self,direction) if arena != null and arena.has_method("steer_direction") else direction
 
+# Use the body shape to detect supports. Upward movement remains collision-based.
+func apply_climbing(delta: float) -> void:
+	climbing = false
+	if dead or not is_instance_valid(player):
+		return
+	if global_position.y > player.global_position.y + 0.9:
+		return
+	var forward := Vector3(velocity.x,0,velocity.z)
+	if forward.length_squared() < 0.01:
+		return
+	var contact := KinematicCollision3D.new()
+	if not test_move(global_transform,forward.normalized() * (0.45 * scale.x),contact):
+		return
+	var support = contact.get_collider()
+	if support == player or contact.get_normal().y > 0.85:
+		return
+	if support is CharacterBody3D:
+		if not support.is_in_group("monsters") or support.dead:
+			return
+		if support.is_in_group("flying_monsters"):
+			return
+	elif not support is StaticBody3D:
+		return
+	if test_move(global_transform,Vector3.UP * maxf(0.06,climb_speed * delta)):
+		return
+	climbing = true
+	velocity.y = climb_speed

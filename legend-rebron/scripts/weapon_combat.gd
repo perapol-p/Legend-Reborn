@@ -1,5 +1,6 @@
 extends Node3D
 signal critical_hit(damage: float)
+signal damage_dealt(amount: float)
 signal hit_confirmed(critical: bool, killed: bool)
 signal attack_started(weapon: String)
 signal bow_released
@@ -42,6 +43,7 @@ var bow_reload := 0.0
 var known_bow_capacity := 4
 var rpg_ready := false
 var special_cooldown := 0.0
+var explosion_cooldown := 0.0
 var ability_status: Label
 var ammo_label: Label
 var ammo_hint: Label
@@ -142,6 +144,11 @@ func equip(id: String) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not can_act() or Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		return
+	if event.is_action_pressed("interact") and not event.is_echo():
+		var healing = get_tree().current_scene.get_node_or_null("HealingPickups")
+		if healing != null and healing.selected_supply >= 0 and healing.can_collect(): return
+		if try_explosion(): get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("reload") and not event.is_echo():
 		try_reload()
 		get_viewport().set_input_as_handled()
@@ -196,6 +203,7 @@ func _physics_process(delta: float) -> void:
 		known_bow_capacity = capacity
 	cooldown = maxf(0.0, cooldown - delta)
 	special_cooldown = maxf(0.0, special_cooldown - delta)
+	explosion_cooldown = maxf(0.0,explosion_cooldown-delta)
 	empowered = maxf(0.0, empowered - delta)
 	if gun_reload > 0.0:
 		gun_reload = maxf(0.0, gun_reload - delta)
@@ -331,21 +339,18 @@ func resolve_attack() -> void:
 				var row_pitch := (0.035 if row == 0 else -0.035) if level >= 4 else 0.0
 				var pitch := row_pitch + randf_range(-jitter, jitter)
 				var direction := (bow_forward + camera.global_basis.x * angle + camera.global_basis.y * pitch).normalized()
-				fire_projectile("bow", direction, roll_damage(), 38.0, 0.04, level >= 3, 0.0, spawn_position, last_damage_critical, volley_hits)
+				fire_projectile("bow", direction, roll_damage(), 38.0, 0.04, true, 0.0, spawn_position, last_damage_critical, volley_hits)
 	else:
 		if view.has_method("release_magic"): view.release_magic()
 		var cast_origin: Vector3 = view.cast_position() if view.has_method("cast_position") else Vector3.INF
 		var cast_aim := aim_point(120.0)
 		var cast_direction := (cast_aim-cast_origin).normalized() if cast_origin != Vector3.INF else forward
-		if level < 3:
-			fire_projectile("magic_wave", cast_direction, roll_damage(), 22.0, 0.15 if level == 1 else 0.9, false, 0.0, cast_origin, last_damage_critical)
-		else:
-			spawn_tornado(aim_point(12.0), roll_damage() * 0.45, 3.5, 2.5, last_damage_critical)
-			if level >= 5:
-				for i in range(3):
-					var direction := (cast_direction + camera.global_basis.x * float(i - 1) * 0.13).normalized()
-					fire_projectile("magic_wave", direction, roll_damage(), 22.0, 0.6, true, 0.0, cast_origin, last_damage_critical)
-				fire_projectile("nuke", cast_direction, roll_damage() * 3.0, 18.0, 0.25, false, 8.0, cast_origin, last_damage_critical)
+		var damage := roll_damage()
+		var critical := last_damage_critical
+		fire_projectile("magic_wave", cast_direction, damage, 22.0, 0.15 if level == 1 else 0.9, false, 0.0, cast_origin, critical)
+		var chance := staff_tornado_chance()
+		if chance >= 1.0 or (chance > 0.0 and run.rng.randf() < chance):
+			spawn_tornado(aim_point(12.0), damage * 0.45, 3.5, 2.5, critical)
 
 func melee_attack(reach: float) -> void:
 	var origin := camera.global_position
@@ -388,9 +393,17 @@ func deal_hit(body: Object, damage: float, hit_weapon: String = "", grants_rpg: 
 		return
 	var monster_kill: bool = body.is_in_group("monsters")
 	var death_position: Vector3 = body.global_position if body is Node3D else Vector3.ZERO
+	var before_health: Variant = body.get("health")
 	var result: int = body.take_damage(damage)
 	if result == 0:
 		return
+	var actual_damage := maxf(damage,0.0)
+	if before_health is float or before_health is int:
+		var after_health: Variant = body.get("health") if is_instance_valid(body) else 0.0
+		if after_health is float or after_health is int:
+			actual_damage = clampf(float(before_health)-float(after_health),0.0,actual_damage)
+	if actual_damage > 0.0:
+		damage_dealt.emit(actual_damage)
 	hit_confirmed.emit(critical, result == 2)
 	if critical:
 		critical_hit.emit(damage)
@@ -457,6 +470,9 @@ func spawn_target() -> void:
 func weapon_level() -> int:
 	return run.weapon_level(weapon_id) if run != null else 1
 
+func staff_tornado_chance() -> float:
+	return [0.0, 0.0, 0.25, 0.50, 1.0][clampi(weapon_level(),1,5)-1] if weapon_id == "spellbook" else 0.0
+
 func attack_cooldown() -> float:
 	var level := weapon_level()
 	if weapon_id == "gun":
@@ -468,7 +484,7 @@ func attack_cooldown() -> float:
 	if weapon_id == "bow" and level >= 5:
 		return 0.3
 	if weapon_id == "spellbook" and level >= 3:
-		return 3.0 if level >= 5 else 1.8
+		return [0.65, 0.50, 0.35][clampi(level,3,5)-3]
 	return float(WEAPONS[weapon_id]["cooldown"])
 
 func release_charge() -> void:
@@ -506,6 +522,8 @@ func update_status() -> void:
 		ammo_hint.text = "ARROWS" if bow_reload <= 0.0 else "RELOADING  %.1fs" % bow_reload
 	elif weapon_id == "spellbook" and weapon_level() >= 4:
 		text = "RMB: Warp | %.1fs cooldown" % special_cooldown
+		if weapon_level() >= 5:
+			text += "  /  %s: EXPLOSION %s" % [GameData.key_label("interact"),"READY" if explosion_cooldown <= 0.0 else "%.1fs" % explosion_cooldown]
 	elif weapon_id == "sword" and weapon_level() >= 4:
 		text = "Hold LMB: rapid sword waves"
 	ability_status.text = text
@@ -519,6 +537,10 @@ func fire_projectile(kind: String, direction: Vector3, damage: float, speed: flo
 	shot.source = self
 	shot.hit_radius = radius
 	shot.piercing = piercing
+	if kind == "bow":
+		shot.piercing = true
+		var bow_level: int = run.weapon_level("bow")
+		shot.pierces_remaining = -1 if bow_level >= 5 else bow_level
 	shot.splash = splash
 	shot.source_weapon = weapon_id
 	shot.critical = critical
@@ -664,3 +686,26 @@ func bow_capacity() -> int:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PAUSED:
 		attack_held = false
+
+func try_explosion() -> bool:
+	if not can_act() or weapon_id != "spellbook" or weapon_level() < 5 or explosion_cooldown > 0.0:
+		return false
+	var point := aim_point(30.0)
+	# Place the animation on the ground beneath the aimed point.
+	var floor_query := PhysicsRayQueryParameters3D.create(point+Vector3.UP*2.0,point-Vector3.UP*40.0,1,[player.get_rid()])
+	var floor_hit := preload("res://scripts/enemy_targeting.gd").ray_hit(get_world_3d().direct_space_state,floor_query.from,floor_query.to,floor_query.exclude)
+	if not floor_hit.is_empty() and Vector3(floor_hit["normal"]).y > 0.5:
+		point = floor_hit["position"]
+	point += Vector3.UP*0.04
+	var effect := preload("res://scripts/staff_explosion.gd").new()
+	effect.source = self
+	effect.damage = roll_damage()*12.0
+	effect.critical = last_damage_critical
+	get_tree().current_scene.add_child(effect)
+	effect.global_position = point
+	explosion_cooldown = 30.0
+	feedback.text = "EXPLOSION"
+	feedback.modulate = Color("ffb34d")
+	feedback_time = 1.0
+	update_status()
+	return true

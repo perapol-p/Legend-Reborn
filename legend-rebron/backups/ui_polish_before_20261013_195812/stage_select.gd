@@ -1,0 +1,60 @@
+extends Control
+const Style = preload("res://scripts/ui_style.gd")
+var stage_buttons: Dictionary = {}
+var background: Control
+func _ready() -> void:
+	background = preload("res://scripts/home_background.gd").new()
+	background.name = "StagePreview"
+	background.auto_cycle = false
+	background.initial_stage = maxi(GameData.STAGES.find(GameData.selected_stage),0)
+	background.transition_duration = 0.25
+	add_child(background)
+	var shade := ColorRect.new()
+	shade.color = Color(0.02,0.03,0.04,0.28)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(shade)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var center := CenterContainer.new()
+	add_child(center)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var stack := VBoxContainer.new()
+	stack.custom_minimum_size = Vector2(1020,440)
+	stack.add_theme_constant_override("separation",24)
+	center.add_child(stack)
+	var heading := Style.label(stack,"CHOOSE YOUR STAGE",38,Style.GOLD)
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var subtitle := Style.label(stack,"Survive the normal stages or test your build in Practice.",18)
+	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var cards := HBoxContainer.new()
+	cards.add_theme_constant_override("separation",20)
+	stack.add_child(cards)
+	var descriptions := {
+		"grassland":"GRASSLAND\nNORMAL MODE\n\nRolling hills and forest\nAncient stone ruins\nBoss arrives at 15:00",
+		"desert":"DESERT\nNORMAL MODE\n\nSand dunes and cacti\nOasis and sandstone gates\nBoss arrives at 15:00",
+		"practice":"PRACTICE\nSANDBOX\n\nGrid arena, ramps and pyramids\nU tools / Manual enemies"
+	}
+	for stage in GameData.STAGES:
+		var id: String = stage
+		var button := Style.button(cards,descriptions[id],func(): select_stage(id))
+		button.name = id.capitalize()+"Button"
+		button.custom_minimum_size = Vector2(320,260)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.mouse_entered.connect(_preview_stage.bind(id))
+		button.focus_entered.connect(_preview_stage.bind(id))
+		stage_buttons[id] = button
+		button.add_theme_font_size_override("font_size",20)
+		button.add_theme_stylebox_override("normal",Style.box(Color(0.08,0.11,0.14,0.88),Color("52615c"),12))
+		button.add_theme_stylebox_override("hover",Style.box(Color(0.18,0.22,0.17,0.94),Style.GOLD,12))
+		button.add_theme_stylebox_override("focus",Style.box(Color(0.18,0.22,0.17,0.94),Style.GOLD,12))
+	Style.button(stack,"BACK",func(): SceneTransition.change_scene("res://scenes/main_menu.tscn"))
+func select_stage(stage: String) -> void:
+	if stage not in GameData.STAGES:
+		return
+	GameData.selected_stage = stage
+	SceneTransition.change_scene("res://scenes/character_select.tscn")
+
+
+func _preview_stage(stage: String) -> void:
+	var index := GameData.STAGES.find(stage)
+	if index >= 0 and background.selected != index:
+		background.select_world(index)

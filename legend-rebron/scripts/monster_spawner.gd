@@ -1,4 +1,4 @@
-﻿extends Node3D
+extends Node3D
 signal monster_spawned(monster: CharacterBody3D, distance: float)
 signal difficulty_changed
 signal boss_spawned(boss: CharacterBody3D)
@@ -147,7 +147,7 @@ func spawn_one(as_boss: bool = false, forced_type: String = "", manual: bool = f
 		if crowded:
 			continue
 		var shape := CapsuleShape3D.new()
-		shape.radius = 0.9 if as_boss else 0.45
+		shape.radius = 1.35 if as_boss else 0.45
 		shape.height = 3.8 if as_boss else 1.9
 		var occupancy := PhysicsShapeQueryParameters3D.new()
 		occupancy.shape = shape

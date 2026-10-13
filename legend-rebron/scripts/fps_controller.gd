@@ -14,6 +14,11 @@ signal dash_ready
 @export_range(0.0, 5.0, 0.1) var strafe_tilt_degrees := 0.2
 @export_range(0.0, 8.0, 0.1) var dash_tilt_degrees := 0.6
 var camera_side_offset := 0.0
+var shake_remaining := 0.0
+var shake_duration := 0.5
+var shake_strength := 0.0
+var shake_time := 0.0
+var screen_shake: Control
 var input_enabled := true
 var run: Node
 var dash_remaining := 0.0
@@ -96,6 +101,7 @@ func _physics_process(delta: float) -> void:
 	camera.fov = 90.0
 	_update_camera_lean(delta, scale_speed)
 func respawn() -> void:
+	clear_camera_shake()
 	global_position = spawn_position
 	velocity = Vector3.ZERO
 	rotation = Vector3.ZERO
@@ -167,4 +173,33 @@ func dash_speed_factor(progress: float) -> float:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PAUSED:
+		clear_camera_shake()
 		dash_buffer = 0.0
+func shake_camera(strength: float = 0.09, duration: float = 0.5) -> void:
+	if not input_enabled or get_tree().paused or (run != null and run.finished):
+		return
+	shake_strength = clampf(strength,0.0,0.12)
+	shake_duration = maxf(duration,0.01)
+	shake_remaining = shake_duration
+	shake_time = 0.0
+func clear_camera_shake() -> void:
+	shake_remaining = 0.0
+	shake_strength = 0.0
+	if is_instance_valid(screen_shake): screen_shake.set_screen_offset(Vector2.ZERO)
+	if is_instance_valid(camera):
+		camera.h_offset = 0.0
+		camera.v_offset = 0.0
+func _process(delta: float) -> void:
+	if not input_enabled or (run != null and run.finished):
+		clear_camera_shake()
+		return
+	if shake_remaining <= 0.0:
+		return
+	shake_remaining = maxf(0.0,shake_remaining-delta)
+	shake_time += delta
+	var decay := pow(shake_remaining/shake_duration,2.0)
+	var offset := Vector2(sin(shake_time*67.0),sin(shake_time*83.0+0.7)*0.65)*shake_strength*180.0*decay
+	if is_instance_valid(screen_shake): screen_shake.set_screen_offset(offset)
+
+	if shake_remaining == 0.0:
+		clear_camera_shake()

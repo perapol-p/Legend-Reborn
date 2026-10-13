@@ -1,9 +1,9 @@
 extends RefCounted
-const RUN_FIELDS = ["level","xp","character_name","equipped_weapon_id","elapsed_time","regen_elapsed","monsters_killed","damage_taken","owned_ids","item_counts","weapon_levels","offer_generation","offers_without_high_rarity","offers","reward_level","pending_levels"]
-const COMBAT_FIELDS = ["cooldown","pending","elapsed","attack_active","charge_ready","charge_time","empowered","gun_ammo","gun_reload","bow_ammo","bow_reload","known_bow_capacity","rpg_ready","special_cooldown","volley_queue","attack_serial","projectiles_fired","tornadoes_created"]
+const RUN_FIELDS = ["level","xp","character_name","equipped_weapon_id","elapsed_time","regen_elapsed","monsters_killed","peak_dps","damage_taken","owned_ids","item_counts","weapon_levels","offer_generation","offers_without_high_rarity","offers","reward_level","pending_levels"]
+const COMBAT_FIELDS = ["cooldown","pending","elapsed","attack_active","charge_ready","charge_time","empowered","gun_ammo","gun_reload","bow_ammo","bow_reload","known_bow_capacity","rpg_ready","special_cooldown","explosion_cooldown","volley_queue","attack_serial","projectiles_fired","tornadoes_created"]
 const SPAWN_FIELDS = ["enabled","survival_time","difficulty_step","countdown","started","total_spawned","last_distance","boss_phase","boss_started"]
 const ACTOR_FIELDS = ["health","max_health","alive_seconds","pressure_multiplier","base_move_speed","base_attack_damage","base_attack_interval","attack_timer","hit_flash","velocity"]
-const SHOT_FIELDS = ["kind","direction","speed","damage","source_weapon","remaining","hit_radius","piercing","critical","splash","velocity","flight_time","travel_remaining"]
+const SHOT_FIELDS = ["kind","direction","speed","damage","source_weapon","remaining","hit_radius","piercing","pierces_remaining","critical","splash","velocity","flight_time","travel_remaining"]
 const ENEMY_SHOT_FIELDS = ["kind","velocity","damage","source_position","gravity","remaining","max_distance","distance_travelled"]
 static func fields(node: Object, keys: Array) -> Dictionary:
 	var values: Dictionary = {}
@@ -111,8 +111,16 @@ static func capture(game: Node3D) -> Dictionary:
 		if target.source == combat and not target.collected and not target.is_queued_for_deletion():
 			targets.append({"transform":target.global_transform,"remaining":target.remaining})
 	data["charge_targets"] = targets
+	var explosions: Array = []
+	for effect in game.get_tree().get_nodes_in_group("staff_explosions"):
+		if effect.source == combat and not effect.is_queued_for_deletion():
+			var saved := fields(effect,["age","damage","critical","radius","damage_applied","hits_done"])
+			saved["transform"] = effect.global_transform
+			explosions.append(saved)
+	data["staff_explosions"] = explosions
 	return data
 static func restore_run(game: Node, data: Dictionary) -> void:
+	GameData.migrate_run_character(data)
 	migrate_removed_weapons(data)
 	var run = game.get_node("RunState")
 	apply(run,data["run"],RUN_FIELDS)
@@ -174,6 +182,12 @@ static func restore_world(game: Node3D, data: Dictionary) -> void:
 		shot.source = combat
 		shot.excluded.assign([player.get_rid()])
 		shot.struck = rids_for_indices(saved.get("struck",[]),actors)
+		if shot.kind == "bow" and not saved.has("pierces_remaining"):
+			var level: int = run.weapon_level("bow")
+			shot.piercing = true
+			shot.pierces_remaining = -1 if level >= 5 else maxi(0,level - saved.get("struck",[]).size())
+			saved["piercing"] = true
+			saved["pierces_remaining"] = shot.pierces_remaining
 		if saved.has("volley"):
 			shot.bow_volley_hits = volleys[int(saved["volley"])]
 		shot.transform = game.global_transform.affine_inverse() * saved["transform"]
@@ -193,6 +207,14 @@ static func restore_world(game: Node3D, data: Dictionary) -> void:
 		tornado.transform = game.global_transform.affine_inverse() * saved["transform"]
 		game.add_child(tornado)
 		tornado.model.rotation.y = saved["spin"]
+	for saved in data.get("staff_explosions",[]):
+		var effect = preload("res://scripts/staff_explosion.gd").new()
+		apply(effect,saved,["age","damage","critical","radius","damage_applied","hits_done"])
+		# Old single-hit saves already dealt their full damage.
+		if not saved.has("hits_done") and effect.damage_applied: effect.hits_done = effect.HIT_COUNT
+		effect.source = combat
+		effect.transform = game.global_transform.affine_inverse()*saved["transform"]
+		game.add_child(effect)
 	for saved in data.get("charge_targets",[]):
 		var target = preload("res://scripts/gun_charge_target.gd").new()
 		target.source = combat

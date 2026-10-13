@@ -99,14 +99,19 @@
                               "Knight":  "sword",
                               "Ninja":  "sword",
                               "อัศวิน":  "sword",
-                              "นินจา":  "sword"
+                              "นินจา":  "sword",
+                              "Saber":  "sword",
+                              "Archer":  "bow",
+                              "Wizard god":  "spellbook",
+                              "Daddy":  "sword",
+                              "Son":  "spellbook"
                           },
     "items":  [
                   {
                       "id":  "red_dot",
-                      "name":  "Red dot",
+                      "name":  "red dot",
                       "rarity":  "common",
-                      "icon":  "",
+                      "icon":  "res://assets/items/red dot.png",
                       "effects":  {
                                       "crit_chance":  1,
                                       "crit_damage":  2
@@ -114,9 +119,9 @@
                   },
                   {
                       "id":  "pencil",
-                      "name":  "Pencil",
+                      "name":  "pencil",
                       "rarity":  "common",
-                      "icon":  "",
+                      "icon":  "res://assets/items/pencil.png",
                       "effects":  {
                                       "attack":  3
                                   }
@@ -125,34 +130,34 @@
                       "id":  "g_string",
                       "name":  "g-string",
                       "rarity":  "common",
-                      "icon":  "",
+                      "icon":  "res://assets/items/g-string.png",
                       "effects":  {
                                       "max_hp":  20
                                   }
                   },
                   {
                       "id":  "sandal",
-                      "name":  "Sandal",
+                      "name":  "sandal",
                       "rarity":  "common",
-                      "icon":  "",
+                      "icon":  "res://assets/items/sandal.png",
                       "effects":  {
                                       "speed":  3
                                   }
                   },
                   {
                       "id":  "clover_three",
-                      "name":  "Clover 3 แฉก",
+                      "name":  "clover3",
                       "rarity":  "common",
-                      "icon":  "",
+                      "icon":  "res://assets/items/clover3.png",
                       "effects":  {
                                       "luck":  5
                                   }
                   },
                   {
                       "id":  "scope_x2",
-                      "name":  "Scope X2",
+                      "name":  "Scope holo",
                       "rarity":  "rare",
-                      "icon":  "",
+                      "icon":  "res://assets/items/Scope holo.png",
                       "effects":  {
                                       "crit_chance":  2.5,
                                       "crit_damage":  5
@@ -162,34 +167,34 @@
                       "id":  "pan",
                       "name":  "Pan",
                       "rarity":  "rare",
-                      "icon":  "",
+                      "icon":  "res://assets/items/Pan.png",
                       "effects":  {
                                       "attack":  6
                                   }
                   },
                   {
                       "id":  "tank_top",
-                      "name":  "Tank top",
+                      "name":  "tank top",
                       "rarity":  "rare",
-                      "icon":  "",
+                      "icon":  "res://assets/items/tank top.png",
                       "effects":  {
                                       "max_hp":  50
                                   }
                   },
                   {
                       "id":  "boot",
-                      "name":  "boot",
+                      "name":  "Boots",
                       "rarity":  "rare",
-                      "icon":  "",
+                      "icon":  "res://assets/items/Boots.png",
                       "effects":  {
                                       "speed":  5
                                   }
                   },
                   {
                       "id":  "clover_four",
-                      "name":  "Clover 4 แฉก",
+                      "name":  "clover4",
                       "rarity":  "rare",
-                      "icon":  "",
+                      "icon":  "res://assets/items/clover4.png",
                       "effects":  {
                                       "luck":  10
                                   }
@@ -198,7 +203,7 @@
                       "id":  "x_ray",
                       "name":  "X-ray",
                       "rarity":  "epic",
-                      "icon":  "",
+                      "icon":  "res://assets/items/X-ray.png",
                       "effects":  {
                                       "crit_chance":  5,
                                       "crit_damage":  10
@@ -206,27 +211,27 @@
                   },
                   {
                       "id":  "light_saber",
-                      "name":  "Light saber",
+                      "name":  "Lightsaber",
                       "rarity":  "epic",
-                      "icon":  "",
+                      "icon":  "res://assets/items/Lightsaber.png",
                       "effects":  {
                                       "attack":  12
                                   }
                   },
                   {
                       "id":  "golden_dick",
-                      "name":  "golden dick",
+                      "name":  "Golden banana",
                       "rarity":  "epic",
-                      "icon":  "",
+                      "icon":  "res://assets/items/Golden banana.png",
                       "effects":  {
                                       "max_hp":  150
                                   }
                   },
                   {
                       "id":  "hermes_boot",
-                      "name":  "Hermes boot",
+                      "name":  "Hermes boots",
                       "rarity":  "epic",
-                      "icon":  "",
+                      "icon":  "res://assets/items/Hermes boots.png",
                       "effects":  {
                                       "speed":  7
                                   }
@@ -235,16 +240,16 @@
                       "id":  "mambo_doll",
                       "name":  "Mambo doll",
                       "rarity":  "epic",
-                      "icon":  "",
+                      "icon":  "res://assets/items/Mambo doll.png",
                       "effects":  {
                                       "luck":  20
                                   }
                   },
                   {
                       "id":  "god_eyes",
-                      "name":  "God Eyes",
+                      "name":  "God eye",
                       "rarity":  "legendary",
-                      "icon":  "",
+                      "icon":  "res://assets/items/God eye.png",
                       "effects":  {
                                       "crit_chance":  10,
                                       "crit_damage":  20
@@ -254,7 +259,7 @@
                       "id":  "zenith",
                       "name":  "Zenith",
                       "rarity":  "legendary",
-                      "icon":  "",
+                      "icon":  "res://assets/items/Zenith.png",
                       "effects":  {
                                       "attack":  20
                                   }
@@ -263,25 +268,25 @@
                       "id":  "furry_set",
                       "name":  "furry set",
                       "rarity":  "legendary",
-                      "icon":  "",
+                      "icon":  "res://assets/items/furry set.png",
                       "effects":  {
                                       "max_hp":  300
                                   }
                   },
                   {
                       "id":  "lighting_boot",
-                      "name":  "Lighting boot",
+                      "name":  "lighting boot",
                       "rarity":  "legendary",
-                      "icon":  "",
+                      "icon":  "res://assets/items/lighting boot.png",
                       "effects":  {
                                       "speed":  10
                                   }
                   },
                   {
                       "id":  "baby_oil",
-                      "name":  "Baby oil",
+                      "name":  "baby oil",
                       "rarity":  "legendary",
-                      "icon":  "",
+                      "icon":  "res://assets/items/baby oil.png",
                       "effects":  {
                                       "luck":  30
                                   }

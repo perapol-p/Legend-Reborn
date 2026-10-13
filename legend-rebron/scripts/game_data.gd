@@ -1,9 +1,10 @@
 extends Node
 signal settings_changed
 signal characters_changed
-const CHARACTERS := ["Daddy", "Mommy", "Son"]
+const CHARACTERS := ["Saber", "Archer", "Wizard god"]
+const CHARACTER_IMAGES := {"Saber":"res://assets/characters/portraits/Knight.png","Archer":"res://assets/characters/portraits/Archer.jpg","Wizard god":"res://assets/characters/portraits/Wizard.jpg"}
 var progress_path := "user://progress.cfg"
-var unlocked_characters: Array[String] = ["Daddy"]
+var unlocked_characters: Array[String] = ["Saber"]
 const SAVE_PATH := "user://settings.cfg"
 const ACTIONS = {
 	"move_forward": {"label": "Move forward", "key": KEY_W},
@@ -15,7 +16,7 @@ const ACTIONS = {
 	"dash": {"label": "Dash", "key": KEY_Q},
 	"toggle_cursor": {"label": "Stats & equipment (hold)", "key": KEY_TAB},
 	"reload": {"label": "Reload weapon", "key": KEY_R},
-	"interact": {"label": "Open supplies", "key": KEY_E}
+	"interact": {"label": "Interact / Staff explosion (LV5)", "key": KEY_E}
 
 }
 const CROSSHAIR_COLORS = {
@@ -24,7 +25,7 @@ const CROSSHAIR_COLORS = {
 }
 const CROSSHAIR_STYLES = ["plus", "dot", "gap"]
 var settings_path := SAVE_PATH
-var selected_character := "Daddy"
+var selected_character := "Saber"
 const STAGES := ["grassland","desert","practice"]
 const STAGE_NAMES := {"grassland":"Grassland","desert":"Desert","practice":"Practice"}
 var selected_stage := "grassland"
@@ -154,9 +155,11 @@ func restore_defaults() -> void:
 	save_settings()
 
 func is_character_unlocked(character: String) -> bool:
-	return unlocked_characters.has(character) or (character == "Mommy" and games_completed >= 1)
+	character = normalize_character(character)
+	return unlocked_characters.has(character) or (character == "Archer" and games_completed >= 1)
 
 func unlock_character(character: String) -> bool:
+	character = normalize_character(character)
 	if character not in CHARACTERS:
 		return false
 	if not unlocked_characters.has(character):
@@ -175,8 +178,9 @@ func load_progress() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load(progress_path) != OK:
 		return
-	unlocked_characters.assign(["Daddy"])
-	for character in cfg.get_value("characters", "unlocked", []):
+	unlocked_characters.assign(["Saber"])
+	for old_character in cfg.get_value("characters", "unlocked", []):
+		var character := normalize_character(str(old_character))
 		if character in CHARACTERS and not unlocked_characters.has(character):
 			unlocked_characters.append(character)
 	games_completed = maxi(0, int(cfg.get_value("progress", "games_completed", 0)))
@@ -200,6 +204,7 @@ func load_active_run() -> Dictionary:
 	for key in ["run","combat","spawner","player","combo"]:
 		if not value.get(key) is Dictionary:
 			return {}
+	migrate_run_character(value)
 	if int(value["run"].get("level",0)) < 1 or value["run"].get("character_name","") not in CHARACTERS:
 		return {}
 	load("res://scripts/run_save_codec.gd").migrate_removed_weapons(value)
@@ -220,3 +225,32 @@ func clear_active_run() -> void:
 	pending_resume.clear()
 	if FileAccess.file_exists(active_run_path):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(active_run_path))
+
+func normalize_character(character: String) -> String:
+	var key := character.strip_edges().to_lower()
+	var aliases := {"daddy":"Saber","mommy":"Archer","son":"Wizard god","wizard":"Wizard god"}
+	if aliases.has(key): return aliases[key]
+	for name in CHARACTERS:
+		if name.to_lower() == key: return name
+	return character.strip_edges()
+
+func character_icon(character: String) -> Texture2D:
+	var path: String = CHARACTER_IMAGES.get(normalize_character(character),"")
+	return load(path) as Texture2D if not path.is_empty() else null
+
+func migrate_run_character(data: Dictionary) -> void:
+	if not data.get("run") is Dictionary: return
+	var state: Dictionary = data["run"]
+	var old_name: String = str(state.get("character_name",""))
+	state["character_name"] = normalize_character(old_name)
+	# Son previously fell back to Sword; the renamed Wizard now has Staff as base weapon.
+	if old_name.to_lower() == "son" and state.get("equipped_weapon_id","") == "sword":
+		state["equipped_weapon_id"] = "spellbook"
+		var levels: Dictionary = state.get("weapon_levels",{})
+		levels["spellbook"] = maxi(int(levels.get("spellbook",1)),int(levels.get("sword",1)))
+		state["weapon_levels"] = levels
+		data.erase("animation")
+		if data.get("combat") is Dictionary:
+			data["combat"]["pending"] = -1.0
+			data["combat"]["attack_active"] = false
+			data["combat"]["cooldown"] = 0.0

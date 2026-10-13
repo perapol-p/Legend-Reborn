@@ -1,5 +1,7 @@
-﻿extends ColorRect
+extends ColorRect
 const Style = preload("res://scripts/ui_style.gd")
+const ItemWidgets = preload("res://scripts/item_widgets.gd")
+const Catalog = preload("res://scripts/item_catalog.gd")
 signal retry_requested
 signal main_menu_requested
 var summary: Dictionary
@@ -54,14 +56,20 @@ func _ready() -> void:
 	scroll.custom_minimum_size.y = 330
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	inventory.add_child(scroll)
-	var items := VBoxContainer.new()
+	var catalog = Catalog.new()
+	var items := HFlowContainer.new()
 	items.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	items.add_theme_constant_override("separation", 8)
+	items.add_theme_constant_override("h_separation", 8)
+	items.add_theme_constant_override("v_separation", 8)
 	scroll.add_child(items)
 	if summary["items"].is_empty():
 		Style.label(items, "No items collected", 18)
 	for item in summary["items"]:
-		Style.label(items, "%s  x%d" % [item["name"], item["count"]], 18, item["color"])
+		var definition: Dictionary = catalog.item_for(str(item.get("id","")))
+		if not definition.is_empty():
+			ItemWidgets.badge(items,catalog,definition,int(item["count"]))
+		else:
+			Style.label(items, "%s  x%d" % [item["name"], item["count"]], 18, item["color"])
 	var buttons := HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", 18)
 	stack.add_child(buttons)

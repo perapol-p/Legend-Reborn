@@ -60,8 +60,8 @@ func _ready() -> void:
 	unlocks.add_theme_constant_override("h_separation",6)
 	unlocks.add_theme_constant_override("v_separation",6)
 	utilities.add_child(unlocks)
-	for id in ["daddy","mommy","son","all"]:
-		_command_button(unlocks,"Unlock " + id.capitalize(),"/unlock " + id)
+	for id in ["Saber","Archer","Wizard god","All"]:
+		_command_button(unlocks,"Unlock " + id,"/unlock " + id.to_lower())
 	_command_button(utilities,"Show Spawn Debug","/spawndebug on")
 	_command_button(utilities,"Hide Spawn Debug","/spawndebug off")
 	_command_button(utilities,"Show Spawn Info","/spawninfo")

@@ -26,6 +26,14 @@ func _ready() -> void:
 		preload("res://scripts/run_save_codec.gd").restore_run(self,resume_data)
 	$RunState.player_died.connect(_on_player_died)
 	$Player.bind_run($RunState)
+	var shake_layer := CanvasLayer.new()
+	shake_layer.name = "ScreenShakeLayer"
+	shake_layer.layer = 150
+	add_child(shake_layer)
+	var shake = preload("res://scripts/screen_shake.gd").new()
+	shake.name = "ScreenShake"
+	shake_layer.add_child(shake)
+	$Player.screen_shake = shake
 	var healing_layer := CanvasLayer.new()
 	healing_layer.layer = 3
 	add_child(healing_layer)
@@ -104,10 +112,10 @@ func _ready() -> void:
 		tools_layer.add_child(practice_hint)
 		practice_hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 		practice_hint.offset_left = 40
-		practice_hint.offset_top = -204
+		practice_hint.offset_top = -230
 		practice_hint.offset_right = 350
-		practice_hint.offset_bottom = -178
-		practice_ui.visibility_changed.connect(func(): practice_hint.visible = not practice_ui.visible and not round_finished)
+		practice_hint.offset_bottom = -204
+		practice_ui.visibility_changed.connect(func(): practice_hint.visible = not practice_ui.visible and not round_finished and not get_tree().paused)
 	if not resume_data.is_empty() and resume_data.get("stage") == stage_id:
 		preload("res://scripts/run_save_codec.gd").restore_world(self,resume_data)
 	elif stage_id != "practice":
@@ -143,6 +151,8 @@ func _pause_changed() -> void:
 		cursor_released = false
 	_update_pointer()
 func _update_pointer() -> void:
+	if is_instance_valid(practice_hint):
+		practice_hint.visible = not get_tree().paused and not round_finished and not practice_ui.visible
 	var locked := get_tree().paused or cursor_released or round_finished
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if locked else Input.MOUSE_MODE_CAPTURED
 	$Player.input_enabled = not locked
@@ -209,7 +219,7 @@ func _show_result(won: bool) -> void:
 	$Interface/HUD.refresh_survival()
 func _leave_result(scene: String) -> void:
 	get_tree().paused = false
-	get_tree().change_scene_to_file(scene)
+	SceneTransition.change_scene(scene)
 
 
 

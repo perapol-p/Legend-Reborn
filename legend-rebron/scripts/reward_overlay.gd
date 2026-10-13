@@ -1,5 +1,6 @@
-﻿extends Control
+extends Control
 const Style = preload("res://scripts/ui_style.gd")
+const ItemWidgets = preload("res://scripts/item_widgets.gd")
 var run: Node
 var heading: Label
 var cards: GridContainer
@@ -18,7 +19,7 @@ func _ready() -> void:
 	var center := CenterContainer.new()
 	margin.add_child(center)
 	var stack := VBoxContainer.new()
-	stack.add_theme_constant_override("separation", 22)
+	stack.add_theme_constant_override("separation", 14)
 	center.add_child(stack)
 	var title := Style.label(stack, "LEVEL UP", 18, Style.GOLD)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -49,18 +50,20 @@ func refresh() -> void:
 		var item: Dictionary = run.catalog.item_for(id)
 		var color: Color = run.catalog.rarity_color(item["rarity"])
 		var panel := PanelContainer.new()
-		panel.custom_minimum_size = Vector2(285, 310)
+		panel.custom_minimum_size = Vector2(285, 410)
 		panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var frame := Style.box(Color("1b2029"), color, 12)
-		frame.set_border_width_all(2)
+		
 		panel.add_theme_stylebox_override("panel", frame)
 		cards.add_child(panel)
 		var stack := VBoxContainer.new()
-		stack.add_theme_constant_override("separation", 18)
+		stack.add_theme_constant_override("separation", 10)
 		panel.add_child(stack)
 		var rarity_label := Style.label(stack, run.catalog.rarity_name(item["rarity"]).to_upper(), 16, color)
 		rarity_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		var name_label := Style.label(stack, item["name"], 28)
+		ItemWidgets.artwork(stack,run.catalog,item,140.0)
+		var name_label := Style.label(stack, item["name"], 24)
+		name_label.name = "ItemName"
 		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		var count := Style.label(stack, "Owned: %d  →  %d" % [run.stack_count(id), run.stack_count(id) + 1], 16, color)

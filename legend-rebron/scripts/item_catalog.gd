@@ -1,4 +1,4 @@
-﻿extends RefCounted
+extends RefCounted
 const DATA_PATH = "res://data/item_catalog.json"
 const STAT_NAMES = {
 	"attack": "ATK", "max_hp": "Max HP",
@@ -8,6 +8,7 @@ const STAT_NAMES = {
 var data: Dictionary
 var items: Array
 var by_id: Dictionary = {}
+var icon_cache: Dictionary = {}
 func _init() -> void:
 	data = JSON.parse_string(FileAccess.get_file_as_string(DATA_PATH))
 	items = data["items"]
@@ -34,3 +35,11 @@ func weapon_name(character: String) -> String:
 static func format_number(value: float) -> String:
 	return ("%.2f" % value).trim_suffix("0").trim_suffix("0").trim_suffix(".")
 
+
+func icon_for(item: Dictionary) -> Texture2D:
+	var path: String = str(item.get("icon",""))
+	if path.is_empty() or not ResourceLoader.exists(path):
+		return null
+	if not icon_cache.has(path):
+		icon_cache[path] = load(path) as Texture2D
+	return icon_cache[path]

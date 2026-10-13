@@ -1,0 +1,8 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+LV 1: 40 single fireballs, 0 tornado procs; cooldown 0.65
+LV 2: 40 single fireballs, 0 tornado procs; cooldown 0.65
+LV 3: 40 single fireballs, 9 tornado procs; cooldown 0.65
+LV 4: 40 single fireballs, 25 tornado procs; cooldown 0.5
+LV 5: 20 single fireballs, 20 tornado procs; cooldown 0.35
+PASS: one ball at every level; LV3/4/5 tornado chances 25/50/100 percent; hold rates increase [3, 4, 5]; release stops; casting animation and old save ID preserved

@@ -10,6 +10,8 @@ var remaining := 5.0
 var travel_remaining := INF
 var hit_radius := 0.04
 var piercing := false
+# -1 is unlimited; positive values count bodies the arrow can pass through.
+var pierces_remaining := -1
 var critical := false
 var bow_volley_hits: Dictionary = {}
 var splash := 0.0
@@ -154,7 +156,8 @@ func impact(body: CollisionObject3D, point: Vector3) -> bool:
 			source.deal_hit(body, dealt_damage, source_weapon, false, critical)
 		if splash > 0.0:
 			source.explode(point - direction * 0.08, splash, damage, body, critical, source_weapon)
-	if piercing and damageable:
+	if piercing and damageable and pierces_remaining != 0:
+		if pierces_remaining > 0: pierces_remaining -= 1
 		return false
 	queue_free()
 	return true

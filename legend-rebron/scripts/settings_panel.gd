@@ -2,6 +2,7 @@ extends VBoxContainer
 const Style = preload("res://scripts/ui_style.gd")
 const Crosshair = preload("res://scripts/crosshair.gd")
 var page := "General"
+var tab_buttons: Dictionary = {}
 var content: VBoxContainer
 var status: Label
 var waiting_action := ""
@@ -15,7 +16,7 @@ func _ready() -> void:
 	var tabs := HBoxContainer.new()
 	add_child(tabs)
 	for title in ["General", "Keyboard", "Crosshair"]:
-		Style.button(tabs, title, show_page.bind(title))
+		tab_buttons[title] = Style.button(tabs,title,show_page.bind(title))
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size.y = 270
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -45,6 +46,10 @@ func cancel_rebind() -> void:
 func show_page(title: String) -> void:
 	cancel_rebind()
 	page = title
+	for tab in tab_buttons:
+		var button: Button = tab_buttons[tab]
+		button.add_theme_stylebox_override("normal",Style.box(Color("3b392b"),Style.GOLD) if tab == page else Style.box(Color("171f26")))
+		button.add_theme_color_override("font_color",Style.GOLD if tab == page else Style.PAPER)
 	binding_buttons.clear()
 	for child in content.get_children():
 		content.remove_child(child)

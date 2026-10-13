@@ -1,0 +1,86 @@
+ERROR: Resource file not found: res:// (expected type: Texture2D)
+   at: _load (core/io/resource_loader.cpp:325)
+ERROR: Can't open file from path 'res://assets/vfx/megumin_explosion/source/1.jpg'.
+   at: get_file_as_bytes (core/io/file_access.cpp:907)
+WARNING: FBX: Image index '0' couldn't be loaded from path: res://assets/vfx/megumin_explosion/source/1.jpg because there was no data to load. Skipping it.
+   at: _parse_images (modules/fbx/fbx_document.cpp:1081)
+ERROR: Resource file not found: res:// (expected type: Texture2D)
+   at: _load (core/io/resource_loader.cpp:325)
+ERROR: Can't open file from path 'res://assets/vfx/megumin_explosion/source/2.jpg'.
+   at: get_file_as_bytes (core/io/file_access.cpp:907)
+WARNING: FBX: Image index '1' couldn't be loaded from path: res://assets/vfx/megumin_explosion/source/2.jpg because there was no data to load. Skipping it.
+   at: _parse_images (modules/fbx/fbx_document.cpp:1081)
+ERROR: Resource file not found: res:// (expected type: Texture2D)
+   at: _load (core/io/resource_loader.cpp:325)
+ERROR: Can't open file from path 'res://assets/vfx/megumin_explosion/source/3.jpg'.
+   at: get_file_as_bytes (core/io/file_access.cpp:907)
+WARNING: FBX: Image index '2' couldn't be loaded from path: res://assets/vfx/megumin_explosion/source/3.jpg because there was no data to load. Skipping it.
+   at: _parse_images (modules/fbx/fbx_document.cpp:1081)
+ERROR: Resource file not found: res:// (expected type: Texture2D)
+   at: _load (core/io/resource_loader.cpp:325)
+ERROR: Can't open file from path 'res://assets/vfx/megumin_explosion/source/4.jpg'.
+   at: get_file_as_bytes (core/io/file_access.cpp:907)
+WARNING: FBX: Image index '3' couldn't be loaded from path: res://assets/vfx/megumin_explosion/source/4.jpg because there was no data to load. Skipping it.
+   at: _parse_images (modules/fbx/fbx_document.cpp:1081)
+ERROR: Resource file not found: res:// (expected type: Texture2D)
+   at: _load (core/io/resource_loader.cpp:325)
+ERROR: Can't open file from path 'res://assets/vfx/megumin_explosion/source/5.jpg'.
+   at: get_file_as_bytes (core/io/file_access.cpp:907)
+WARNING: FBX: Image index '4' couldn't be loaded from path: res://assets/vfx/megumin_explosion/source/5.jpg because there was no data to load. Skipping it.
+   at: _parse_images (modules/fbx/fbx_document.cpp:1081)
+ERROR: Resource file not found: res:// (expected type: Texture2D)
+   at: _load (core/io/resource_loader.cpp:325)
+ERROR: Can't open file from path 'res://assets/vfx/megumin_explosion/source/6.jpg'.
+   at: get_file_as_bytes (core/io/file_access.cpp:907)
+WARNING: FBX: Image index '5' couldn't be loaded from path: res://assets/vfx/megumin_explosion/source/6.jpg because there was no data to load. Skipping it.
+   at: _parse_images (modules/fbx/fbx_document.cpp:1081)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Basis [X: (0.0, 0.0, 0.0), Y: (0.0, 0.0, 0.0), Z: (0.0, 0.0, 0.0)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:717)
+ERROR: Plugin is not attached to debugger.
+   at: is_active (editor/debugger/editor_debugger_plugin.cpp:102)

@@ -1,6 +1,6 @@
 extends PanelContainer
 const Style = preload("res://scripts/ui_style.gd")
-const HELP := "/help — list commands\n/unlock mommy — unlock Mommy (Archer / Bow)\n/unlock son — unlock Son\n/unlock daddy — unlock Daddy\n/unlock all — unlock every character\nUnlocks are saved. Available in lobby and gameplay.\n/weapon <sword|bow|staff> — equip weapon\n/target — create training target\n/hit — test combo hit\n/kill — test combo kill\n/reset — reset combo\n/levelup — level up and choose an item\n/weaponlevel — upgrade current weapon (max 5)\n/spawndebug <on|off> — show/hide spawn ring and markers\n/spawninfo — show spawn counts and distance\n/spawn <melee|archer|flyer|boss> [1-10] — Practice enemies\n/clear — clear console"
+const HELP := "/help — list commands\n/unlock archer — unlock Archer (Bow)\n/unlock wizard god — unlock Wizard god (Staff)\n/unlock saber — unlock Saber (Sword)\n/unlock all — unlock every character\nUnlocks are saved. Practice only (U / F1).\n/weapon <sword|bow|staff> — equip weapon\n/target — create training target\n/hit — test combo hit\n/kill — test combo kill\n/reset — reset combo\n/levelup — level up and choose an item\n/weaponlevel — upgrade current weapon (max 5)\n/spawndebug <on|off> — show/hide spawn ring and markers\n/spawninfo — show spawn counts and distance\n/spawn <melee|archer|flyer|boss> [1-10] — Practice enemies\n/clear — clear console"
 var game: Node
 var previous_focus: Control
 var output: RichTextLabel
@@ -114,19 +114,18 @@ func submit(raw: String) -> void:
 		output.clear()
 		return
 	if name == "/unlock":
-		if args.size() != 2:
-			write("Usage: /unlock daddy|mommy|son|all")
+		if args.size() < 2:
+			write("Usage: /unlock saber|archer|wizard god|all")
 			return
-		var names: Array = GameData.CHARACTERS if args[1] == "all" else []
-		if args[1] != "all":
-			for character in GameData.CHARACTERS:
-				if character.to_lower() == args[1]:
-					names.append(character)
+		var requested := " ".join(args.slice(1))
+		var names: Array = GameData.CHARACTERS if requested == "all" else []
+		if requested != "all":
+			var character := GameData.normalize_character(requested)
+			if character in GameData.CHARACTERS: names.append(character)
 		if names.is_empty():
-			write("Unknown character. Use daddy, mommy, son or all.")
+			write("Unknown character. Use saber, archer, wizard god or all.")
 			return
-		for character in names:
-			GameData.unlock_character(character)
+		for character in names: GameData.unlock_character(character)
 		write("Unlocked: " + ", ".join(names))
 		return
 	if not is_instance_valid(game):

@@ -1,0 +1,35 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+FILE res://assets/monsters/golem/golem.glb
+NODE . [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)]
+NODE ./Sketchfab_model [X: (1.0, 0.0, 0.0), Y: (0.0, 0.0, -1.0), Z: (0.0, 1.0, 0.0), O: (0.0, 0.0, 0.0)]
+NODE ./Sketchfab_model/root [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)]
+NODE ./Sketchfab_model/root/GLTF_SceneRootNode [X: (1.0, 0.0, 0.0), Y: (0.0, 0.0, 1.0), Z: (0.0, -1.0, 0.0), O: (0.0, 0.0, 0.0)]
+NODE ./Sketchfab_model/root/GLTF_SceneRootNode/Armature_15 [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (1.260655, 6.960758, -1.459743)]
+NODE ./Sketchfab_model/root/GLTF_SceneRootNode/Armature_15/GLTF_created_0 [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)]
+NODE ./Sketchfab_model/root/GLTF_SceneRootNode/Armature_15/GLTF_created_0/Skeleton3D [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)]
+BONE_COUNT 15
+NODE ./Sketchfab_model/root/GLTF_SceneRootNode/Armature_15/GLTF_created_0/Skeleton3D/Object_7 [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)]
+BOUNDS [P: (-7.247239, 0.011974, -2.164469), S: (13.8354, 12.84139, 5.698709)] GLOBAL [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (1.260655, 6.960758, -1.459743)]
+NODE ./Sketchfab_model/root/GLTF_SceneRootNode/Armature_15/GLTF_created_0/Skeleton3D/Object_8 [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)]
+BOUNDS [P: (-1.109705, 7.24596, -0.026097), S: (2.65802, 4.451444, 2.814891)] GLOBAL [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (1.260655, 6.960758, -1.459743)]
+NODE ./Sketchfab_model/root/GLTF_SceneRootNode/Armature_15/GLTF_created_0/Cube_002_14 [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)]
+ROOT ..
+ANIM Attack1 2.91666674613953
+ANIM Attack2 2.5
+ANIM Attack3 1.66666662693024
+ANIM Defence1 4.16666650772095
+ANIM Defence2 3.54166674613953
+ANIM Defence3 1.66666662693024
+ANIM Idle 2.08333325386047
+ANIM IdlePieces 6.25
+ANIM Walk 2.08333325386047
+FILE res://assets/monsters/flying_eye/source/flying_eye_stand.fbx
+NODE . [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)]
+NODE ./Skeleton3D [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)]
+BONE_COUNT 47
+NODE ./Skeleton3D/Object003 [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)]
+BOUNDS [P: (-2.023444, -0.212554, -0.200645), S: (4.046888, 3.368689, 1.001328)] GLOBAL [X: (1.0, 0.0, 0.0), Y: (0.0, 1.0, 0.0), Z: (0.0, 0.0, 1.0), O: (0.0, 0.0, 0.0)]
+ROOT ..
+ANIM fly 0.83333333333333
+ANIM stand 0.83333333333333

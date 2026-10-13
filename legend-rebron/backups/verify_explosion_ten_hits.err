@@ -1,0 +1,4 @@
+SCRIPT ERROR: Invalid access to property or key 'health' on a base object of type 'Nil'.
+   at: verify (res://backups/verify_explosion_ten_hits.gd:71)
+   GDScript backtrace (most recent call first):
+       [0] verify (res://backups/verify_explosion_ten_hits.gd:71)

@@ -1,0 +1,4 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 581.57 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 4060 Laptop GPU
+
+PASS: textured/animated Golem boss and Flying Eye, aligned muzzle, melee/fireball combat, death cleanup; zombie/archer preserved; 15min boss and 10min flyer timing; boss victory callback

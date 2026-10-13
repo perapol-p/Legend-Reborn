@@ -1,42 +1,84 @@
 extends Control
 const Style = preload("res://scripts/ui_style.gd")
 var stage_buttons: Dictionary = {}
+var background: Control
 func _ready() -> void:
-	var background := ColorRect.new()
-	background.color = Color("10171c")
+	background = preload("res://scripts/home_background.gd").new()
+	background.name = "StagePreview"
+	background.auto_cycle = false
+	background.initial_stage = maxi(GameData.STAGES.find(GameData.selected_stage),0)
+	background.transition_duration = 0.25
 	add_child(background)
-	background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var shade := ColorRect.new()
+	shade.color = Color(0.02,0.03,0.04,0.34)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(shade)
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var center := CenterContainer.new()
 	add_child(center)
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var stack := VBoxContainer.new()
-	stack.custom_minimum_size = Vector2(1020,440)
-	stack.add_theme_constant_override("separation",24)
+	stack.custom_minimum_size = Vector2(1020,510)
+	stack.add_theme_constant_override("separation",18)
 	center.add_child(stack)
-	var heading := Style.label(stack,"CHOOSE YOUR STAGE",38,Style.GOLD)
+	var overline := Style.caption(stack,"01  /  SELECT YOUR DESTINATION",14,Style.GOLD)
+	overline.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var heading := Style.label(stack,"CHOOSE YOUR STAGE",42)
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var subtitle := Style.label(stack,"Survive the normal stages or test your build in Practice.",18)
+	var subtitle := Style.caption(stack,"Hover to explore. Choose where your legend begins.",18)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var cards := HBoxContainer.new()
-	cards.add_theme_constant_override("separation",20)
+	cards.add_theme_constant_override("separation",22)
 	stack.add_child(cards)
-	var descriptions := {
-		"grassland":"GRASSLAND\nNORMAL MODE\n\nRolling hills and forest\nAncient stone ruins\nBoss arrives at 15:00",
-		"desert":"DESERT\nNORMAL MODE\n\nSand dunes and cacti\nOasis and sandstone gates\nBoss arrives at 15:00",
-		"practice":"PRACTICE\nSANDBOX\n\nGrid arena, ramps and pyramids\nU tools / Manual enemies"
+	var details := {
+		"grassland":["GRASSLAND","NORMAL MODE","Rolling hills. Forest paths.\nAncient ruins under open skies.","15:00  /  GOLEM ENCOUNTER",Color("8db894")],
+		"desert":["DESERT","NORMAL MODE","Golden dunes. Sandstone gates.\nAn oasis beyond the horde.","15:00  /  GOLEM ENCOUNTER",Color("dfbc79")],
+		"practice":["PRACTICE","SANDBOX","Build freely. Test every weapon.\nSpawn enemies on your terms.","U  /  OPEN PRACTICE TOOLS",Color("91baca")]
 	}
 	for stage in GameData.STAGES:
 		var id: String = stage
-		var button := Style.button(cards,descriptions[id],func(): select_stage(id))
+		var info: Array = details[id]
+		var accent: Color = info[4]
+		var button := Style.button(cards,"",select_stage.bind(id))
 		button.name = id.capitalize()+"Button"
-		button.custom_minimum_size = Vector2(320,260)
+		button.custom_minimum_size = Vector2(320,320)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var frame := StyleBoxFlat.new()
+		frame.draw_center = true
+		frame.bg_color = Color("20272d")
+		frame.border_color = Color(0.75,0.79,0.81,0.6)
+		frame.set_border_width_all(1)
+		for state in ["normal","pressed","disabled"]:
+			button.add_theme_stylebox_override(state,frame)
+		var outline := StyleBoxFlat.new()
+		outline.draw_center = true
+		outline.bg_color = Color("20272d")
+		outline.border_color = Style.GOLD
+		outline.set_border_width_all(1)
+		for state in ["hover","focus"]:
+			button.add_theme_stylebox_override(state,outline)
+		var content := Style.card_stack(button)
+		Style.caption(content,"%02d  /  %s" % [GameData.STAGES.find(id)+1,info[1]],13,accent)
+		Style.rule(content,accent)
+		Style.caption(content,info[0],28,Style.PAPER)
+		var description := Style.caption(content,info[2],17)
+		description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		description.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		Style.caption(content,info[3],12,accent)
+		Style.caption(content,"SELECT STAGE  →",16,Style.PAPER)
+		for label in content.get_children():
+			if label is Label:
+				label.add_theme_color_override("font_outline_color",Color(0.01,0.02,0.03,0.95))
+				label.add_theme_constant_override("outline_size",4)
+		button.mouse_entered.connect(_preview_stage.bind(id))
+		button.focus_entered.connect(_preview_stage.bind(id))
 		stage_buttons[id] = button
-		button.add_theme_font_size_override("font_size",20)
-	Style.button(stack,"BACK",func(): get_tree().change_scene_to_file("res://scenes/main_menu.tscn"))
+	var back := Style.button(stack,"BACK",func(): SceneTransition.change_scene("res://scenes/main_menu.tscn"))
+	back.custom_minimum_size.y = 46
 func select_stage(stage: String) -> void:
-	if stage not in GameData.STAGES:
-		return
+	if stage not in GameData.STAGES: return
 	GameData.selected_stage = stage
-	get_tree().change_scene_to_file("res://scenes/character_select.tscn")
-
+	SceneTransition.change_scene("res://scenes/character_select.tscn")
+func _preview_stage(stage: String) -> void:
+	var index := GameData.STAGES.find(stage)
+	if index >= 0 and background.selected != index: background.select_world(index)

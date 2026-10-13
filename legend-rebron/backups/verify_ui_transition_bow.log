@@ -1,0 +1,6 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 581.57 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 4060 Laptop GPU
+
+PASS: texture theme, all menu routes, duplicate-click guard, unpause
+PASS: all character HUD portraits have 96px image area
+PASS: bow LV1-4 hits 2/3/4/5 targets; LV5 pierces all; terrain stops arrows

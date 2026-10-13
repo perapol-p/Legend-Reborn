@@ -1,4 +1,4 @@
-﻿extends Control
+extends Control
 const VIGNETTE = preload("res://shaders/damage_vignette.gdshader")
 const HIT_DURATION := 0.85
 var player: CharacterBody3D
@@ -6,6 +6,8 @@ var camera: Camera3D
 var hits: Array[Dictionary] = []
 var flash_time := 0.0
 var flash_strength := 0.0
+var low_health_strength := 0.0
+var low_health_target := 0.0
 var vignette_material: ShaderMaterial
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -26,6 +28,10 @@ func bind_player(body: CharacterBody3D) -> void:
 	player = body
 	camera = player.get_node("Head/Camera3D")
 	player.damage_received.connect(_on_damage_received)
+	player.run.changed.connect(_on_health_changed)
+	_on_health_changed()
+	low_health_strength = low_health_target
+	_update_shader()
 func _on_damage_received(amount: float, source_position: Vector3) -> void:
 	flash_time = 0.25
 	flash_strength = clampf(amount / 20.0, 0.45, 1.0)
@@ -55,15 +61,18 @@ func _process(delta: float) -> void:
 	if get_tree().paused or player.run.finished:
 		hide()
 		return
+	low_health_strength = lerpf(low_health_strength,low_health_target,1.0-exp(-8.0*delta))
+	if low_health_target <= 0.0001 and low_health_strength < 0.001: low_health_strength = 0.0
 	flash_time = maxf(0.0, flash_time - delta)
 	for hit in hits:
 		hit["time"] -= delta
 	hits = hits.filter(func(hit): return hit["time"] > 0.0)
-	visible = flash_time > 0.0 or not hits.is_empty()
+	visible = low_health_strength > 0.0001 or flash_time > 0.0 or not hits.is_empty()
 	if visible:
 		_update_shader()
 		queue_redraw()
 func _update_shader() -> void:
+	vignette_material.set_shader_parameter("low_health",low_health_strength)
 	vignette_material.set_shader_parameter("flash", flash_strength * pow(flash_time / 0.25, 2.0))
 	var direction := Vector2.ZERO
 	var strength := 0.0
@@ -87,3 +96,10 @@ func _draw() -> void:
 		draw_arc(center, radius, angle - 0.30, angle + 0.30, 24, Color(1.0, 0.08, 0.08, alpha * 0.18), 18.0, true)
 		draw_arc(center, radius, angle - 0.27, angle + 0.27, 24, Color(1.0, 0.14, 0.10, alpha * 0.9), 5.0, true)
 
+
+func _on_health_changed() -> void:
+	if not is_instance_valid(player) or not is_instance_valid(player.run):
+		return
+	var maximum: float = maxf(float(player.run.stats()["max_hp"]),1.0)
+	var ratio: float = clampf(player.run.current_health()/maximum,0.0,1.0)
+	low_health_target = pow(1.0-ratio,1.6)

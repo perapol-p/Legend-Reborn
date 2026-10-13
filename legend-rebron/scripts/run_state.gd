@@ -5,6 +5,7 @@ signal health_restored(amount: float, burst: bool)
 var finished := false
 var elapsed_time := 0.0
 var monsters_killed := 0
+var peak_dps := 0.0
 var regen_elapsed := 0.0
 signal offers_changed
 const Catalog = preload("res://scripts/item_catalog.gd")
@@ -218,7 +219,7 @@ func result_summary() -> Dictionary:
 	var inventory: Array[Dictionary] = []
 	for id in owned_ids:
 		var item: Dictionary = catalog.item_for(id)
-		inventory.append({"name": item["name"], "count": stack_count(id), "color": catalog.rarity_color(item["rarity"])})
+		inventory.append({"id": id,"name": item["name"], "count": stack_count(id), "color": catalog.rarity_color(item["rarity"])})
 	return {
 		"elapsed_seconds": elapsed_time,
 		"monsters_killed": monsters_killed,

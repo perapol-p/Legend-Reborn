@@ -27,13 +27,12 @@ text="CHARACTER"
 horizontal_alignment=1
 [node name="Body" type="HBoxContainer" parent="Center/Panel/VBox"]
 theme_override_constants/separation=30
-[node name="Portrait" type="Label" parent="Center/Panel/VBox/Body"]
-custom_minimum_size=Vector2(330,390)
-horizontal_alignment=1
-vertical_alignment=1
-[node name="Detail" type="Label" parent="Center/Panel/VBox/Body"]
-custom_minimum_size=Vector2(580,390)
-vertical_alignment=1
+[node name="Portrait" type="PanelContainer" parent="Center/Panel/VBox/Body"]
+custom_minimum_size=Vector2(420,390)
+[node name="Detail" type="RichTextLabel" parent="Center/Panel/VBox/Body"]
+custom_minimum_size=Vector2(480,390)
+bbcode_enabled=true
+scroll_active=false
 autowrap_mode=2
 [node name="Buttons" type="HBoxContainer" parent="Center/Panel/VBox"]
 theme_override_constants/separation=20

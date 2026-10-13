@@ -26,7 +26,7 @@ func _ready() -> void:
 	shade = ColorRect.new()
 	add_child(shade)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	shade.color = Color(0.025, 0.035, 0.04, 0.97)
+	shade.color = Color(0.025, 0.035, 0.04, 0.91)
 	var margin := MarginContainer.new()
 	add_child(margin)
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -44,12 +44,13 @@ func _ready() -> void:
 	menu_center.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_child(menu_center)
 	menu = VBoxContainer.new()
-	menu.custom_minimum_size.x = 365
-	menu.add_theme_constant_override("separation", 8)
+	menu.custom_minimum_size.x = 390
+	menu.add_theme_constant_override("separation",14)
 	menu_center.add_child(menu)
 	Style.label(menu, "LEGEND REBORN", 22, Style.GOLD)
-	Style.label(menu, "Paused", 58)
-	resume = Style.button(menu, "Resume", toggle_pause)
+	Style.label(menu, "PAUSED",46)
+	resume = Style.button(menu,"RESUME",toggle_pause)
+	Style.primary(resume)
 	Style.button(menu, "Settings", show_settings)
 	return_button = Style.button(menu, "Return to Main Menu", return_to_menu)
 	quit_button = Style.button(menu, "Quit to Desktop", quit_to_desktop)
@@ -69,7 +70,7 @@ func _ready() -> void:
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(content)
 	equipment = HBoxContainer.new()
-	equipment.custom_minimum_size.y = 120
+	equipment.custom_minimum_size.y = 200
 	equipment.add_theme_constant_override("separation", 16)
 	layout.add_child(equipment)
 	var weapon_slot := PanelContainer.new()
@@ -89,7 +90,7 @@ func _ready() -> void:
 	item_slot.add_child(item_stack)
 	item_summary = Style.label(item_stack, "ITEMS / 0", 16, Style.GOLD)
 	var item_scroll := ScrollContainer.new()
-	item_scroll.custom_minimum_size.y = 70
+	item_scroll.custom_minimum_size.y = 156
 	item_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	item_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	item_stack.add_child(item_scroll)
@@ -210,9 +211,9 @@ func refresh_opacity() -> void:
 	var opacity: float = GameData.tab_ui_opacity if overlay_mode == "stats" else 1.0
 	shade.color = Color(0.025, 0.035, 0.04, 0.35 * opacity if overlay_mode == "stats" else 0.97)
 	for panel in background_panels:
-		var background := panel.get_theme_stylebox("panel") as StyleBoxFlat
-		background.bg_color.a = opacity
-		background.border_color.a = opacity
+		var background := panel.get_theme_stylebox("panel") as StyleBoxTexture
+		background.modulate_color.a = opacity
+		
 func _close_overlay() -> void:
 	hide()
 	get_tree().paused = false
@@ -255,7 +256,7 @@ func return_to_menu() -> void:
 		return
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	get_tree().paused = false
-	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	SceneTransition.change_scene("res://scenes/main_menu.tscn")
 
 
 

@@ -12,6 +12,7 @@ var locked_target := Vector3.ZERO
 var hover_time := 0.0
 var shots_fired := 0
 var archer_visual: Node3D
+var flyer_visual: Node3D
 var muzzle: Marker3D
 var charge_visual: MeshInstance3D
 var wings: Array[MeshInstance3D] = []
@@ -38,9 +39,9 @@ func _ready() -> void:
 		_build_archer()
 	else:
 		motion_mode = CharacterBody3D.MOTION_MODE_FLOATING
-		_build_wings()
+		_build_flying_eye()
 func refresh() -> void:
-	health_label.text = ("ARCHER " if enemy_type == "archer" else "FIRE WISP ") + "%d / %d" % [ceili(health), ceili(max_health)]
+	health_label.text = ("ARCHER " if enemy_type == "archer" else "FLYING EYE ") + "%d / %d" % [ceili(health), ceili(max_health)]
 func _physics_process(delta: float) -> void:
 	if dead or not is_instance_valid(player) or player.run.finished:
 		return
@@ -57,6 +58,8 @@ func _physics_process(delta: float) -> void:
 	if distance > 0.05:
 		rotation.y = atan2(-direction.x, -direction.z)
 	var movement := 1.0 if distance > preferred_distance else (-0.65 if distance < retreat_distance else 0.0)
+	if enemy_type == "archer" and offset.y > 1.1 and not can_fire():
+		movement = 1.0
 	if windup_remaining >= 0.0:
 		movement = 0.0
 	if enemy_type == "archer" and movement > 0.0:
@@ -70,6 +73,8 @@ func _physics_process(delta: float) -> void:
 			wings[i].rotation.z = (1.0 if i == 0 else -1.0) * (0.15 + sin(hover_time * 8.0) * 0.35)
 	else:
 		velocity.y -= 25.0 * delta
+	if enemy_type == "archer":
+		apply_climbing(delta)
 	move_and_slide()
 	if is_instance_valid(archer_visual):
 		if windup_remaining >= 0.0:
@@ -106,6 +111,8 @@ func can_fire() -> bool:
 func _fire_projectile() -> void:
 	if is_instance_valid(archer_visual):
 		archer_visual.release()
+	if is_instance_valid(flyer_visual):
+		flyer_visual.release()
 	var shot = PROJECTILE.new()
 	shot.player = player
 	shot.kind = "arrow" if enemy_type == "archer" else "fireball"
@@ -180,4 +187,14 @@ func _build_archer() -> void:
 	death_visual = archer_visual
 	muzzle.reparent(archer_visual.weapon,false)
 	muzzle.position = Vector3(0,0.07,1.12)
+	damage_flash.bind_model(model)
+
+func _build_flying_eye() -> void:
+	for child in model.get_children():
+		if child is GeometryInstance3D: child.hide()
+	flyer_visual = preload("res://scripts/flying_eye_visual.gd").new()
+	flyer_visual.name = "FlyingEyeVisual"
+	model.add_child(flyer_visual)
+	death_visual = flyer_visual
+	muzzle.position = Vector3(0,1.25,-0.50)
 	damage_flash.bind_model(model)

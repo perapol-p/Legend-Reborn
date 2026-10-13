@@ -27,7 +27,7 @@ text="CREDIT"
 horizontal_alignment=1
 [node name="Text" type="Label" parent="Center/Panel/VBox"]
 custom_minimum_size=Vector2(0,300)
-text="Legend Rebron\n\nCreated by: Your Team\nGame Design: -\nProgramming: -\n3D Art: -\nAudio: -\n\nEdit this page with your real team credits."
+text="Legend Reborn\n\nCreated by: Your Team\nGame Design: -\nProgramming: -\n3D Art: -\nAudio: -\n\nEdit this page with your real team credits."
 horizontal_alignment=1
 vertical_alignment=1
 [node name="Back" type="Button" parent="Center/Panel/VBox"]

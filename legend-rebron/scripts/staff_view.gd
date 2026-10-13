@@ -37,6 +37,8 @@ func _ready() -> void:
  staff_mesh.set_surface_override_material(0,material)
 func play_attack(duration: float) -> void:
  super.play_attack(duration)
+ # Keep the entire original cast animation visible at faster firing rates.
+ animation_player.speed_scale = maxf(1.0,animation_player.get_animation(attack_animation).length/maxf(duration,0.01))
  cast_remaining = 0.35
 func release_magic() -> void:
  cast_remaining = 0.3

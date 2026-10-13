@@ -1,0 +1,6 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 581.57 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 4060 Laptop GPU
+
+PASS: all menu layouts, stage hover, character portraits, settings pages
+PASS: HUD, Pause, item selection, inventory and return transition
+UI POLISH CHECKS PASSED

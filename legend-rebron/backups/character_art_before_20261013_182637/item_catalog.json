@@ -1,0 +1,290 @@
+{
+    "base_stats":  {
+                       "attack":  10,
+                       "max_hp":  100,
+                       "speed":  100,
+                       "luck":  0,
+                       "crit_chance":  5,
+                       "crit_damage":  150
+                   },
+    "rarities":  {
+                     "common":  {
+                                    "name":  "Common",
+                                    "color":  "#a6aeb8"
+                                },
+                     "rare":  {
+                                  "name":  "Rare",
+                                  "color":  "#57a8f5"
+                              },
+                     "epic":  {
+                                  "name":  "Epic",
+                                  "color":  "#b881f5"
+                              },
+                     "legendary":  {
+                                       "name":  "Legendary",
+                                       "color":  "#edbe54"
+                                   }
+                 },
+    "progression":  {
+                        "xp_initial":  10,
+                        "xp_per_level":  5,
+                        "rarity_unlock_seconds":  {
+                                                      "common":  0,
+                                                      "rare":  0,
+                                                      "epic":  120,
+                                                      "legendary":  300
+                                                  },
+                        "rarity_time_stages":  [
+                                                   {
+                                                       "weights":  {
+                                                                       "common":  75,
+                                                                       "legendary":  0,
+                                                                       "rare":  25,
+                                                                       "epic":  0
+                                                                   },
+                                                       "seconds":  0
+                                                   },
+                                                   {
+                                                       "weights":  {
+                                                                       "common":  65,
+                                                                       "legendary":  0,
+                                                                       "rare":  27,
+                                                                       "epic":  8
+                                                                   },
+                                                       "seconds":  120
+                                                   },
+                                                   {
+                                                       "weights":  {
+                                                                       "common":  55,
+                                                                       "legendary":  3,
+                                                                       "rare":  30,
+                                                                       "epic":  12
+                                                                   },
+                                                       "seconds":  300
+                                                   },
+                                                   {
+                                                       "weights":  {
+                                                                       "common":  35,
+                                                                       "legendary":  7,
+                                                                       "rare":  35,
+                                                                       "epic":  23
+                                                                   },
+                                                       "seconds":  600
+                                                   }
+                                               ],
+                        "epic_pity_offers":  5,
+                        "rarity_min_levels":  {
+                                                  "common":  1,
+                                                  "rare":  1,
+                                                  "epic":  8,
+                                                  "legendary":  15
+                                              }
+                    },
+    "weapons":  [
+                    {
+                        "id":  "sword",
+                        "name":  "Sword"
+                    },
+                    {
+                        "id":  "bow",
+                        "name":  "Bow"
+                    },
+                    {
+                        "id":  "spellbook",
+                        "name":  "Staff"
+                    }
+                ],
+    "character_weapons":  {
+                              "Mommy":  "bow",
+                              "Knight":  "sword",
+                              "Ninja":  "sword",
+                              "อัศวิน":  "sword",
+                              "นินจา":  "sword"
+                          },
+    "items":  [
+                  {
+                      "id":  "red_dot",
+                      "name":  "red dot",
+                      "rarity":  "common",
+                      "icon":  "res://assets/items/red dot.png",
+                      "effects":  {
+                                      "crit_chance":  1,
+                                      "crit_damage":  2
+                                  }
+                  },
+                  {
+                      "id":  "pencil",
+                      "name":  "pencil",
+                      "rarity":  "common",
+                      "icon":  "res://assets/items/pencil.png",
+                      "effects":  {
+                                      "attack":  3
+                                  }
+                  },
+                  {
+                      "id":  "g_string",
+                      "name":  "g-string",
+                      "rarity":  "common",
+                      "icon":  "res://assets/items/g-string.png",
+                      "effects":  {
+                                      "max_hp":  20
+                                  }
+                  },
+                  {
+                      "id":  "sandal",
+                      "name":  "sandal",
+                      "rarity":  "common",
+                      "icon":  "res://assets/items/sandal.png",
+                      "effects":  {
+                                      "speed":  3
+                                  }
+                  },
+                  {
+                      "id":  "clover_three",
+                      "name":  "clover3",
+                      "rarity":  "common",
+                      "icon":  "res://assets/items/clover3.png",
+                      "effects":  {
+                                      "luck":  5
+                                  }
+                  },
+                  {
+                      "id":  "scope_x2",
+                      "name":  "Scope holo",
+                      "rarity":  "rare",
+                      "icon":  "res://assets/items/Scope holo.png",
+                      "effects":  {
+                                      "crit_chance":  2.5,
+                                      "crit_damage":  5
+                                  }
+                  },
+                  {
+                      "id":  "pan",
+                      "name":  "Pan",
+                      "rarity":  "rare",
+                      "icon":  "res://assets/items/Pan.png",
+                      "effects":  {
+                                      "attack":  6
+                                  }
+                  },
+                  {
+                      "id":  "tank_top",
+                      "name":  "tank top",
+                      "rarity":  "rare",
+                      "icon":  "res://assets/items/tank top.png",
+                      "effects":  {
+                                      "max_hp":  50
+                                  }
+                  },
+                  {
+                      "id":  "boot",
+                      "name":  "Boots",
+                      "rarity":  "rare",
+                      "icon":  "res://assets/items/Boots.png",
+                      "effects":  {
+                                      "speed":  5
+                                  }
+                  },
+                  {
+                      "id":  "clover_four",
+                      "name":  "clover4",
+                      "rarity":  "rare",
+                      "icon":  "res://assets/items/clover4.png",
+                      "effects":  {
+                                      "luck":  10
+                                  }
+                  },
+                  {
+                      "id":  "x_ray",
+                      "name":  "X-ray",
+                      "rarity":  "epic",
+                      "icon":  "res://assets/items/X-ray.png",
+                      "effects":  {
+                                      "crit_chance":  5,
+                                      "crit_damage":  10
+                                  }
+                  },
+                  {
+                      "id":  "light_saber",
+                      "name":  "Lightsaber",
+                      "rarity":  "epic",
+                      "icon":  "res://assets/items/Lightsaber.png",
+                      "effects":  {
+                                      "attack":  12
+                                  }
+                  },
+                  {
+                      "id":  "golden_dick",
+                      "name":  "Golden banana",
+                      "rarity":  "epic",
+                      "icon":  "res://assets/items/Golden banana.png",
+                      "effects":  {
+                                      "max_hp":  150
+                                  }
+                  },
+                  {
+                      "id":  "hermes_boot",
+                      "name":  "Hermes boots",
+                      "rarity":  "epic",
+                      "icon":  "res://assets/items/Hermes boots.png",
+                      "effects":  {
+                                      "speed":  7
+                                  }
+                  },
+                  {
+                      "id":  "mambo_doll",
+                      "name":  "Mambo doll",
+                      "rarity":  "epic",
+                      "icon":  "res://assets/items/Mambo doll.png",
+                      "effects":  {
+                                      "luck":  20
+                                  }
+                  },
+                  {
+                      "id":  "god_eyes",
+                      "name":  "God eye",
+                      "rarity":  "legendary",
+                      "icon":  "res://assets/items/God eye.png",
+                      "effects":  {
+                                      "crit_chance":  10,
+                                      "crit_damage":  20
+                                  }
+                  },
+                  {
+                      "id":  "zenith",
+                      "name":  "Zenith",
+                      "rarity":  "legendary",
+                      "icon":  "res://assets/items/Zenith.png",
+                      "effects":  {
+                                      "attack":  20
+                                  }
+                  },
+                  {
+                      "id":  "furry_set",
+                      "name":  "furry set",
+                      "rarity":  "legendary",
+                      "icon":  "res://assets/items/furry set.png",
+                      "effects":  {
+                                      "max_hp":  300
+                                  }
+                  },
+                  {
+                      "id":  "lighting_boot",
+                      "name":  "lighting boot",
+                      "rarity":  "legendary",
+                      "icon":  "res://assets/items/lighting boot.png",
+                      "effects":  {
+                                      "speed":  10
+                                  }
+                  },
+                  {
+                      "id":  "baby_oil",
+                      "name":  "baby oil",
+                      "rarity":  "legendary",
+                      "icon":  "res://assets/items/baby oil.png",
+                      "effects":  {
+                                      "luck":  30
+                                  }
+                  }
+              ]
+}

@@ -1,4 +1,4 @@
-﻿extends Control
+extends Control
 const Style = preload("res://scripts/ui_style.gd")
 var run: Node
 var level_label: Label
@@ -22,6 +22,14 @@ var combo_info: Label
 var critical_label: Label
 var critical_remaining := 0.0
 var flames: CPUParticles2D
+const DPS_WINDOW := 1.0
+var dps_label: Label
+var dps_area: Control
+var dps_value := 0.0
+var dps_peak := 0.0
+var dps_clock := 0.0
+var dps_window_damage := 0.0
+var dps_events: Array[Dictionary] = []
 func corner(rect: Rect2, anchor: Vector2 = Vector2.ZERO) -> Control:
 	var n := Control.new()
 	add_child(n)
@@ -95,18 +103,36 @@ func _ready() -> void:
 	critical_label.add_theme_constant_override("shadow_offset_y", 2)
 	critical_label.pivot_offset = Vector2(121, 26)
 	critical_label.hide()
-	var status := corner(Rect2(40, -156, 320, 126), Vector2(0, 1))
+	dps_area = corner(Rect2(-266,16,242,40),Vector2(1,0))
+	dps_area.name = "DPSCounter"
+	dps_area.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	dps_label = Style.label(dps_area,"",30,Color("b4e3ef"))
+	dps_label.name = "DPSValue"
+	dps_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dps_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	dps_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	dps_label.add_theme_color_override("font_outline_color",Color(0.02,0.04,0.06,0.9))
+	dps_label.add_theme_constant_override("outline_size",4)
+	dps_area.hide()
+	var status := corner(Rect2(40, -194, 360, 164), Vector2(0, 1))
 	var stack := VBoxContainer.new()
 	status.add_child(stack)
 	stack.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var row := HBoxContainer.new()
 	stack.add_child(row)
 	var portrait := PanelContainer.new()
-	portrait.custom_minimum_size = Vector2(64, 60)
-	portrait.add_theme_stylebox_override("panel", Style.box(Style.INK, Style.GOLD))
+	portrait.name = "CharacterPortrait"
+	portrait.custom_minimum_size = Vector2(104,104)
+	row.add_theme_constant_override("separation",12)
+	portrait.add_theme_stylebox_override("panel",StyleBoxEmpty.new())
 	row.add_child(portrait)
-	var initial := Style.label(portrait, GameData.selected_character.left(1).to_upper(), 30)
-	initial.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var portrait_image := TextureRect.new()
+	portrait_image.name = "CharacterImage"
+	portrait_image.texture = GameData.character_icon(GameData.selected_character)
+	portrait_image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	portrait_image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	portrait_image.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	portrait.add_child(portrait_image)
 	var weapon := VBoxContainer.new()
 	row.add_child(weapon)
 	Style.label(weapon, GameData.selected_character.to_upper(), 18, Style.PAPER)
@@ -125,6 +151,8 @@ func _ready() -> void:
 func bind_run(model: Node) -> void:
 	run = model
 	run.changed.connect(refresh_run)
+	dps_peak = run.peak_dps
+	_refresh_dps_text()
 	refresh_run()
 func refresh_run() -> void:
 	var current: Dictionary = run.stats()
@@ -153,6 +181,7 @@ func refresh_combo() -> void:
 	flames.emitting = rank == 8
 	rank_label.add_theme_color_override("font_color", Color("f36b26") if rank == 8 else Color("b9572b"))
 func _process(delta: float) -> void:
+	update_dps(delta)
 	critical_remaining = maxf(0.0, critical_remaining - delta)
 	critical_label.visible = critical_remaining > 0.0
 	critical_label.modulate.a = minf(critical_remaining / 0.20, 1.0)
@@ -193,6 +222,7 @@ func refresh_survival() -> void:
 
 func bind_combat(combat: Node) -> void:
 	combat.critical_hit.connect(show_critical)
+	combat.damage_dealt.connect(record_damage)
 func show_critical(damage: float) -> void:
 	critical_remaining = 1.1
 	critical_label.text = "CRITICAL!\n%d DAMAGE" % roundi(damage)
@@ -202,3 +232,34 @@ func show_critical(damage: float) -> void:
 
 
 
+
+func record_damage(amount: float) -> void:
+	if amount <= 0.0 or get_tree().paused or not is_instance_valid(run) or run.finished:
+		return
+	# Combine hits within the same frame, including volleys and area damage.
+	if not dps_events.is_empty() and dps_events[-1]["time"] == dps_clock:
+		dps_events[-1]["amount"] += amount
+	else:
+		dps_events.append({"time":dps_clock,"amount":amount})
+	dps_window_damage += amount
+	dps_value = dps_window_damage / DPS_WINDOW
+	dps_peak = maxf(dps_peak,dps_value)
+	run.peak_dps = dps_peak
+	_refresh_dps_text()
+
+func update_dps(delta: float) -> void:
+	if get_tree().paused or not is_instance_valid(run) or run.finished:
+		dps_area.hide()
+		return
+	dps_clock += maxf(delta,0.0)
+	while not dps_events.is_empty() and float(dps_events[0]["time"]) <= dps_clock-DPS_WINDOW+0.000001:
+		dps_window_damage -= float(dps_events.pop_front()["amount"])
+	dps_window_damage = maxf(0.0,dps_window_damage)
+	dps_value = dps_window_damage / DPS_WINDOW
+	_refresh_dps_text()
+
+func _refresh_dps_text() -> void:
+	if not is_instance_valid(run) or not is_instance_valid(dps_label):
+		return
+	dps_label.text = run.catalog.format_number(dps_value)
+	dps_area.visible = dps_value > 0.0001 and not get_tree().paused and not run.finished

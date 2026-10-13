@@ -1,0 +1,202 @@
+extends CharacterBody3D
+signal damage_received(amount: float, source_position: Vector3)
+signal dash_started
+signal dash_ready
+@export var move_speed := 9.0
+@export var sprint_multiplier := 1.5
+@export var jump_speed := 9.0
+@export var gravity := 25.0
+@export var ground_acceleration := 70.0
+@export var air_acceleration := 22.0
+@export var dash_speed := 25.0
+@export var dash_duration := 0.16
+@export var dash_cooldown := 0.65
+@export_range(0.0, 5.0, 0.1) var strafe_tilt_degrees := 0.2
+@export_range(0.0, 8.0, 0.1) var dash_tilt_degrees := 0.6
+var camera_side_offset := 0.0
+var shake_remaining := 0.0
+var shake_duration := 0.5
+var shake_strength := 0.0
+var shake_time := 0.0
+var input_enabled := true
+var run: Node
+var dash_remaining := 0.0
+var dash_recovery := 0.0
+var dash_direction := Vector3.ZERO
+const DASH_BUFFER_WINDOW := 0.15
+var dash_buffer := 0.0
+var dash_buffer_direction := Vector3.ZERO
+var dash_total_duration := 0.16
+var coyote_remaining := 0.0
+var jump_buffer := 0.0
+var spawn_position := Vector3(0, 0.1, 12)
+@onready var head: Node3D = $Head
+@onready var camera: Camera3D = $Head/Camera3D
+@onready var head_rest_position: Vector3 = $Head.position
+func bind_run(model: Node) -> void:
+	run = model
+func speed_multiplier() -> float:
+	if run == null:
+		return 1.0
+	return float(run.stats()["speed"]) / float(run.catalog.data["base_stats"]["speed"])
+func _unhandled_input(event: InputEvent) -> void:
+	if input_enabled and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED and event is InputEventMouseMotion:
+		apply_look(event.relative)
+func apply_look(motion: Vector2) -> void:
+	var sensitivity := lerpf(0.0004, 0.004, GameData.mouse_sensitivity)
+	rotation.y -= motion.x * sensitivity
+	var direction := 1.0 if GameData.invert_y else -1.0
+	head.rotation.x = clampf(head.rotation.x + motion.y * sensitivity * direction, deg_to_rad(-89), deg_to_rad(89))
+func _physics_process(delta: float) -> void:
+	if global_position.y < -20:
+		respawn()
+	var axis := Vector2.ZERO
+	if input_enabled:
+		axis = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	coyote_remaining = 0.1 if is_on_floor() else maxf(0.0, coyote_remaining - delta)
+	jump_buffer = maxf(0.0, jump_buffer - delta)
+	if input_enabled and Input.is_action_just_pressed("jump"):
+		jump_buffer = 0.12
+	if not input_enabled:
+		jump_buffer = 0.0
+	if jump_buffer > 0 and coyote_remaining > 0:
+		velocity.y = jump_speed
+		jump_buffer = 0
+		coyote_remaining = 0
+	else:
+		velocity.y -= gravity * delta
+	var direction: Vector3 = global_basis * Vector3(axis.x, 0, axis.y)
+	direction.y = 0
+	direction = direction.normalized()
+	var previous_recovery := dash_recovery
+	dash_recovery = maxf(0.0, dash_recovery - delta)
+	var scale_speed := speed_multiplier()
+	if not input_enabled:
+		dash_buffer = 0.0
+	elif Input.is_action_just_pressed("dash"):
+		request_dash(direction)
+	_try_start_dash()
+	if dash_recovery <= 0.0 and previous_recovery > 0.0:
+		dash_ready.emit()
+	dash_buffer = maxf(0.0, dash_buffer - delta)
+	if dash_remaining > 0 and input_enabled:
+		# Midpoint sampling keeps the original distance while easing the speed.
+		var progress := clampf(1.0 - (dash_remaining - delta * 0.5) / dash_total_duration, 0.0, 1.0)
+		var speed := dash_speed * scale_speed * dash_speed_factor(progress)
+		velocity.x = dash_direction.x * speed
+		velocity.z = dash_direction.z * speed
+		velocity.y = 0
+		dash_remaining = maxf(0.0, dash_remaining - delta)
+	else:
+		dash_remaining = 0
+		var target_speed := move_speed * scale_speed
+		if input_enabled and Input.is_action_pressed("sprint"):
+			target_speed *= sprint_multiplier
+		var acceleration := ground_acceleration if is_on_floor() else air_acceleration
+		velocity.x = move_toward(velocity.x, direction.x * target_speed, acceleration * delta * scale_speed)
+		velocity.z = move_toward(velocity.z, direction.z * target_speed, acceleration * delta * scale_speed)
+	move_and_slide()
+	_slide_off_cover(delta)
+	camera.fov = 90.0
+	_update_camera_lean(delta, scale_speed)
+func respawn() -> void:
+	clear_camera_shake()
+	global_position = spawn_position
+	velocity = Vector3.ZERO
+	rotation = Vector3.ZERO
+	head.rotation = Vector3.ZERO
+	head.position = head_rest_position
+	camera_side_offset = 0.0
+	dash_remaining = 0
+	dash_recovery = 0
+	dash_buffer = 0
+	jump_buffer = 0
+
+func receive_damage(amount: float, source_position: Vector3 = Vector3.INF) -> void:
+	if run == null or run.finished or get_tree().paused or amount <= 0.0:
+		return
+	damage_received.emit(amount, source_position)
+	if run.damage_player(amount):
+		input_enabled = false
+		velocity = Vector3.ZERO
+
+
+
+func _update_camera_lean(delta: float, scale_speed: float) -> void:
+	var dashing := dash_remaining > 0.0
+	var reference_speed := (dash_speed if dashing else move_speed) * maxf(scale_speed, 0.01)
+	var lateral := clampf(velocity.dot(global_basis.x) / reference_speed, -1.0, 1.0) if input_enabled else 0.0
+	var tilt := deg_to_rad(dash_tilt_degrees if dashing else strafe_tilt_degrees)
+	var weight := 1.0 - exp(-14.0 * delta)
+	head.rotation.z = lerpf(head.rotation.z, -lateral * tilt, weight)
+	camera_side_offset = lerpf(camera_side_offset, 0.0, weight)
+	head.position = head_rest_position + Vector3(camera_side_offset, 0.0, 0.0)
+
+
+func _slide_off_cover(delta: float) -> void:
+	for i in get_slide_collision_count():
+		var collision := get_slide_collision(i)
+		var body = collision.get_collider()
+		if body is Node3D and body.is_in_group("unstable_cover") and global_position.y > body.global_position.y and collision.get_normal().y > 0.0:
+			var outward: Vector3 = global_position - body.global_position
+			outward.y = 0.0
+			outward = outward.normalized() if outward.length_squared() > 0.0025 else Vector3.RIGHT
+			move_and_collide(outward * 4.0 * delta)
+			velocity.y = minf(velocity.y, -3.0)
+			break
+
+
+
+func current_dash_duration() -> float:
+	return dash_duration
+
+func request_dash(direction: Vector3) -> void:
+	if not input_enabled or get_tree().paused or (run != null and run.finished):
+		return
+	direction.y = 0.0
+	dash_buffer_direction = direction.normalized() if direction.length_squared() > 0.01 else -global_basis.z.normalized()
+	dash_buffer = DASH_BUFFER_WINDOW
+
+func _try_start_dash() -> void:
+	if dash_buffer <= 0.0 or dash_recovery > 0.0 or dash_remaining > 0.0 or not input_enabled:
+		return
+	dash_direction = dash_buffer_direction
+	dash_total_duration = current_dash_duration()
+	dash_remaining = dash_total_duration
+	dash_recovery = dash_cooldown
+	dash_buffer = 0.0
+	dash_started.emit()
+
+func dash_speed_factor(progress: float) -> float:
+	return lerpf(1.3, 0.7, smoothstep(0.0, 1.0, progress))
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PAUSED:
+		clear_camera_shake()
+		dash_buffer = 0.0
+func shake_camera(strength: float = 0.09, duration: float = 0.5) -> void:
+	if not input_enabled or get_tree().paused or (run != null and run.finished):
+		return
+	shake_strength = clampf(strength,0.0,0.12)
+	shake_duration = maxf(duration,0.01)
+	shake_remaining = shake_duration
+	shake_time = 0.0
+func clear_camera_shake() -> void:
+	shake_remaining = 0.0
+	shake_strength = 0.0
+	if is_instance_valid(camera):
+		camera.h_offset = 0.0
+		camera.v_offset = 0.0
+func _process(delta: float) -> void:
+	if not input_enabled or (run != null and run.finished):
+		clear_camera_shake()
+		return
+	if shake_remaining <= 0.0:
+		return
+	shake_remaining = maxf(0.0,shake_remaining-delta)
+	shake_time += delta
+	var decay := pow(shake_remaining/shake_duration,2.0)
+	camera.h_offset = sin(shake_time*67.0)*shake_strength*decay
+	camera.v_offset = sin(shake_time*83.0+0.7)*shake_strength*0.65*decay
+	if shake_remaining == 0.0:
+		clear_camera_shake()
