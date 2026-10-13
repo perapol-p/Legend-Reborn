@@ -1,0 +1,8 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PASS: character background matches all three selected maps
+PASS: zombie climbs 3m obstacle and attacks elevated player
+PASS: monsters can climb other living monsters
+PASS: archer approaches and climbs obstructed elevated target
+PASS: climbing respects overhead collisions
+ALL CLIMBING AND CHARACTER BACKGROUND CHECKS PASSED

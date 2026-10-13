@@ -59,7 +59,7 @@ func detonate() -> void:
   if not is_instance_valid(body) or body.dead: continue
   var point: Vector3 = body.aim_point()
   if centre.distance_to(point) > radius: continue
-  var hit := preload("res://scripts/enemy_targeting.gd").ray_hit(space,centre,point,excluded.duplicate())
+  var hit: Dictionary = source.world_obstruction(centre,point)
   if hit.is_empty(): source.deal_hit(body,damage/float(HIT_COUNT),"spellbook",false,critical)
 
 # Stretch only the charge phase; keep the actual blast fast and forceful.

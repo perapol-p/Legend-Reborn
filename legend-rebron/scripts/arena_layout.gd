@@ -1,5 +1,10 @@
-﻿extends Node3D
+extends Node3D
 const HALF_EXTENT := 80.0
+func _ready() -> void:
+	_apply_quality()
+	GameData.settings_changed.connect(_apply_quality)
+func _apply_quality() -> void:
+	preload("res://scripts/performance_profile.gd").prepare_arena(self)
 func is_spawn_point_inside(point: Vector3) -> bool:
 	var local := to_local(point)
 	return absf(local.x) <= HALF_EXTENT - 3.0 and absf(local.z) <= HALF_EXTENT - 3.0
@@ -22,7 +27,8 @@ func steer_direction(actor: CharacterBody3D, desired: Vector3) -> Vector3:
 	for angle in [0.0,0.65,-0.65,1.15,-1.15,1.57,-1.57]:
 		var candidate := desired.rotated(Vector3.UP,angle)
 		var excluded: Array[RID] = [actor.get_rid(),actor.player.get_rid()]
-		var hit := preload("res://scripts/enemy_targeting.gd").ray_hit(space,origin,origin+candidate*2.0,excluded)
+		var query := PhysicsRayQueryParameters3D.create(origin,origin+candidate*2.0,int(get_meta("world_collision_mask",1)),excluded)
+		var hit := space.intersect_ray(query)
 		if hit.is_empty() or Vector3(hit["normal"]).y > 0.7 or "Ramp" in str(hit["collider"].name):
 			return candidate
 	return Vector3.ZERO

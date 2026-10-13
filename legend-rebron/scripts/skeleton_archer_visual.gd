@@ -3,9 +3,7 @@ const ROOT_PATH := "res://assets/monsters/skeleton_archer/"
 const ROGUE = preload(ROOT_PATH + "Skeleton_Rogue.glb")
 const CROSSBOW = preload(ROOT_PATH + "Skeleton_Crossbow.gltf")
 const QUIVER = preload(ROOT_PATH + "Skeleton_Quiver.gltf")
-const MOVEMENT = preload(ROOT_PATH + "Rig_Medium_MovementBasic.glb")
-const GENERAL = preload(ROOT_PATH + "Rig_Medium_General.glb")
-const RANGED = preload(ROOT_PATH + "Rig_Medium_CombatRanged.glb")
+const ANIMATIONS = preload(ROOT_PATH+"archer_animations.res")
 var animation_player: AnimationPlayer
 var skeleton: Skeleton3D
 var weapon: Node3D
@@ -22,10 +20,7 @@ func _ready() -> void:
  animation_player = AnimationPlayer.new()
  animation_player.name = "ArcherAnimation"
  rogue.add_child(animation_player)
- var library := AnimationLibrary.new()
- _add_animations(library,MOVEMENT,["Walking_B"])
- _add_animations(library,GENERAL,["Death_A"])
- _add_animations(library,RANGED,["Ranged_2H_Aiming","Ranged_2H_Shoot"])
+ var library := ANIMATIONS.duplicate() as AnimationLibrary
  library.get_animation("Walking_B").loop_mode = Animation.LOOP_LINEAR
  animation_player.add_animation_library("",library)
  animation_player.animation_finished.connect(func(name):
@@ -49,13 +44,6 @@ func _ready() -> void:
  quiver.rotation.z = -0.2
  back.add_child(quiver)
  update_locomotion(false,2.2)
-func _add_animations(library: AnimationLibrary, scene: PackedScene, names: Array) -> void:
- var source = scene.instantiate()
- var source_player = source.find_child("AnimationPlayer",true,false) as AnimationPlayer
- for name in names:
-  assert(source_player.has_animation(name),"Missing archer animation: "+name)
-  library.add_animation(name,source_player.get_animation(name).duplicate())
- source.free()
 func _play(name: String, speed: float) -> void:
  animation_player.speed_scale = speed
  if animation_player.current_animation != name:

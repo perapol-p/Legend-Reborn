@@ -1,0 +1,7 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+LOAD_MS 602.874
+PHYSICS_MS_AVG 403.3248 PEAK 618.368
+STATIC_MEMORY_MB 87.4977588653564
+NODES 3547.0
+BENCHMARK 160 zombies + 4 tornadoes; no enemy cap

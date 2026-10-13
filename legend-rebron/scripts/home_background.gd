@@ -36,22 +36,21 @@ func _ready() -> void:
  shade.material = material
  add_child(shade)
  shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+ GameData.settings_changed.connect(_apply_quality)
  _build_caption()
  select_world(initial_stage if initial_stage >= 0 and initial_stage < 3 else rng.randi_range(0,2),false)
 func _build_world(index: int) -> void:
  var viewport := SubViewport.new()
  viewport.name = STAGES[index].capitalize()+"Preview"
- viewport.size = Vector2i(1280,720)
+ viewport.size = preload("res://scripts/performance_profile.gd").menu_resolution()
  viewport.own_world_3d = true
  viewport.gui_disable_input = true
  viewport.handle_input_locally = false
- viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
+ viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
  add_child(viewport)
  var world := Node3D.new()
  viewport.add_child(world)
- var arena = load(PATHS[index]).instantiate()
- arena.name = "Arena"
- world.add_child(arena)
+ var arena: Node3D = null
  var camera := Camera3D.new()
  world.add_child(camera)
  camera.fov = 65.0
@@ -85,6 +84,12 @@ func _build_world(index: int) -> void:
  views.append(viewport)
  worlds.append(world)
  images.append(image)
+func _ensure_world(index: int) -> void:
+ if index < 0 or index >= 3 or arenas[index] != null: return
+ var arena = load(PATHS[index]).instantiate()
+ arena.name = "Arena"
+ worlds[index].add_child(arena)
+ arenas[index] = arena
 func _build_caption() -> void:
  stage_caption = Style.label(self,"",13,Color("b7c0b7"))
  stage_caption.name = "StageCaption"
@@ -96,6 +101,7 @@ func _build_caption() -> void:
  stage_caption.offset_bottom = -26
  stage_caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 func select_world(index: int, animated := true) -> void:
+ _ensure_world(index)
  if index == selected:
   cycle_time = 0.0
   return
@@ -224,3 +230,6 @@ func _process(delta: float) -> void:
   spawn_timer = rng.randf_range(5.0,8.0)
  var cursor := get_viewport().get_mouse_position()/Vector2(get_viewport().get_visible_rect().size)*2.0-Vector2.ONE
  _update_cameras(delta,cursor)
+
+func _apply_quality() -> void:
+ for viewport in views: viewport.size = preload("res://scripts/performance_profile.gd").menu_resolution()

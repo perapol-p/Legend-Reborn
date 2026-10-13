@@ -1,0 +1,6 @@
+SCRIPT ERROR: Assertion failed: Crosshair target must be hit once at LV 4 / 2m
+   at: verify (res://backups/verify_staff_aim.gd:58)
+   GDScript backtrace (most recent call first):
+       [0] verify (res://backups/verify_staff_aim.gd:58)
+WARNING: 2 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2536)

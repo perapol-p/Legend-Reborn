@@ -34,6 +34,13 @@ func _ready() -> void:
 	shake.name = "ScreenShake"
 	shake_layer.add_child(shake)
 	$Player.screen_shake = shake
+	if OS.has_feature("web"):
+		var gate_layer := CanvasLayer.new()
+		gate_layer.layer = 160
+		add_child(gate_layer)
+		var gate := preload("res://scripts/web_input_gate.gd").new()
+		gate.player = $Player
+		gate_layer.add_child(gate)
 	var healing_layer := CanvasLayer.new()
 	healing_layer.layer = 3
 	add_child(healing_layer)
@@ -154,7 +161,11 @@ func _update_pointer() -> void:
 	if is_instance_valid(practice_hint):
 		practice_hint.visible = not get_tree().paused and not round_finished and not practice_ui.visible
 	var locked := get_tree().paused or cursor_released or round_finished
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if locked else Input.MOUSE_MODE_CAPTURED
+	if OS.has_feature("web"):
+		# Browser pointer lock must be requested by the trusted click in WebInputGate.
+		if locked: Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	else:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if locked else Input.MOUSE_MODE_CAPTURED
 	$Player.input_enabled = not locked
 	$Interface/Crosshair.visible = not locked
 func _notification(what: int) -> void:

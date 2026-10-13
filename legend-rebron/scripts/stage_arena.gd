@@ -10,6 +10,7 @@ var obstacle_points: Array[Vector3] = []
 var scenery_rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
+ super._ready()
  scenery_rng.seed = 71023 if biome == "grassland" else 94017
  # Normal stages have natural terrain; Practice retains the original grid arena.
  for name in ["Floor","Terrain","Cover"]:
@@ -30,6 +31,7 @@ func _ready() -> void:
  _build_landmarks()
  _scatter_props()
  _finish_batches()
+ _apply_quality()
 
 func _material(key: String, color: Color) -> StandardMaterial3D:
  if materials.has(key): return materials[key]

@@ -1,0 +1,4 @@
+SCRIPT ERROR: Assertion failed: Crosshair target must be hit once at LV 4 / 8m
+   at: verify (res://backups/verify_staff_aim.gd:60)
+   GDScript backtrace (most recent call first):
+       [0] verify (res://backups/verify_staff_aim.gd:60)

@@ -1,6 +1,7 @@
 extends Node3D
 const ZOMBIE = preload("res://assets/monsters/zombie/zombie.fbx")
 const TEXTURE = preload("res://assets/monsters/zombie/Texture.Zombie.png")
+static var shared_material: StandardMaterial3D
 var animation_player: AnimationPlayer
 var attacking := false
 var dying := false
@@ -10,9 +11,11 @@ func _ready() -> void:
  zombie.scale = Vector3.ONE * 1.12
  zombie.rotation.y = 0.0
  add_child(zombie)
- var material := StandardMaterial3D.new()
- material.albedo_texture = TEXTURE
- material.roughness = 0.9
+ if shared_material == null:
+  shared_material = StandardMaterial3D.new()
+  shared_material.albedo_texture = TEXTURE
+  shared_material.roughness = 0.9
+ var material := shared_material
  for mesh in zombie.find_children("*", "MeshInstance3D", true, false):
   mesh.material_override = material
  animation_player = zombie.find_child("AnimationPlayer", true, false) as AnimationPlayer

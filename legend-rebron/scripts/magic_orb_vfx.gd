@@ -12,8 +12,8 @@ func _ready() -> void:
  var sphere := SphereMesh.new()
  sphere.radius = radius
  sphere.height = radius*2.0
- sphere.radial_segments = 32
- sphere.rings = 16
+ sphere.radial_segments = 12 if preload("res://scripts/performance_profile.gd").quality()=="low" else 32
+ sphere.rings = 8 if preload("res://scripts/performance_profile.gd").quality()=="low" else 16
  visual.mesh = sphere
  shell = ShaderMaterial.new()
  shell.shader = preload("res://shaders/magic_energy.gdshader")

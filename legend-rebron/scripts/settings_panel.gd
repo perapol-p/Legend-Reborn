@@ -82,6 +82,15 @@ func _slider(label_text: String, current: float, minimum: float, maximum: float,
 		callback.call(value))
 	return slider
 func _general() -> void:
+	var graphics_row := _row("Graphics quality")
+	var quality_picker := OptionButton.new()
+	for title in ["Low / Fastest","Medium","High"]: quality_picker.add_item(title)
+	quality_picker.selected = ["low","medium","high"].find(GameData.graphics_quality)
+	quality_picker.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	graphics_row.add_child(quality_picker)
+	quality_picker.item_selected.connect(func(index):
+		GameData.graphics_quality = ["low","medium","high"][index]
+		_commit())
 	opacity_slider = _slider("Tab UI opacity (%)", GameData.tab_ui_opacity * 100, 0, 100, func(v): _set_number("tab_ui_opacity", v / 100.0))
 	Style.label(content, "0%: clear background / 100%: solid background. Text stays readable.", 14, Style.GOLD)
 	_slider("Master volume", GameData.master_volume * 100, 0, 100, func(v): _set_number("master_volume", v / 100.0))

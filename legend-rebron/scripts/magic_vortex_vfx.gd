@@ -24,13 +24,14 @@ func _ready() -> void:
   var hit := get_world_3d().direct_space_state.intersect_ray(query)
   if not hit.is_empty(): height = hit.position.y+0.03
  rune.global_position = Vector3(point.x,height,point.z)
+ var segments := 32 if preload("res://scripts/performance_profile.gd").quality()=="low" else 80
  for strand in 3:
   var visual := MeshInstance3D.new()
   var surface := SurfaceTool.new()
   surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-  for i in 80:
-   var a := float(i)/80.0
-   var b := float(i+1)/80.0
+  for i in segments:
+   var a := float(i)/float(segments)
+   var b := float(i+1)/float(segments)
    var theta_a := a*TAU*2.0+float(strand)*TAU/3.0
    var theta_b := b*TAU*2.0+float(strand)*TAU/3.0
    var ra := radius*(0.10+a*0.48)

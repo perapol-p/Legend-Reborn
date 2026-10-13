@@ -39,6 +39,7 @@ var markers: Node3D
 var info: Label
 var last_distance := 0.0
 var total_spawned := 0
+var housekeeping_timer := 0.0
 func _ready() -> void:
 	player = get_parent().get_node("Player")
 	rng.randomize()
@@ -80,8 +81,12 @@ func ring_mesh(radius: float, width: float, color: Color) -> ImmediateMesh:
 	mesh.surface_end()
 	return mesh
 func _physics_process(delta: float) -> void:
-	monsters = monsters.filter(func(m): return is_instance_valid(m) and not m.dead and not m.is_queued_for_deletion())
-	update_debug()
+	housekeeping_timer -= delta
+	var refresh := housekeeping_timer <= 0.0
+	if refresh:
+		housekeeping_timer = 0.25
+		monsters = monsters.filter(func(m): return is_instance_valid(m) and not m.dead and not m.is_queued_for_deletion())
+		update_debug()
 	if not enabled or completed or not is_instance_valid(player) or get_tree().paused:
 		return
 	survival_time += delta
@@ -91,14 +96,15 @@ func _physics_process(delta: float) -> void:
 			difficulty_changed.emit()
 		if not boss_started:
 			_try_spawn_boss()
-	_update_overtime_pressure()
+	if refresh: _update_overtime_pressure()
 	var next_step := int(floor(survival_time / maxf(growth_interval, 0.1)))
 	if next_step != difficulty_step:
 		difficulty_step = next_step
 		difficulty_changed.emit()
-	for monster in monsters:
-		if monster != boss and monster.global_position.distance_to(player.global_position) > 85.0:
-			monster.queue_free()
+	if refresh:
+		for monster in monsters:
+			if is_instance_valid(monster) and monster != boss and monster.global_position.distance_squared_to(player.global_position) > 7225.0:
+				monster.queue_free()
 	countdown -= delta
 	if countdown > 0.0:
 		return
@@ -119,7 +125,7 @@ func monster_health() -> float:
 	var base_hp := 40.0 + health_growth_per_minute * minutes + health_growth_curve * minutes * minutes
 	return base_hp * pow(1.0 + 0.30 * overtime_minutes(), 2.0)
 func spawn_one(as_boss: bool = false, forced_type: String = "", manual: bool = false) -> CharacterBody3D:
-	monsters = monsters.filter(func(m): return is_instance_valid(m) and not m.dead and not m.is_queued_for_deletion())
+	if manual: monsters = monsters.filter(func(m): return is_instance_valid(m) and not m.dead and not m.is_queued_for_deletion())
 	if (not enabled and not manual) or completed or (get_tree().paused and not manual) or not is_instance_valid(player):
 		return null
 	var enemy_type := "boss" if as_boss else (forced_type if forced_type in ["melee","archer","flyer"] else pick_monster_type())
@@ -134,14 +140,14 @@ func spawn_one(as_boss: bool = false, forced_type: String = "", manual: bool = f
 		var arena = get_parent().get_node_or_null("Arena")
 		if arena != null and arena.has_method("is_spawn_point_inside") and not arena.is_spawn_point_inside(candidate):
 			continue
-		var ground_query := PhysicsRayQueryParameters3D.create(candidate + Vector3(0, 8, 0), candidate - Vector3(0, 32, 0), 1, [player.get_rid()])
+		var ground_query := PhysicsRayQueryParameters3D.create(candidate + Vector3(0, 8, 0), candidate - Vector3(0, 32, 0), 5, [player.get_rid()])
 		var ground := get_world_3d().direct_space_state.intersect_ray(ground_query)
 		if ground.is_empty() or ground["normal"].y < 0.8 or ground["collider"] is CharacterBody3D:
 			continue
 		candidate = ground["position"] + Vector3(0, 2.24 if enemy_type == "flyer" else 0.04, 0)
 		var crowded := false
 		for monster in monsters:
-			if monster.global_position.distance_to(candidate) < 1.5:
+			if is_instance_valid(monster) and not monster.dead and monster.global_position.distance_squared_to(candidate) < 2.25:
 				crowded = true
 				break
 		if crowded:
@@ -152,7 +158,7 @@ func spawn_one(as_boss: bool = false, forced_type: String = "", manual: bool = f
 		var occupancy := PhysicsShapeQueryParameters3D.new()
 		occupancy.shape = shape
 		occupancy.transform = Transform3D(Basis.IDENTITY, candidate + Vector3(0, 1.9 if as_boss else 0.95, 0))
-		occupancy.collision_mask = 1
+		occupancy.collision_mask = 5
 		if not get_world_3d().direct_space_state.intersect_shape(occupancy, 1).is_empty():
 			continue
 		var scene: PackedScene = BOSS if as_boss else (ARCHER if enemy_type == "archer" else (FLYER if enemy_type == "flyer" else MONSTER))

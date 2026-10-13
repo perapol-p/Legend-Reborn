@@ -42,6 +42,8 @@ func change_scene(path: String) -> void:
  await _wipe(1.0,0.0)
  cover.hide()
  get_tree().paused = previous_pause if error != OK else false
+ var scene = get_tree().current_scene
+ if is_instance_valid(scene) and scene.has_method("_update_pointer"): scene._update_pointer()
  busy = false
  transition_finished.emit(path,error)
  if error != OK: push_error("Could not change scene: "+path)

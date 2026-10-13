@@ -35,6 +35,7 @@ var music_volume := 0.7
 var effects_volume := 0.8
 var mouse_sensitivity := 0.5
 var fullscreen := false
+var graphics_quality := "low" if OS.has_feature("web") else "medium"
 var invert_y := false
 var crosshair_style := "plus"
 var crosshair_color := "white"
@@ -88,6 +89,7 @@ func save_settings() -> void:
 	cfg.set_value("controls", "mouse_sensitivity", mouse_sensitivity)
 	cfg.set_value("controls", "invert_y", invert_y)
 	cfg.set_value("display", "fullscreen", fullscreen)
+	cfg.set_value("display","graphics_quality",graphics_quality)
 	cfg.set_value("ui", "tab_opacity", tab_ui_opacity)
 	cfg.set_value("crosshair", "style", crosshair_style)
 	cfg.set_value("crosshair", "color", crosshair_color)
@@ -103,7 +105,9 @@ func load_settings() -> void:
 	music_volume = clampf(float(cfg.get_value("audio", "music", music_volume)), 0.0, 1.0)
 	effects_volume = clampf(float(cfg.get_value("audio", "effects", effects_volume)), 0.0, 1.0)
 	mouse_sensitivity = clampf(float(cfg.get_value("controls", "mouse_sensitivity", mouse_sensitivity)), 0.01, 1.0)
-	fullscreen = bool(cfg.get_value("display", "fullscreen", fullscreen))
+	fullscreen = bool(cfg.get_value("display", "fullscreen", fullscreen)) and not OS.has_feature("web")
+	var quality: String = cfg.get_value("display","graphics_quality",graphics_quality)
+	graphics_quality = quality if quality in ["low","medium","high"] else ("low" if OS.has_feature("web") else "medium")
 	tab_ui_opacity = clampf(float(cfg.get_value("ui", "tab_opacity", 0.65)), 0.0, 1.0)
 	invert_y = bool(cfg.get_value("controls", "invert_y", invert_y))
 	var saved_style: String = cfg.get_value("crosshair", "style", "plus")
@@ -124,6 +128,7 @@ func load_settings() -> void:
 				break
 		bindings[action] = keycode
 func apply_settings() -> void:
+	get_tree().root.scaling_3d_scale = 0.75 if graphics_quality == "low" else 1.0
 	AudioServer.set_bus_volume_db(0, linear_to_db(maxf(master_volume, 0.001)))
 	AudioServer.set_bus_mute(0, master_volume <= 0.0)
 	var effects_bus := AudioServer.get_bus_index("Effects")
@@ -140,6 +145,7 @@ func apply_settings() -> void:
 	rebuild_input_map()
 	settings_changed.emit()
 func restore_defaults() -> void:
+	graphics_quality = "low" if OS.has_feature("web") else "medium"
 	master_volume = 0.8
 	music_volume = 0.7
 	effects_volume = 0.8

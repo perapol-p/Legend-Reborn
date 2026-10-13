@@ -264,7 +264,7 @@ func _physics_process(delta: float) -> void:
 		if t >= 1.0:
 			attack_active = false
 
-func ray(from: Vector3, to: Vector3, mask: int = 1) -> Dictionary:
+func ray(from: Vector3, to: Vector3, mask: int = 5) -> Dictionary:
 	var query := PhysicsRayQueryParameters3D.create(from, to, mask, [player.get_rid()])
 	return get_world_3d().direct_space_state.intersect_ray(query)
 
@@ -343,7 +343,7 @@ func resolve_attack() -> void:
 	else:
 		if view.has_method("release_magic"): view.release_magic()
 		var cast_origin: Vector3 = view.cast_position() if view.has_method("cast_position") else Vector3.INF
-		var cast_aim := aim_point(120.0)
+		var cast_aim := crosshair_target(120.0)
 		var cast_direction := (cast_aim-cast_origin).normalized() if cast_origin != Vector3.INF else forward
 		var damage := roll_damage()
 		var critical := last_damage_critical
@@ -360,7 +360,7 @@ func melee_attack(reach: float) -> void:
 	var query := PhysicsShapeQueryParameters3D.new()
 	query.shape = shape
 	query.transform = Transform3D(Basis.IDENTITY, origin)
-	query.collision_mask = 1
+	query.collision_mask = 5
 	query.exclude = [player.get_rid()]
 	var struck: Array = []
 	for hit in get_world_3d().direct_space_state.intersect_shape(query, 64):
@@ -628,14 +628,14 @@ func damageables(center: Vector3, radius: float) -> Array:
 	var query := PhysicsShapeQueryParameters3D.new()
 	query.shape = shape
 	query.transform = Transform3D(Basis.IDENTITY, center)
-	query.collision_mask = 1
+	query.collision_mask = 5
 	query.exclude = [player.get_rid()]
 	var result: Array = []
 	for hit in get_world_3d().direct_space_state.intersect_shape(query, 128):
 		var body: Node3D = hit["collider"]
 		if body.has_method("take_damage") and not result.has(body):
 			var target: Vector3 = body.aim_point() if body.has_method("aim_point") else body.global_position + Vector3.UP
-			var obstruction := ray(center, target)
+			var obstruction := world_obstruction(center,target)
 			if obstruction.is_empty() or obstruction["collider"] == body:
 				result.append(body)
 	return result
@@ -712,3 +712,19 @@ func try_explosion() -> bool:
 	feedback_time = 1.0
 	update_status()
 	return true
+
+# Projectile aim must intersect the actual centre reticle, not a point shifted
+# along the surface normal (the latter is only useful for placing ground VFX).
+func crosshair_target(distance: float) -> Vector3:
+	var centre := camera.get_viewport().get_visible_rect().size*0.5
+	var origin := camera.project_ray_origin(centre)
+	var end := origin+camera.project_ray_normal(centre)*distance
+	var hit := ray(origin,end)
+	return end if hit.is_empty() else Vector3(hit["position"])
+
+func world_obstruction(from: Vector3,to: Vector3) -> Dictionary:
+	var arena = get_tree().current_scene.get_node_or_null("Arena")
+	if arena != null and arena.has_meta("world_collision_mask"):
+		return ray(from,to,int(arena.get_meta("world_collision_mask")))
+	var ignored: Array[RID] = [player.get_rid()]
+	return preload("res://scripts/enemy_targeting.gd").ray_hit(get_world_3d().direct_space_state,from,to,ignored)

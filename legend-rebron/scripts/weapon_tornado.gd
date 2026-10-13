@@ -7,6 +7,8 @@ var radius := 3.0
 var remaining := 2.0
 var pulse := 0.0
 var model: Node3D
+var scan_remaining := 0.0
+var cached_bodies: Array = []
 func _ready() -> void:
 	add_to_group("weapon_tornadoes")
 	model = preload("res://scripts/magic_vortex_vfx.gd").new()
@@ -22,7 +24,12 @@ func _physics_process(delta: float) -> void:
 	var tick := pulse <= 0.0
 	if tick:
 		pulse = 0.35
-	for body in source.damageables(global_position, radius):
+	scan_remaining -= delta
+	if tick or scan_remaining <= 0.0:
+		cached_bodies = source.damageables(global_position,radius)
+		scan_remaining = 0.1
+	for body in cached_bodies:
+		if not is_instance_valid(body) or body.is_queued_for_deletion(): continue
 		if body is CharacterBody3D and not body.is_queued_for_deletion():
 			var offset: Vector3 = global_position - body.global_position
 			offset.y = 0.0

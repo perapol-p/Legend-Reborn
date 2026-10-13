@@ -31,15 +31,15 @@ static func ring(radius: float, width: float, tint: Color) -> MeshInstance3D:
  var torus := TorusMesh.new()
  torus.inner_radius = maxf(0.001,radius-width)
  torus.outer_radius = radius+width
- torus.rings = 32
- torus.ring_segments = 6
+ torus.rings = 16 if preload("res://scripts/performance_profile.gd").quality()=="low" else 32
+ torus.ring_segments = 4 if preload("res://scripts/performance_profile.gd").quality()=="low" else 6
  torus.material = material(tint)
  visual.mesh = torus
  visual.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
  return visual
 static func particles(tint: Color, amount: int, life: float, size_value: float, explosive := false) -> CPUParticles3D:
  var particles := CPUParticles3D.new()
- particles.amount = amount
+ particles.amount = preload("res://scripts/performance_profile.gd").particle_count(amount)
  particles.lifetime = life
  particles.one_shot = explosive
  particles.explosiveness = 1.0 if explosive else 0.0
@@ -69,7 +69,7 @@ static func particles(tint: Color, amount: int, life: float, size_value: float, 
  return particles
 static func burst(world: Node3D, point: Vector3, radius: float, purple := false) -> Node3D:
  var live = world.get_tree().get_nodes_in_group("magic_bursts").filter(func(node): return not node.is_queued_for_deletion())
- if live.size() >= 18: live[0].queue_free()
+ if live.size() >= (8 if preload("res://scripts/performance_profile.gd").quality()=="low" else 18): live[0].queue_free()
  var effect = load("res://scripts/magic_burst_vfx.gd").new()
  effect.radius = radius
  effect.purple = purple

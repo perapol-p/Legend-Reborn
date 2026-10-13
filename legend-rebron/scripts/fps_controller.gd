@@ -35,6 +35,7 @@ var spawn_position := Vector3(0, 0.1, 12)
 @onready var camera: Camera3D = $Head/Camera3D
 @onready var head_rest_position: Vector3 = $Head.position
 func bind_run(model: Node) -> void:
+	collision_mask = 5
 	run = model
 func speed_multiplier() -> float:
 	if run == null:

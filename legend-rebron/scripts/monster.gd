@@ -14,6 +14,9 @@ var base_attack_interval := 0.0
 @export var stop_distance := 1.1
 @export var climb_speed := 2.8
 var climbing := false
+var navigation_timer := 0.0
+var navigation_target := Vector3.INF
+var navigation_direction := Vector3.ZERO
 var player: CharacterBody3D
 var health := 30.0
 var dead := false
@@ -27,6 +30,8 @@ var damage_flash: Node
 @onready var health_label: Label3D = $Health
 func _ready() -> void:
 	health = max_health
+	collision_layer = 4
+	collision_mask = 7
 	base_move_speed = move_speed
 	base_attack_damage = attack_damage
 	base_attack_interval = attack_interval
@@ -44,6 +49,8 @@ func _ready() -> void:
 	damage_flash = preload("res://scripts/enemy_hit_flash.gd").new()
 	add_child(damage_flash)
 	damage_flash.bind_model(model)
+	var budget := preload("res://scripts/enemy_visual_budget.gd").new()
+	add_child(budget)
 	refresh()
 func aim_point() -> Vector3:
 	return global_position + Vector3(0, 1.25 * scale.y, 0)
@@ -97,7 +104,7 @@ func _physics_process(delta: float) -> void:
 		queue_free()
 		return
 	if distance <= attack_range and absf(offset.y) < 1.4 and attack_timer <= 0:
-		var query := PhysicsRayQueryParameters3D.create(aim_point(), player.global_position + Vector3.UP, 1, [get_rid()])
+		var query := PhysicsRayQueryParameters3D.create(aim_point(), player.global_position + Vector3.UP, 5, [get_rid()])
 		var hit := get_world_3d().direct_space_state.intersect_ray(query)
 		if not hit.is_empty() and hit["collider"] == player:
 			if is_instance_valid(melee_visual):
@@ -112,6 +119,10 @@ func advance_age(delta: float) -> void:
 	if dead or get_tree().paused:
 		return
 	alive_seconds += maxf(delta, 0.0)
+	navigation_timer -= delta
+	if is_instance_valid(player):
+		var needs_climbing := climbing or player.global_position.y > global_position.y+0.6
+		collision_mask = 7 if needs_climbing or preload("res://scripts/performance_profile.gd").quality() != "low" else 3
 	move_speed = base_move_speed * (1.0 + speed_growth_per_minute * alive_seconds / 60.0) * pressure_multiplier
 	attack_damage = base_attack_damage * pressure_multiplier
 	attack_interval = base_attack_interval / maxf(pressure_multiplier, 1.0)
@@ -123,6 +134,11 @@ func movement_direction(target: Vector3) -> Vector3:
 	direct.y = 0.0
 	if target.y > global_position.y + 0.6 and direct.length_squared() > 0.001:
 		return direct.normalized()
+	if navigation_timer > 0.0 and navigation_target.distance_squared_to(target) < 4.0:
+		return navigation_direction
+	var quality: String = preload("res://scripts/performance_profile.gd").quality()
+	navigation_timer = ((0.12 if direct.length_squared() < 324.0 else 0.24) if quality == "low" else (0.10 if quality == "medium" else 0.066))*lerpf(0.8,1.2,float(get_instance_id()%17)/16.0)
+	navigation_target = target
 	var current_scene = get_tree().current_scene
 	var arena = current_scene.get_node_or_null("Arena") if is_instance_valid(current_scene) else null
 	if arena == null:
@@ -131,11 +147,15 @@ func movement_direction(target: Vector3) -> Vector3:
 	var direction := destination - global_position
 	direction.y = 0.0
 	direction = direction.normalized()
-	return arena.steer_direction(self,direction) if arena != null and arena.has_method("steer_direction") else direction
+	navigation_direction = arena.steer_direction(self,direction) if arena != null and arena.has_method("steer_direction") else direction
+	return navigation_direction
 
 # Use the body shape to detect supports. Upward movement remains collision-based.
 func apply_climbing(delta: float) -> void:
+	var was_climbing := climbing
 	climbing = false
+	# Start climbing only for elevated targets; finish an already active climb.
+	if is_instance_valid(player) and not was_climbing and player.global_position.y <= global_position.y+0.6: return
 	if dead or not is_instance_valid(player):
 		return
 	if global_position.y > player.global_position.y + 0.9:

@@ -19,6 +19,8 @@ var splash := 0.0
 var struck: Array[RID] = []
 var velocity := Vector3.ZERO
 var flight_time := 0.0
+var collision_sphere: SphereShape3D
+var collision_query: PhysicsShapeQueryParameters3D
 var wave_vfx: Node3D
 var magic_vfx: Node3D
 var wind_rings: Array[MeshInstance3D] = []
@@ -116,22 +118,27 @@ func _physics_process(delta: float) -> void:
 			var phase := fposmod(flight_time * 3.5 + float(i) * 0.33, 1.0)
 			ring.position.z = 0.10 + phase * 0.95
 			ring.scale = Vector3.ONE * (0.45 + phase * 0.75)
+	if kind == "bow":
+		_advance_arrow(displacement)
+		return
 	var steps := maxi(1, ceili(displacement.length() / maxf(hit_radius, 0.12)))
 	var step := displacement / float(steps)
 	for i in range(steps):
 		var next := global_position + step
-		var query := PhysicsRayQueryParameters3D.create(global_position, next, 1, excluded + struck)
+		var query := PhysicsRayQueryParameters3D.create(global_position, next, 5, excluded + struck)
 		var hit := get_world_3d().direct_space_state.intersect_ray(query)
 		if not hit.is_empty():
 			if impact(hit["collider"], hit["position"]):
 				return
 		if hit_radius > 0.1:
-			var sphere := SphereShape3D.new()
-			sphere.radius = hit_radius
-			var shape_query := PhysicsShapeQueryParameters3D.new()
-			shape_query.shape = sphere
+			if collision_sphere == null:
+				collision_sphere = SphereShape3D.new()
+				collision_query = PhysicsShapeQueryParameters3D.new()
+				collision_query.shape = collision_sphere
+			collision_sphere.radius = hit_radius
+			var shape_query := collision_query
 			shape_query.transform = Transform3D(Basis.IDENTITY, next)
-			shape_query.collision_mask = 1
+			shape_query.collision_mask = 5
 			shape_query.exclude = excluded + struck
 			for overlap in get_world_3d().direct_space_state.intersect_shape(shape_query, 16):
 				if impact(overlap["collider"], next):
@@ -177,7 +184,7 @@ func _arrow_material(color: Color) -> StandardMaterial3D:
 func _create_wind() -> void:
 	var wind_material := _arrow_material(Color(0.68, 0.92, 1.0, 0.32))
 	wind_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	for i in 3:
+	for i in (1 if preload("res://scripts/performance_profile.gd").quality()=="low" else 3):
 		var ring := MeshInstance3D.new()
 		var torus := TorusMesh.new()
 		torus.inner_radius = 0.095
@@ -192,7 +199,7 @@ func _create_wind() -> void:
 		wind_rings.append(ring)
 	var trail := CPUParticles3D.new()
 	trail.name = "WindTrail"
-	trail.amount = 24
+	trail.amount = preload("res://scripts/performance_profile.gd").particle_count(24)
 	trail.lifetime = 0.18
 	trail.local_coords = false
 	trail.direction = Vector3(0, 0, 1)
@@ -228,7 +235,7 @@ func _advance_sword_wave(displacement: Vector3) -> void:
 		var query := PhysicsShapeQueryParameters3D.new()
 		query.shape = piece["shape"]
 		query.transform = wave_vfx.global_transform * piece["offset"]
-		query.collision_mask = 1
+		query.collision_mask = 5
 		query.exclude = excluded + struck
 		query.margin = 0.002
 		# Include initial overlaps and sweep the whole movement to prevent tunneling.
@@ -269,3 +276,14 @@ func _advance_sword_wave(displacement: Vector3) -> void:
 
 
 
+
+# Trace the full frame segment once, repeating only when an arrow pierces a body.
+func _advance_arrow(displacement: Vector3) -> void:
+	var end := global_position+displacement
+	var query := PhysicsRayQueryParameters3D.create(global_position,end,5,excluded+struck)
+	while true:
+		var hit := get_world_3d().direct_space_state.intersect_ray(query)
+		if hit.is_empty(): break
+		if impact(hit["collider"],hit["position"]): return
+		query.exclude = excluded+struck
+	global_position = end
