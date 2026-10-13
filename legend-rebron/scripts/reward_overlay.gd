@@ -13,7 +13,7 @@ func _ready() -> void:
 	var shade := ColorRect.new()
 	add_child(shade)
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	shade.color = Color(0.02, 0.03, 0.045, 0.95)
+	shade.color = Color(0.02, 0.03, 0.045, 1.0)
 	var margin := MarginContainer.new()
 	add_child(margin)
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -27,10 +27,8 @@ func _ready() -> void:
 	level_title = preload("res://scripts/level_up_title.gd").new()
 	level_title.name = "LevelUpTitle"
 	stack.add_child(level_title)
-	heading = Style.label(stack,"Choose one item",24)
+	heading = Style.label(stack,"",24)
 	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var subtitle := Style.label(stack, "Choose one. Its bonus is yours for this run.", 18)
-	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	cards = GridContainer.new()
 	cards.columns = 3
 	cards.add_theme_constant_override("h_separation", 18)
@@ -41,6 +39,7 @@ func _ready() -> void:
 	celebration = preload("res://scripts/level_up_party.gd").new()
 	celebration.name = "LevelUpParty"
 	add_child(celebration)
+
 func bind_run(model: Node) -> void:
 	run = model
 func refresh() -> void:
@@ -52,7 +51,10 @@ func refresh() -> void:
 	if not visible:
 		celebration.stop()
 		return
-	heading.text = "Level %d  /  Choose one item" % run.reward_level
+	if run.reward_phase == "weapon":
+		_refresh_weapon_choices()
+		return
+	heading.text = "Level %d" % run.reward_level
 	for index in range(run.offers.size()):
 		var id: String = run.offers[index]
 		var item: Dictionary = run.catalog.item_for(id)
@@ -92,7 +94,10 @@ func _choose(id: String, generation: int) -> void:
 		return
 	for button in choice_buttons:
 		button.disabled = true
-	run.choose_item(id, generation)
+	if run.reward_phase == "weapon":
+		run.choose_weapon_upgrade(id, generation)
+	else:
+		run.choose_item(id, generation)
 func _input(event: InputEvent) -> void:
 	if GameData.command_console_active or GameData.practice_ui_active:
 		return
@@ -111,3 +116,26 @@ func _input(event: InputEvent) -> void:
 		elif event.physical_keycode == KEY_ESCAPE:
 			get_viewport().set_input_as_handled()
 
+
+func _refresh_weapon_choices() -> void:
+	heading.text = "Level %d" % run.weapon_level(run.upgrade_weapon_id)
+	for index in range(run.offers.size()):
+		var id: String = run.offers[index]
+		var option: Dictionary = run.Progression.OPTIONS[id]
+		var panel := PanelContainer.new()
+		panel.custom_minimum_size = Vector2(285, 410)
+		panel.add_theme_stylebox_override("panel", Style.box(Color("1b2029"), Style.PAPER, 12))
+		cards.add_child(panel)
+		var stack := VBoxContainer.new()
+		stack.add_theme_constant_override("separation", 18)
+		panel.add_child(stack)
+		var title := Style.label(stack, option["name"], 24)
+		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		var detail := Style.label(stack, option["description"], 20)
+		detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		Style.label(stack, "Upgrades: %d -> %d" % [run.upgrade_count(run.upgrade_weapon_id,id), run.upgrade_count(run.upgrade_weapon_id,id)+1], 18)
+		choice_buttons.append(Style.button(stack, "Choose [%d]" % (index+1), _choose.bind(id,run.offer_generation)))
+	choice_buttons[0].grab_focus()

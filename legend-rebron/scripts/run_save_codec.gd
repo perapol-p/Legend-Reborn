@@ -1,6 +1,6 @@
 extends RefCounted
-const RUN_FIELDS = ["level","xp","character_name","equipped_weapon_id","elapsed_time","regen_elapsed","monsters_killed","peak_dps","damage_taken","owned_ids","item_counts","weapon_levels","offer_generation","offers_without_high_rarity","offers","reward_level","pending_levels"]
-const COMBAT_FIELDS = ["cooldown","pending","elapsed","attack_active","charge_ready","charge_time","empowered","gun_ammo","gun_reload","bow_ammo","bow_reload","known_bow_capacity","rpg_ready","special_cooldown","explosion_cooldown","volley_queue","attack_serial","projectiles_fired","tornadoes_created"]
+const RUN_FIELDS = ["level","xp","character_name","equipped_weapon_id","elapsed_time","regen_elapsed","monsters_killed","peak_dps","damage_taken","owned_ids","item_counts","weapon_levels","offer_generation","offers_without_high_rarity","offers","reward_level","pending_levels","weapon_upgrades","reward_phase","upgrade_weapon_id"]
+const COMBAT_FIELDS = ["cooldown","pending","elapsed","attack_active","charge_ready","charge_time","empowered","gun_ammo","gun_reload","bow_ammo","bow_reload","known_bow_capacity","rpg_ready","special_cooldown","explosion_cooldown","storm_cooldown","volley_queue","attack_serial","projectiles_fired","tornadoes_created"]
 const SPAWN_FIELDS = ["enabled","survival_time","difficulty_step","countdown","started","total_spawned","last_distance","boss_phase","boss_started"]
 const ACTOR_FIELDS = ["health","max_health","alive_seconds","pressure_multiplier","base_move_speed","base_attack_damage","base_attack_interval","attack_timer","hit_flash","velocity"]
 const SHOT_FIELDS = ["kind","direction","speed","damage","damage_falloff","source_weapon","remaining","hit_radius","piercing","pierces_remaining","critical","splash","velocity","flight_time","travel_remaining"]
@@ -261,6 +261,33 @@ static func migrate_removed_weapons(data: Dictionary) -> void:
 	levels.erase("gun")
 	levels.erase("katana")
 	state["weapon_levels"] = levels
+	# Older saves retain their weapon levels; spread earned ranks over the new choices.
+	if not state.has("weapon_upgrades"):
+		var progression = preload("res://scripts/weapon_progression.gd")
+		var ranks: Dictionary = {}
+		for id in levels:
+			if not progression.UPGRADES.has(id): continue
+			var choices: Array = progression.UPGRADES[id]
+			var earned: Dictionary = {}
+			for i in range(maxi(0, int(levels[id])-1)):
+				var choice: String = choices[i % choices.size()]
+				earned[choice] = int(earned.get(choice,0))+1
+			ranks[id] = earned
+		state["weapon_upgrades"] = ranks
+		state["reward_phase"] = "item"
+		state["upgrade_weapon_id"] = ""
+	# Convert orbiting-storm upgrades and pending choices to cooldown reduction.
+	var weapon_ranks: Dictionary = state.get("weapon_upgrades", {})
+	var staff_ranks: Dictionary = weapon_ranks.get("spellbook", {})
+	if staff_ranks.has("storm"):
+		staff_ranks["storm_cooldown"] = int(staff_ranks.get("storm_cooldown",0)) + int(staff_ranks["storm"])
+		staff_ranks.erase("storm")
+		weapon_ranks["spellbook"] = staff_ranks
+		state["weapon_upgrades"] = weapon_ranks
+	if state.get("reward_phase", "item") == "weapon" and state.get("upgrade_weapon_id", "") == "spellbook":
+		state["offers"] = ["cast_speed", "storm_cooldown", "explosion_size"]
+	if data.get("tornadoes") is Array:
+		data["tornadoes"] = data["tornadoes"].filter(func(effect): return not (effect.get("source_weapon", "") == "spellbook" and effect.get("follow_player", false)))
 	if data.get("combat") is Dictionary:
 		data["combat"]["charge_ready"] = false
 		data["combat"]["charge_time"] = 0.0

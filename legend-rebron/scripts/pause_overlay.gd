@@ -6,6 +6,7 @@ const ItemWidgets = preload("res://scripts/item_widgets.gd")
 var run: Node
 var current_page := "stats"
 var weapon_summary: Label
+var weapon_stats_panel: PanelContainer
 var item_summary: Label
 var item_flow: HFlowContainer
 var content: VBoxContainer
@@ -70,7 +71,7 @@ func _ready() -> void:
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(content)
 	equipment = HBoxContainer.new()
-	equipment.custom_minimum_size.y = 200
+	equipment.custom_minimum_size.y = 250
 	equipment.add_theme_constant_override("separation", 16)
 	layout.add_child(equipment)
 	var weapon_slot := PanelContainer.new()
@@ -79,9 +80,10 @@ func _ready() -> void:
 	equipment.add_child(weapon_slot)
 	var weapon_stack := VBoxContainer.new()
 	weapon_slot.add_child(weapon_stack)
-	Style.label(weapon_stack, "BASE WEAPON", 16, Style.GOLD)
-	weapon_summary = Style.label(weapon_stack, "Not assigned", 22)
-	Style.label(weapon_stack, "Sword / Bow / Staff", 14)
+	weapon_stats_panel = preload("res://scripts/weapon_stats_panel.gd").new()
+	weapon_stack.add_child(weapon_stats_panel)
+	weapon_stats_panel.add_theme_stylebox_override("panel", StyleBoxEmpty.new())
+	weapon_summary = weapon_stats_panel.title
 	var item_slot := PanelContainer.new()
 	item_slot.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	item_slot.add_theme_stylebox_override("panel", Style.box(Color("25292e"), Style.GOLD))
@@ -109,9 +111,9 @@ func bind_run(model: Node) -> void:
 	return_button.text = "Save and Go Back to Main Menu" if game.stage_id != "practice" else "Go Back to Main Menu"
 	quit_button.text = "Save and Quit to Desktop" if game.stage_id != "practice" else "Quit to Desktop"
 	run.changed.connect(refresh_run)
+	weapon_stats_panel.bind_run(run)
 	refresh_run()
 func refresh_run() -> void:
-	weapon_summary.text = run.weapon_name()
 	item_summary.text = "ITEMS / %d  (%d types)" % [run.total_items(), run.owned_ids.size()]
 	for child in item_flow.get_children():
 		item_flow.remove_child(child)

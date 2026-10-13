@@ -102,7 +102,7 @@ func execute(command: String) -> void:
 	var actual := command
 	if command.begins_with("/spawn "):
 		actual += " " + str(int(count.value))
-	if command == "/levelup":
+	if command in ["/levelup", "/weaponlevel"]:
 		close_panel()
 	game.command_console.submit(actual)
 	output.text = game.command_console.output.get_parsed_text()

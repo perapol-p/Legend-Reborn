@@ -1,9 +1,9 @@
-# Staff LV5 Explosion
-- Requires equipped Staff (internal ID spellbook), weapon level 5.
+# Staff Explosion
+- Requires equipped Staff (internal ID spellbook), available from weapon level 1.
 - Press E (the rebindable Interact action). Targeted healing supplies take priority.
 - Cooldown: 30 active seconds, independent of RMB Warp. Pause freezes it.
 - Aims up to 30 metres and places the effect on the ground beneath the aimed point when available.
-- Charges until 0.5 seconds after the final click in wizard_pre_explosion.wav (click at 3.43s, blast at 3.93s; full file duration 5.46s), then pulses 10 hits at 0.18-second intervals within 27 metres (1.62 seconds from first hit to last).
+- Charges until 0.5 seconds after the final click in wizard_pre_explosion.wav (click at 3.43s, blast at 3.93s; full file duration 5.46s), then pulses 10 hits at 0.18-second intervals within a base radius of 27 metres (+15% per Explosion Size upgrade) (1.62 seconds from first hit to last).
 - Total damage across all 10 hits is 12 times the normal Staff damage roll; critical damage and hit/DPS/combo feedback use the existing combat system.
 - Each pulse applies one tenth of total damage and checks current enemy position. Enemies entering or leaving the blast receive only the pulses they remain in range for.
 - Terrain blocks blast damage. Other enemies do not shield each other; no victim-count cap.

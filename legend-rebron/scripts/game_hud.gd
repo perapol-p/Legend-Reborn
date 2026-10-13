@@ -135,8 +135,7 @@ func _ready() -> void:
 	portrait.add_child(portrait_image)
 	var weapon := VBoxContainer.new()
 	row.add_child(weapon)
-	Style.label(weapon, GameData.selected_character.to_upper(), 18, Style.PAPER)
-	weapon_label = Style.label(weapon, "WEAPON / NOT ASSIGNED", 15, Style.PAPER)
+	weapon_label = Style.label(weapon, "", 18, Style.GOLD)
 	weapon_level_label = Style.label(weapon, "", 14, Style.PAPER)
 	var ability_area := corner(Rect2(-350, 80, 700, 30), Vector2(0.5, 0))
 	weapon_ability_label = Style.label(ability_area, "", 15, Style.PAPER)
@@ -161,14 +160,9 @@ func refresh_run() -> void:
 	xp_label.text = "%d / %d XP" % [run.xp, run.xp_to_next()]
 	hp_label.text = "HP    %s / %s" % [run.catalog.format_number(run.current_health()), run.catalog.format_number(float(current["max_hp"]))]
 	hp_bar.value = run.current_health() / maxf(float(current["max_hp"]), 1.0) * 100.0
-	weapon_label.text = "WEAPON / " + run.weapon_name().to_upper()
-	weapon_level_label.text = "WEAPON LV %d / %d" % [run.weapon_level(), run.MAX_WEAPON_LEVEL]
-	if run.weapon_level() < run.MAX_WEAPON_LEVEL:
-		var next_level: int = (int(run.level) / run.WEAPON_UPGRADE_INTERVAL + 1) * run.WEAPON_UPGRADE_INTERVAL
-		weapon_level_label.text += "\nNEXT: CHARACTER LV %d" % next_level
-	else:
-		weapon_level_label.text += " / MAX"
-	weapon_ability_label.text = "" if run.equipped_weapon_id == "gun" and run.weapon_level() >= 3 else run.weapon_ability()
+	weapon_label.text = run.character_name
+	weapon_level_label.text = "%s / Lv.%d" % [run.Progression.display_name(run.equipped_weapon_id), run.weapon_level()]
+	weapon_ability_label.text = ""
 func bind_combo(model: Node) -> void:
 	combo = model
 	combo.changed.connect(refresh_combo)

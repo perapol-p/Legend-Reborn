@@ -1,6 +1,6 @@
 extends PanelContainer
 const Style = preload("res://scripts/ui_style.gd")
-const HELP := "/help — list commands\n/unlock archer — unlock Archer (Bow)\n/unlock wizard god — unlock Wizard god (Staff)\n/unlock saber — unlock Saber (Sword)\n/unlock all — unlock every character\nUnlocks are saved. Practice only (U / F1).\n/weapon <sword|bow|staff> — equip weapon\n/target — create training target\n/hit — test combo hit\n/kill — test combo kill\n/reset — reset combo\n/levelup — level up and choose an item\n/weaponlevel — upgrade current weapon (max 5)\n/spawndebug <on|off> — show/hide spawn ring and markers\n/spawninfo — show spawn counts and distance\n/spawn <melee|archer|flyer|boss> [1-10] — Practice enemies\n/clear — clear console"
+const HELP := "/help — list commands\n/unlock archer — unlock Archer (Bow)\n/unlock wizard god — unlock Wizard god (Staff)\n/unlock saber — unlock Saber (Sword)\n/unlock all — unlock every character\nUnlocks are saved. Practice only (U / F1).\n/weapon <sword|bow|staff> — equip weapon\n/target — create training target\n/hit — test combo hit\n/kill — test combo kill\n/reset — reset combo\n/levelup — level up and choose an item\n/weaponlevel — level up current weapon and choose an upgrade\n/spawndebug <on|off> — show/hide spawn ring and markers\n/spawninfo — show spawn counts and distance\n/spawn <melee|archer|flyer|boss> [1-10] — Practice enemies\n/clear — clear console"
 var game: Node
 var previous_focus: Control
 var output: RichTextLabel
@@ -184,10 +184,10 @@ func submit(raw: String) -> void:
 				"/levelup": run.test_level_up()
 				"/weaponlevel":
 					if not run.upgrade_weapon():
-						write("Weapon cannot be upgraded (max level 5).")
+						write("Finish the current reward before upgrading the weapon.")
 						return
 			write("Done: " + name)
-			if name == "/levelup":
+			if name in ["/levelup", "/weaponlevel"]:
 				close_console()
 		_: write("Unknown command. Type /help.")
 func _exit_tree() -> void:

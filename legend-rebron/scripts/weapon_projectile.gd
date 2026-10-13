@@ -62,7 +62,7 @@ func _ready() -> void:
 	elif kind == "sword_wave":
 		var wave := preload("res://scripts/sword_wave_vfx.gd").new()
 		wave.name = "SwordWaveVFX"
-		wave.radius = maxf(hit_radius * 2.2, 1.25)
+		wave.radius = 1.25 * hit_radius / 0.4
 		add_child(wave)
 		wave_vfx = wave
 		visual.free()

@@ -46,6 +46,7 @@ var known_bow_capacity := 4
 var rpg_ready := false
 var special_cooldown := 0.0
 var explosion_cooldown := 0.0
+var storm_cooldown := 0.0
 var ability_status: Label
 var ammo_label: Label
 var ammo_hint: Label
@@ -180,7 +181,7 @@ func try_reload() -> bool:
 	update_status()
 	return true
 func try_attack() -> bool:
-	if not can_act() or cooldown > 0.0 or (weapon_id == "gun" and gun_reload > 0.0 and empowered <= 0.0) or (weapon_id == "bow" and weapon_level() < 5 and bow_reload > 0.0):
+	if not can_act() or cooldown > 0.0 or (weapon_id == "gun" and gun_reload > 0.0 and empowered <= 0.0) or (weapon_id == "bow" and bow_reload > 0.0):
 		return false
 	cooldown = attack_cooldown()
 	pending = minf(float(WEAPONS[weapon_id]["delay"]), cooldown * 0.3)
@@ -215,9 +216,7 @@ func _physics_process(delta: float) -> void:
 		bow_reload = maxf(0.0, bow_reload - delta)
 		if bow_reload == 0.0:
 			bow_ammo = bow_capacity()
-	if weapon_level() >= 5 and weapon_id == "bow":
-		bow_reload = 0.0
-		bow_ammo = bow_capacity()
+	_tick_storm(delta)
 	if can_act() and attack_held:
 		try_attack()
 	update_status()
@@ -277,11 +276,9 @@ func resolve_attack() -> void:
 	var origin := camera.global_position
 	var forward := -camera.global_basis.z
 	if weapon_id == "sword":
-		if level == 1:
-			melee_attack(3.2)
-		else:
-			var wave = fire_projectile("sword_wave", forward, roll_damage(), 14.0, 0.4 if level == 2 else 1.05, true, 0.0, Vector3.INF, last_damage_critical)
-			wave.travel_remaining = [6.0, 12.0, 20.0, 32.0][clampi(level, 2, 5) - 2]
+		var sword_stats: Dictionary = run.weapon_stats("sword")
+		var wave = fire_projectile("sword_wave", forward, roll_damage(), sword_stats["wave_speed"], sword_stats["wave_hit_radius"], true, 0.0, Vector3.INF, last_damage_critical)
+		wave.travel_remaining = sword_stats["wave_range"]
 	elif weapon_id == "katana":
 		melee_attack(3.5)
 		var dash_scale := 1.5 if level >= 3 else 1.0
@@ -314,12 +311,11 @@ func resolve_attack() -> void:
 			if level >= 5:
 				explode(end - forward * 0.06, 3.0, damage * 0.7, hit["collider"], last_damage_critical, "gun")
 	elif weapon_id == "bow":
-		if level < 5:
-			if bow_ammo <= 0:
-				return
-			bow_ammo -= 1
-			if bow_ammo == 0:
-				bow_reload = 1.3
+		if bow_ammo <= 0:
+			return
+		bow_ammo -= 1
+		if bow_ammo == 0:
+			bow_reload = 1.3
 		if is_instance_valid(view) and view.has_method("release_arrow"):
 			view.release_arrow()
 		bow_released.emit()
@@ -330,18 +326,11 @@ func resolve_attack() -> void:
 		# Put the back of the flying arrow at the nock when it leaves the string.
 		var spawn_position := release_position + bow_forward * 0.45
 		var volley_hits: Dictionary = {}
-		var count := 1 if level == 1 else (3 if level == 2 else 6)
-		for row in range(2 if level >= 4 else 1):
-			for i in range(count):
-				# Wider fans at higher levels, with bounded per-arrow human variation.
-				var half_spread := [0.012, 0.070, 0.150, 0.180, 0.200][clampi(level, 1, 5) - 1] as float
-				var spacing := half_spread * 2.0 / float(maxi(count - 1, 1))
-				var jitter := 0.004 if level == 1 else (0.010 if level == 2 else 0.014)
-				var angle := (float(i) - float(count - 1) * 0.5) * spacing + randf_range(-jitter, jitter)
-				var row_pitch := (0.035 if row == 0 else -0.035) if level >= 4 else 0.0
-				var pitch := row_pitch + randf_range(-jitter, jitter)
-				var direction := (bow_forward + camera.global_basis.x * angle + camera.global_basis.y * pitch).normalized()
-				fire_projectile("bow", direction, roll_damage(), 38.0, 0.04, true, 0.0, spawn_position, last_damage_critical, volley_hits)
+		var count: int = run.weapon_stats("bow")["arrow_count"]
+		for i in range(count):
+			var angle := (float(i) - float(count - 1) * 0.5) * minf(0.035, 0.4 / float(maxi(count-1,1)))
+			var direction := (bow_forward + camera.global_basis.x * angle).normalized()
+			fire_projectile("bow", direction, roll_damage(), 38.0, 0.04, true, 0.0, spawn_position, last_damage_critical, volley_hits)
 	else:
 		if view.has_method("release_magic"): view.release_magic()
 		var cast_origin: Vector3 = view.cast_position() if view.has_method("cast_position") else Vector3.INF
@@ -349,11 +338,8 @@ func resolve_attack() -> void:
 		var cast_direction := (cast_aim-cast_origin).normalized() if cast_origin != Vector3.INF else forward
 		var damage := roll_damage()
 		var critical := last_damage_critical
-		fire_projectile("magic_wave", cast_direction, damage, 22.0, 0.15 if level == 1 else 0.9, level <= 2, 0.0, cast_origin, critical)
+		fire_projectile("magic_wave", cast_direction, damage, 22.0, 0.15, true, 0.0, cast_origin, critical)
 		staff_fired.emit()
-		var chance := staff_tornado_chance()
-		if chance >= 1.0 or (chance > 0.0 and run.rng.randf() < chance):
-			spawn_tornado(aim_point(12.0), damage * 0.45, 3.5, 2.5, critical)
 
 func melee_attack(reach: float) -> void:
 	var origin := camera.global_position
@@ -474,21 +460,36 @@ func weapon_level() -> int:
 	return run.weapon_level(weapon_id) if run != null else 1
 
 func staff_tornado_chance() -> float:
-	return [0.0, 0.0, 0.25, 0.50, 1.0][clampi(weapon_level(),1,5)-1] if weapon_id == "spellbook" else 0.0
+	return 0.0
 
 func attack_cooldown() -> float:
-	var level := weapon_level()
-	if weapon_id == "gun":
-		return 0.07 if empowered > 0.0 else (0.12 if level >= 2 else 0.55)
-	if weapon_id == "sword" and level >= 2:
-		return 0.16 if level >= 5 else (0.25 if level >= 4 else 0.75)
-	if weapon_id == "katana" and level >= 2:
-		return 1.6 if level >= 5 else 1.0
-	if weapon_id == "bow" and level >= 5:
-		return 0.3
-	if weapon_id == "spellbook" and level >= 3:
-		return [0.65, 0.50, 0.35][clampi(level,3,5)-3]
-	return float(WEAPONS[weapon_id]["cooldown"])
+	return float(run.weapon_stats(weapon_id)["attack_interval"])
+
+func _tick_storm(delta: float) -> void:
+	if weapon_id != "spellbook" or not can_act(): return
+	var interval: float = run.weapon_stats("spellbook")["storm_cooldown"]
+	storm_cooldown = maxf(0.0, minf(storm_cooldown, interval) - delta)
+	if storm_cooldown > 0.0: return
+	var spawned := 0
+	var count: int = run.weapon_stats("spellbook")["storm_spawn_count"]
+	for i in range(count):
+		if spawn_random_storm() != null:
+			spawned += 1
+	storm_cooldown = interval if spawned > 0 else 0.25
+
+func spawn_random_storm() -> Node3D:
+	var config: Dictionary = run.Progression.STORM
+	for attempt in range(12):
+		var angle: float = run.rng.randf() * TAU
+		var distance: float = sqrt(run.rng.randf()) * float(config["spawn_radius"])
+		var point := player.global_position + Vector3(cos(angle), 0.0, sin(angle)) * distance
+		var ground := ray(point + Vector3.UP * 3.0, point - Vector3.UP * 8.0, 1)
+		if ground.is_empty() or Vector3(ground["normal"]).y < 0.5: continue
+		point = ground["position"]
+		if not world_obstruction(player.global_position + Vector3.UP, point + Vector3.UP).is_empty(): continue
+		var damage := roll_damage() * float(config["damage_multiplier"])
+		return spawn_tornado(point, damage, config["damage_radius"], config["duration"], last_damage_critical)
+	return null
 
 func release_charge() -> void:
 	if not can_act() or gun_reload > 0.0 or not charge_ready:
@@ -521,13 +522,13 @@ func update_status() -> void:
 		if weapon_level() >= 4:
 			ammo_hint.text += "\nRMB  RPG " + ("READY" if rpg_ready else "NOT READY")
 	elif weapon_id == "bow":
-		ammo_label.text = "\u221e / %d" % bow_capacity() if weapon_level() >= 5 else "%d / %d" % [bow_ammo, bow_capacity()]
+		ammo_label.text = "%d / %d" % [bow_ammo, bow_capacity()]
 		ammo_hint.text = "ARROWS" if bow_reload <= 0.0 else "RELOADING  %.1fs" % bow_reload
-	elif weapon_id == "spellbook" and weapon_level() >= 4:
+	elif weapon_id == "spellbook":
 		text = "RMB: Warp | %.1fs cooldown" % special_cooldown
-		if weapon_level() >= 5:
+		if weapon_id == "spellbook":
 			text += "  /  %s: EXPLOSION %s" % [GameData.key_label("interact"),"READY" if explosion_cooldown <= 0.0 else "%.1fs" % explosion_cooldown]
-	elif weapon_id == "sword" and weapon_level() >= 4:
+	elif weapon_id == "sword":
 		text = "Hold LMB: rapid sword waves"
 	ability_status.text = text
 func fire_projectile(kind: String, direction: Vector3, damage: float, speed: float, radius: float, piercing: bool, splash: float = 0.0, spawn_position: Vector3 = Vector3.INF, critical: bool = false, bow_volley_hits: Variant = null) -> Node3D:
@@ -540,13 +541,12 @@ func fire_projectile(kind: String, direction: Vector3, damage: float, speed: flo
 	shot.source = self
 	shot.hit_radius = radius
 	shot.piercing = piercing
-	if kind == "magic_wave" and weapon_id == "spellbook" and weapon_level() <= 2:
+	if kind == "magic_wave" and weapon_id == "spellbook":
 		shot.piercing = true
 		shot.damage_falloff = 0.75
 	if kind == "bow":
 		shot.piercing = true
-		var bow_level: int = run.weapon_level("bow")
-		shot.pierces_remaining = -1 if bow_level >= 5 else bow_level
+		shot.pierces_remaining = run.weapon_stats("bow")["pierce_count"]
 	shot.splash = splash
 	shot.source_weapon = weapon_id
 	shot.critical = critical
@@ -598,7 +598,7 @@ func try_special() -> bool:
 		special_cooldown = 1.0
 		fire_projectile("rpg", -camera.global_basis.z, roll_damage() * 3.0, 28.0, 0.15, false, 4.0, Vector3.INF, last_damage_critical)
 		return true
-	if weapon_id == "spellbook" and weapon_level() >= 4:
+	if weapon_id == "spellbook":
 		return warp()
 	return false
 
@@ -679,8 +679,7 @@ func flash(center: Vector3, radius: float, color: Color) -> void:
 
 
 func bow_capacity() -> int:
-	var level: int = run.weapon_level("bow") if is_instance_valid(run) else 1
-	return [4, 6, 8, 10, 12][clampi(level, 1, 5) - 1]
+	return 4
 
 
 
@@ -694,7 +693,7 @@ func _notification(what: int) -> void:
 		attack_held = false
 
 func try_explosion() -> bool:
-	if not can_act() or weapon_id != "spellbook" or weapon_level() < 5 or explosion_cooldown > 0.0:
+	if not can_act() or weapon_id != "spellbook" or explosion_cooldown > 0.0:
 		return false
 	var point := aim_point(30.0)
 	# Place the animation on the ground beneath the aimed point.
@@ -707,6 +706,7 @@ func try_explosion() -> bool:
 	effect.source = self
 	effect.damage = roll_damage()*12.0
 	effect.critical = last_damage_critical
+	effect.radius = run.weapon_stats("spellbook")["explosion_size"]
 	get_tree().current_scene.add_child(effect)
 	effect.global_position = point
 	explosion_cooldown = 30.0

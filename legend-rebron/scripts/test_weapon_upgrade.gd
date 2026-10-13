@@ -1,209 +1,145 @@
-﻿extends Node
+extends Node
+const Codec = preload("res://scripts/run_save_codec.gd")
+const Run = preload("res://scripts/run_state.gd")
 var failed := false
-var game: Node
-var run: Node
-var hud: Node
-var combat: Node
-var player: CharacterBody3D
-var targets: Array[Node] = []
-func frames(count: int) -> void:
-	for i in range(count):
-		await get_tree().physics_frame
 func check(ok: bool, message: String) -> void:
 	if not ok:
 		failed = true
-		push_error("FAIL: " + message)
-func target_at(offset: Vector3) -> Node3D:
-	var target: Node3D = load("res://scenes/training_dummy.tscn").instantiate()
-	target.max_health = 10000.0
-	game.add_child(target)
-	target.global_position = player.global_position + offset
-	targets.append(target)
-	return target
-func clear_effects() -> void:
-	combat.attack_held = false
-	combat.empowered = 0.0
-	combat.charge_time = 0.0
-	combat.volley_queue.clear()
-	combat.pending = -1.0
-	for node in get_tree().get_nodes_in_group("weapon_projectiles") + get_tree().get_nodes_in_group("weapon_tornadoes"):
-		node.queue_free()
-	for target in targets:
-		if is_instance_valid(target):
-			target.queue_free()
-	targets.clear()
-	player.respawn()
-	player.input_enabled = true
-	combat.cooldown = 0.0
-	combat.special_cooldown = 0.0
-	combat.gun_ammo = 12
-	combat.gun_reload = 0.0
-	combat.bow_ammo = 4
-	combat.bow_reload = 0.0
-	await frames(3)
+		push_error(message)
 func _ready() -> void:
-	game = load("res://scenes/game_placeholder.tscn").instantiate()
+	GameData.selected_stage = "practice"
+	GameData.selected_character = "Wizard god"
+	GameData.pending_resume = {}
+	var game = load("res://scenes/game_placeholder.tscn").instantiate()
 	game.auto_pause_on_focus_loss = false
 	game.get_node("MonsterSpawner").enabled = false
-	add_child(game)
-	await frames(10)
-	run = game.get_node("RunState")
-	hud = game.get_node("Interface/HUD")
-	player = game.get_node("Player")
-	combat = player.get_node("Head/Camera3D/Combat")
-	var previews := OS.get_cmdline_user_args().has("--preview")
-	if OS.get_cmdline_user_args().has("--ui-only"):
-		combat.equip("gun")
-		for i in range(3):
-			game.command_console.submit("/weaponlevel")
-		await frames(3)
-		await RenderingServer.frame_post_draw
-		get_viewport().get_texture().get_image().save_png("res://backups/upgrade_button_ready.png")
-		print("UPGRADE UI PREVIEW PASSED")
-		get_tree().quit()
-		return
-	for id in combat.ORDER:
-		combat.equip(id)
-		check(run.weapon_level() == 1, "Each weapon starts at LV1: " + id)
-		var previous_cooldown: float = combat.attack_cooldown()
-		for level in range(1, 6):
-			if level > 1:
-				game.command_console.submit("/weaponlevel")
-			check(run.weapon_level() == level, "Upgrade command: " + id + str(level))
-			check(hud.weapon_level_label.text.contains("LV %d / 5" % level), "Level label")
-			check(hud.weapon_ability_label.text.is_empty() if id == "gun" and level >= 3 else not hud.weapon_ability_label.text.is_empty(), "Ability description / visual gun charge meter")
-			await clear_effects()
-			var target := target_at(Vector3(0, 0, -8 if id == "sword" and level >= 2 else -2.6))
-			var nearby: Node3D
-			if id == "gun" and level == 5:
-				nearby = target_at(Vector3(1.5, 0, -2.6))
-			await frames(3)
-			var shots: int = combat.projectiles_fired
-			var tornadoes: int = combat.tornadoes_created
-			check(combat.try_attack(), "Attack starts")
-			await frames(60)
-			if previews and level == 5:
+	var mount_game := func():
+		get_tree().root.add_child(game)
+		get_tree().current_scene = game
+	mount_game.call_deferred()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var run = game.get_node("RunState")
+	var reward = game.get_node("Interface/RewardOverlay")
+	var pause = game.get_node("Interface/PauseOverlay")
+	var hud = game.get_node("Interface/HUD")
+	var player = game.get_node("Player")
+	var combat = player.get_node("Head/Camera3D/Combat")
+	for weapon in ["sword","bow","spellbook"]:
+		combat.equip(weapon)
+		check(hud.weapon_label.text == run.character_name and hud.weapon_level_label.text.begins_with(run.Progression.display_name(weapon)), "HUD displays character name above weapon type")
+		for choice in run.Progression.UPGRADES[weapon]:
+			run.test_level_up()
+			check(reward.visible and get_tree().paused, "Item reward pauses gameplay")
+			reward.choice_buttons[0].pressed.emit()
+			check(run.reward_phase == "weapon" and reward.choice_buttons.size() == 3 and get_tree().paused and not player.input_enabled, "Weapon choices follow item and remain paused")
+			check(reward.heading.text.begins_with("Level ") and not reward.heading.text.contains("Choose"), "Heading only shows level")
+			check(reward.find_children("WeaponStatsPanel", "", true, false).is_empty(), "Level Up contains only choices, without weapon stats")
+			if weapon == "spellbook":
+				check(run.offers == ["cast_speed", "storm_cooldown", "explosion_size"], "Only three composite Staff choices")
+			if OS.get_cmdline_user_args().has("--preview") and choice == run.Progression.UPGRADES[weapon][-1]:
 				await RenderingServer.frame_post_draw
-				get_viewport().get_texture().get_image().save_png("res://backups/upgrade_" + id + ".png")
-			await frames(15)
-			check(target.health < 10000, "Actual damage " + id + " LV" + str(level))
-			match id:
-				"sword":
-					check(combat.projectiles_fired - shots == (0 if level == 1 else 1), "Sword wave unlock")
-					if level >= 4:
-						check(combat.attack_cooldown() < previous_cooldown, "Rapid waves grow faster")
-				"katana":
-					var expected := 0 if level == 1 else (15 if level == 5 else (4 if level == 4 else 1))
-					check(combat.tornadoes_created - tornadoes == expected, "Katana tornadoes/rounds")
-				"gun":
-					if level == 2:
-						check(combat.attack_cooldown() < previous_cooldown, "Gun fire rate increases")
-					if level >= 4:
-						check(combat.rpg_ready, "Target hit earns RPG")
-						check(combat.try_special(), "RPG launches")
-						check(not combat.rpg_ready, "RPG consumed")
-					if level == 5:
-						check(nearby.health < 10000, "Explosive bullet hurts nearby target")
-				"bow":
-					var expected := [1, 3, 6, 12, 12][level - 1] as int
-					check(combat.projectiles_fired - shots == expected, "Bow arrow count")
-				"spellbook":
-					check(combat.tornadoes_created - tornadoes == (1 if level >= 3 else 0), "Spell tornado")
-					if level == 5:
-						check(combat.projectiles_fired - shots == 4, "Nuke plus three spells at once")
-			previous_cooldown = combat.attack_cooldown()
-		check(not run.upgrade_weapon(), "MAX rejects further upgrade")
-		check(not run.upgrade_weapon(), "Model enforces LV5 cap")
-		print("PASS 5 levels: ", id)
-	await clear_effects()
-	# U is disabled; only the console command upgrades the weapon.
-	run.weapon_levels["sword"] = 1
-	combat.equip("sword")
-	var key := InputEventKey.new()
-	key.physical_keycode = KEY_U
-	key.keycode = KEY_U
-	key.pressed = true
-	Input.parse_input_event(key)
-	await frames(2)
-	check(run.weapon_level() == 1, "U shortcut disabled")
-	game.command_console.submit("/weaponlevel")
-	check(run.weapon_level() == 2, "Console command upgrades")
-	key.pressed = false
-	Input.parse_input_event(key)
-	await frames(2)
-	combat.equip("bow")
-	check(run.weapon_level() == 5, "Other weapon levels retained")
-	check(run.level == 1 and run.xp == 0, "Player level unaffected")
-	# Piercing arrows hit two targets in a line.
-	await clear_effects()
-	combat.equip("bow")
-	var front := target_at(Vector3(0, 0, -3))
-	var rear := target_at(Vector3(0, 0, -6))
-	await frames(3)
-	combat.try_attack()
-	await frames(35)
-	check(front.health < 10000 and rear.health < 10000, "Piercing arrows hit both targets")
-	combat.bow_ammo = 0
-	combat.bow_reload = 1.0
-	await frames(2)
-	check(combat.bow_reload == 0 and combat.bow_ammo == combat.bow_capacity(), "LV5 bow has no reload")
-	# Charged gun powers up rate/damage while consuming no ammunition.
-	await clear_effects()
-	combat.equip("gun")
-	var gun_target := target_at(Vector3(0, 0, -3))
-	await frames(3)
-	combat.unlock_charge()
-	combat.charge_time = 1.0
-	var ammo: int = combat.gun_ammo
-	combat.release_charge()
-	await frames(12)
-	check(combat.empowered > 0 and combat.gun_ammo == ammo, "Charged burst consumes no ammo")
-	check(gun_target.health < 9970, "Charged burst actually fires repeatedly")
-	# Tornado pulls a moving monster in, without teleporting through walls.
-	await clear_effects()
-	var monster: CharacterBody3D = load("res://scenes/monster.tscn").instantiate()
-	monster.player = player
-	monster.move_speed = 0
-	monster.max_health = 10000
-	game.add_child(monster)
-	monster.position = player.position + Vector3(2, 0, -6)
-	targets.append(monster)
-	var center := player.position + Vector3(0, 1.2, -6)
-	var before := Vector2(monster.position.x - center.x, monster.position.z - center.z).length()
-	combat.spawn_tornado(center, 1, 4, 2)
-	await frames(30)
-	var after := Vector2(monster.position.x - center.x, monster.position.z - center.z).length()
-	print("TORNADO distance ", before, " -> ", after, " health ", monster.health)
-	check(after < before - 0.4 and monster.health < 10000, "Tornado pulls and damages monsters")
-	# Warp moves through clear ground, not through a solid wall.
-	await clear_effects()
+				get_viewport().get_texture().get_image().save_png("res://backups/weapon_stats_%s.png" % weapon)
+			var copy = Run.new()
+			Codec.apply(copy,Codec.fields(run,Codec.RUN_FIELDS),Codec.RUN_FIELDS)
+			check(copy.choose_weapon_upgrade(choice,copy.offer_generation), "Save restores pending choice")
+			reward._choose(choice,run.offer_generation)
+			check(copy.weapon_upgrades == run.weapon_upgrades, "Saved ranks match")
+			copy.free()
+			check(pause.weapon_stats_panel.values.text == run.Progression.stat_text(run.weapon_stats(weapon),weapon), "Tab stats update immediately after selection")
+			check(not reward.visible and not get_tree().paused and player.input_enabled, "Choosing upgrade resumes gameplay")
+		check(combat.attack_cooldown() < float(combat.WEAPONS[weapon]["cooldown"]), "Attack speed affects combat")
+		if weapon == "bow":
+			var before: int = combat.projectiles_fired
+			combat.resolve_attack()
+			check(combat.projectiles_fired-before == 2, "Projectile upgrade adds an arrow")
+			for shot in get_tree().get_nodes_in_group("weapon_projectiles"):
+				if shot.kind == "bow": check(shot.pierces_remaining == 1, "Pierce upgrade adds one additional enemy")
+		elif weapon == "sword":
+			combat.resolve_attack()
+			for shot in get_tree().get_nodes_in_group("weapon_projectiles"):
+				if shot.kind == "sword_wave":
+					check(shot.speed > 14.0 and shot.travel_remaining > 6.0 and shot.hit_radius > 0.4 and shot.wave_vfx.radius > 1.25, "Sword upgrades change range, speed, visible size and collision")
+		else:
+			check(run.weapon_stats("spellbook")["storm_cooldown"] < 8.0 and run.weapon_stats("spellbook")["storm_spawn_radius"] == 10.0, "Storm upgrade reduces cooldown with fixed 10 m spawn radius")
+			check(combat.try_explosion(), "Explosion available without level milestone")
+			for effect in get_tree().get_nodes_in_group("staff_explosions"):
+				check(effect.radius > 27.0, "Explosion upgrade enlarges actual radius")
+		for shot in get_tree().get_nodes_in_group("weapon_projectiles")+get_tree().get_nodes_in_group("staff_explosions"):
+			shot.queue_free()
+		await get_tree().process_frame
+	check(hud.find_children("WeaponStatsPanel", "", true, false).is_empty(), "Gameplay HUD is a compact weapon summary without a background panel")
+	pause.toggle_stats()
+	check(pause.visible and pause.equipment.visible and pause.weapon_stats_panel.values.text.contains("Storm"), "Tab displays detailed weapon stats")
+	if OS.get_cmdline_user_args().has("--preview"):
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png("res://backups/weapon_stats_tab.png")
+	pause._close_overlay()
+	if OS.get_cmdline_user_args().has("--preview"):
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png("res://backups/weapon_stats_hud.png")
 	combat.equip("spellbook")
-	var start := player.position
-	check(combat.try_special(), "Warp activates")
-	check(player.position.distance_to(start) > 7.0, "Warp travels eight metres")
-	await clear_effects()
-	var wall := StaticBody3D.new()
-	var collision := CollisionShape3D.new()
-	var shape := BoxShape3D.new()
-	shape.size = Vector3(8, 5, 0.3)
-	collision.shape = shape
-	wall.add_child(collision)
-	game.add_child(wall)
-	wall.position = player.position + Vector3(0, 1, -2)
-	await frames(3)
-	start = player.position
-	combat.try_special()
-	check(player.position.distance_to(start) < 2, "Warp cannot pass through walls")
-	wall.queue_free()
-	await clear_effects()
-	run.weapon_levels["sword"] = 2
-	combat.equip("sword")
+	combat.storm_cooldown = 0.0
+	for effect in get_tree().get_nodes_in_group("weapon_tornadoes"): effect.queue_free()
+	await get_tree().process_frame
+	var positions: Array[Vector3] = []
+	for i in range(20):
+		var storm = combat.spawn_random_storm()
+		check(storm != null, "Random storm finds valid ground")
+		if storm == null: continue
+		var offset: Vector3 = storm.global_position-player.global_position
+		offset.y = 0.0
+		check(offset.length() <= 10.001 and storm.remaining <= 2.5, "Storm spawns within 10 m with finite duration")
+		positions.append(storm.global_position)
+		var original: Vector3 = storm.global_position
+		player.global_position.x += 0.1
+		storm._physics_process(0.01)
+		check(storm.global_position.is_equal_approx(original), "Storm remains at spawn point")
+		player.global_position.x -= 0.1
+		storm.queue_free()
+	check(positions.size() > 1 and not positions[0].is_equal_approx(positions[-1]), "Storm locations are randomized")
+	await get_tree().process_frame
+	combat.storm_cooldown = 1.0
+	var before: int = combat.tornadoes_created
+	combat._tick_storm(0.5)
+	check(combat.tornadoes_created == before, "Cooldown prevents early storm spawn")
+	combat._tick_storm(0.5)
+	check(combat.tornadoes_created == before+1, "Cooldown expiry creates one storm")
+	for rank in [0,4,5,9,10,14,15]:
+		run.weapon_upgrades["spellbook"]["storm_cooldown"] = rank
+		run.changed.emit()
+		var expected := 1 + floori(float(rank)/5.0)
+		check(run.weapon_stats("spellbook")["storm_spawn_count"] == expected, "Storm count increases every five selected upgrades")
+		check(pause.weapon_stats_panel.values.text.contains("Per Spawn : %d" % expected), "Tab displays actual storm count per spawn")
+		combat.storm_cooldown = 0.0
+		before = combat.tornadoes_created
+		combat._tick_storm(0.0)
+		check(combat.tornadoes_created == before+expected, "Cooldown expiry spawns the complete storm batch")
+		check(combat.storm_cooldown > 0.0, "Batch uses one shared cooldown")
+		for effect in get_tree().get_nodes_in_group("weapon_tornadoes"):
+			if effect.is_queued_for_deletion(): continue
+			var offset: Vector3 = effect.global_position-player.global_position
+			offset.y = 0.0
+			check(offset.length() <= 10.001, "Every storm in batch spawns inside 10 m")
+			effect.queue_free()
+	run.weapon_upgrades["spellbook"]["storm_cooldown"] = 1
+	run.changed.emit()
 	get_tree().paused = true
-	game.command_console.submit("/weaponlevel")
-	check(run.weapon_level() == 3, "Console commands work while paused")
-	get_tree().paused = false
-	print("REFERENCE WEAPON UPGRADE ", "FAILED" if failed else "PASSED")
+	var saved: Dictionary = Codec.capture(game)
+	check(saved["combat"].has("storm_cooldown"), "Checkpoint preserves storm timer")
+	for effect in get_tree().get_nodes_in_group("weapon_tornadoes"): effect.queue_free()
+	await get_tree().process_frame
+	Codec.restore_world(game,saved)
+	check(is_equal_approx(combat.storm_cooldown,saved["combat"]["storm_cooldown"]), "Continue restores storm cooldown")
+	var previous := {"run":{"weapon_levels":{"spellbook":3},"weapon_upgrades":{"spellbook":{"storm":2}},"reward_phase":"weapon","upgrade_weapon_id":"spellbook","offers":["cast_speed","storm","explosion_size"]},"tornadoes":[{"source_weapon":"spellbook","follow_player":true}]}
+	Codec.migrate_removed_weapons(previous)
+	check(previous["run"]["weapon_upgrades"]["spellbook"]["storm_cooldown"] == 2 and previous["run"]["offers"][1] == "storm_cooldown" and previous["tornadoes"].is_empty(), "Orbit saves migrate to random cooldown storms")
+	var legacy := {"run":{"weapon_levels":{"sword":5},"equipped_weapon_id":"sword"}}
+	Codec.migrate_removed_weapons(legacy)
+	check(legacy["run"]["weapon_upgrades"]["sword"]["attack_speed"] == 2, "Legacy levels migrate to new ranks")
+	print("WEAPON UPGRADE INTEGRATION ", "FAILED" if failed else "PASSED")
+	for effect in get_tree().get_nodes_in_group("weapon_tornadoes"):
+		effect.queue_free()
+	game.queue_free()
+	await get_tree().process_frame
 	get_tree().quit(1 if failed else 0)
-
-
-

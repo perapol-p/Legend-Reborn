@@ -16,10 +16,11 @@ func _ready() -> void:
 	add_child(model)
 func _physics_process(delta: float) -> void:
 	remaining -= delta
-	if remaining <= 0.0 or not is_instance_valid(source):
+	if remaining <= 0.0 or not is_instance_valid(source) or source.run.finished:
 		queue_free()
 		return
-	model.rotation.y += delta * 7.0
+	var visual_speed: float = TAU * float(source.run.Progression.STORM["visual_rotation_speed"]) if source_weapon == "spellbook" else 7.0
+	model.rotation.y += delta * visual_speed
 	pulse -= delta
 	var tick := pulse <= 0.0
 	if tick:
@@ -37,4 +38,3 @@ func _physics_process(delta: float) -> void:
 				body.move_and_collide(offset.normalized() * minf(offset.length(), 5.0 * delta))
 		if tick:
 			source.deal_hit(body, damage, source_weapon, false, critical)
-

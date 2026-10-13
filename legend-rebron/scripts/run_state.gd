@@ -108,8 +108,6 @@ func add_xp(amount: int) -> void:
 		xp -= xp_to_next()
 		level += 1
 		pending_levels.append(level)
-		if level % WEAPON_UPGRADE_INTERVAL == 0:
-			upgrade_weapon()
 	changed.emit()
 	if offers.is_empty():
 		_next_reward()
@@ -136,14 +134,15 @@ func _next_reward() -> void:
 			break
 	offers_changed.emit()
 func choose_item(id: String, generation: int = -1) -> bool:
-	if (generation >= 0 and generation != offer_generation) or not offers.has(id):
+	if reward_phase != "item" or (generation >= 0 and generation != offer_generation) or not offers.has(id):
 		return false
 	if not owned_ids.has(id):
 		owned_ids.append(id)
 	item_counts[id] = stack_count(id) + 1
 	offers.clear()
 	changed.emit()
-	_next_reward()
+	if not upgrade_weapon():
+		_next_reward()
 	return true
 
 func weapon_name() -> String:
@@ -171,8 +170,10 @@ func restore_health() -> void:
 	damage_taken = 0.0
 	changed.emit()
 
-const MAX_WEAPON_LEVEL := 5
-const WEAPON_UPGRADE_INTERVAL := 10
+const Progression = preload("res://scripts/weapon_progression.gd")
+var reward_phase := "item"
+var upgrade_weapon_id := ""
+var weapon_upgrades: Dictionary = {}
 var weapon_levels: Dictionary = {}
 func weapon_level(id: String = "") -> int:
 	var selected := equipped_weapon_id if id.is_empty() else id
@@ -185,10 +186,15 @@ func upgrade_weapon() -> bool:
 		if weapon["id"] == equipped_weapon_id:
 			valid = true
 			break
-	if not valid or weapon_level() >= MAX_WEAPON_LEVEL:
+	if not valid or not Progression.UPGRADES.has(equipped_weapon_id) or not offers.is_empty():
 		return false
 	weapon_levels[equipped_weapon_id] = weapon_level() + 1
+	upgrade_weapon_id = equipped_weapon_id
+	reward_phase = "weapon"
+	offer_generation += 1
+	offers.assign(Progression.UPGRADES[upgrade_weapon_id])
 	changed.emit()
+	offers_changed.emit()
 	return true
 
 func weapon_ability() -> String:
@@ -247,3 +253,23 @@ func heal_fraction(fraction: float) -> float:
 	changed.emit()
 	health_restored.emit(amount,true)
 	return amount
+
+func upgrade_count(id: String, upgrade: String) -> int:
+	return int(weapon_upgrades.get(id, {}).get(upgrade, 0))
+
+func choose_weapon_upgrade(id: String, generation: int = -1) -> bool:
+	if reward_phase != "weapon" or (generation >= 0 and generation != offer_generation) or not offers.has(id):
+		return false
+	var ranks: Dictionary = weapon_upgrades.get(upgrade_weapon_id, {}).duplicate()
+	ranks[id] = upgrade_count(upgrade_weapon_id, id) + 1
+	weapon_upgrades[upgrade_weapon_id] = ranks
+	reward_phase = "item"
+	upgrade_weapon_id = ""
+	offers.clear()
+	changed.emit()
+	_next_reward()
+	return true
+
+func weapon_stats(id: String = "") -> Dictionary:
+	var selected := equipped_weapon_id if id.is_empty() else id
+	return Progression.stats(self, selected)

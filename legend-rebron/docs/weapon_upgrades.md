@@ -1,21 +1,15 @@
-# Weapon upgrade test (reference-based)
-Reference: C:/test/ref for project/Screenshot 2026-09-28 003817.png.
-Use U, or Tab to release the cursor and click Weapon level up in TEST CONTROLS. Each weapon has its own level 1-5, retained when switching 1-5. New runs reset all weapon levels. This does not grant player XP or trigger item rewards.
-HUD shows weapon level and the unlocked ability. MAX disables the upgrade button.
+# Weapon level upgrades
+Every character level-up queues an item reward followed by one upgrade for the equipped weapon. Selecting the item raises weapon level by one and displays the weapon's three choices. Select one with the mouse or keys 1/2/3. The game remains paused until all item/weapon reward pairs are complete. Weapon levels start at 1 and have no level-5 cap or character-level 10/20/30/40 milestones.
 
-| Weapon | LV1 | LV2 | LV3 | LV4 | LV5 |
-| --- | --- | --- | --- | --- | --- |
-| Sword | Wide slash | Slow wave | Bigger wave | Hold LMB rapid waves | Faster rapid waves |
-| Katana | Slash + dash | Pulling tornado | +50% dash distance | 2 tornadoes, 2 rounds | 3 tornadoes, 5 rounds |
-| Gun | Slow fire | Fast fire | Hold/release LMB for stronger, faster burst without ammo consumption | A hit grants one RPG, RMB fires it | Explosive bullets |
-| Bow | 1 arrow | 3 arrows | 6 piercing arrows | 6 upper + 6 lower arrows | No reload, hold LMB |
-| Spellbook | Magic wave | Bigger wave | Tornado | RMB warp | Nuke plus 3 magic waves and tornado simultaneously |
+Upgrades stack independently for each weapon:
+- Sword: Attack Speed (+10% additive); Sword Wave Size (+15% additive); Sword Wave Range + Speed (+15% additive to both).
+- Bow: Attack Speed (+10% additive); Projectile Count (+1 arrow per volley); Pierce Count (+1 additional enemy passed through).
+- Staff (internal ID spellbook): Cast Speed (+10% additive); Storm Cooldown (8 seconds divided by 1.10 per rank; minimum 0.5 seconds); Explosion Size (+15% additive radius).
 
-Higher levels retain earlier features. Gun RPG storage is capped at one; RPG/explosion secondary hits do not generate another rocket. Gun has 12-round magazines and automatic reload. Charge for at least 0.45 seconds then release: automatically fire a 2-5 second powered burst where aiming still follows the mouse. Tap LMB for normal shots at LV3+. Bow has 4 volleys before auto reload through LV4. LV5 eliminates reload.
+Attack/cast speed divides the base attack interval by 1 + 0.10 times rank. Sword starts with a piercing wave (6 m range, 14 m/s). Bow starts with one arrow, no additional piercing, and four volleys per reload. Staff has normal piercing fireballs, random storms within 10 m of the player, RMB warp, and E Explosion available from level 1. Explosion retains its 30-second cooldown and starts at 27 m radius.
 
-The image leaves numeric tuning unspecified. Prototype choices: sword LV5 is faster than LV4 (both table cells say rapid waves); warp 8 m / 3 s cooldown; nuke radius 8 m; RPG radius 4 m; gun bullet explosions radius 3 m. Basic attack damage continues to use ATK and critical stats, not the discarded flat +20%/level scheme.
+Save fields include upgrade ranks, pending choice phase, weapon being upgraded, and storm cooldown and active storm lifetimes. Old saves keep their weapon levels and distribute prior earned ranks across the three new choices. /weaponlevel opens an upgrade choice in practice mode.
 
-Damage/projectile size, firing rates, pulls, penetration, ammo and collision are functional; meshes/effects are simple placeholders.
-Replace art in scenes/weapons; gameplay is in weapon_combat.gd, weapon_projectile.gd and weapon_tornado.gd. UI ability text is in weapon_progression.gd.
+Regression tests: scripts/test_character_weapon_progression.gd and scenes/test_weapon_upgrade.tscn.
 
-Tests: scenes/test_weapon_upgrade.tscn exercises all 25 steps, actual hits, projectile counts, tornado rounds/pull, piercing, charge ammo, RPG consumption, splash and safe warp. -- --preview saves screenshots to backups/upgrade_*.png when using graphics.
+Weapon Stats Panel in the Tab equipment section reads the same central module used by combat. Gameplay HUD shows only character name above weapon type and level as compact text without a panel background. Level Up shows centered cards without weapon stats. Attack/cast speed is attacks per second; Wave Size is the crescent radius in metres. Storm spawns at a random valid ground position within 10 m, remains stationary, and lasts 2.5 seconds. Upgrades reduce cooldown, with +1 storm per spawn every five selected upgrades. Tab displays actual cooldown and spawn radius. All balance values live in weapon_progression.gd.

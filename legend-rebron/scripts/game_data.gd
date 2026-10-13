@@ -16,7 +16,7 @@ const ACTIONS = {
 	"dash": {"label": "Dash", "key": KEY_Q},
 	"toggle_cursor": {"label": "Stats & equipment (hold)", "key": KEY_TAB},
 	"reload": {"label": "Reload weapon", "key": KEY_R},
-	"interact": {"label": "Interact / Staff explosion (LV5)", "key": KEY_E}
+	"interact": {"label": "Interact / Staff explosion", "key": KEY_E}
 
 }
 const CROSSHAIR_COLORS = {

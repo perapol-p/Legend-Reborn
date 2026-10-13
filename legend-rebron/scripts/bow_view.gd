@@ -9,10 +9,10 @@ func release_arrow() -> void:
 	nocked_arrow.hide()
 func _process(_delta: float) -> void:
 	var combat = get_parent()
-	var ready_to_nock: bool = not attacking and (combat.bow_reload <= 0.0 or combat.weapon_level() >= 5)
+	var ready_to_nock: bool = not attacking and (combat.bow_reload <= 0.0)
 	if arrow_released and ready_to_nock:
 		arrow_released = false
-	nocked_arrow.visible = not arrow_released and (combat.bow_ammo > 0 or combat.weapon_level() >= 5)
+	nocked_arrow.visible = not arrow_released and (combat.bow_ammo > 0)
 
 func arrow_release_position() -> Vector3:
 	# The arrow's animated bone follows the drawn string, unlike its mesh rest AABB.
